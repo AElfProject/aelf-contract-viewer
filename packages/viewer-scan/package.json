@@ -1,0 +1,22 @@
+{
+  "name": "viewer-scan",
+  "version": "0.0.0",
+  "description": "Scanner of viewer",
+  "author": "atom-young <atom.yang@aelf.io>",
+  "homepage": "",
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "scan": "npm run scan:prod",
+    "scan:dev": "npm run clean && cross-env NODE_ENV=development pm2 start src/index.js --name aelf-viewer-scan --time",
+    "scan:prod": "cross-env NODE_ENV=production pm2 start src/index.js --name aelf-viewer-scan --exp-backoff-restart-delay=1000 --time",
+    "clean": "rimraf ./*.log"
+  },
+  "dependencies": {
+    "aelf-block-scan": "^0.1.6",
+    "axios": "^0.19.0",
+    "lodash": "^4.17.15",
+    "pm2": "^4.1.2",
+    "viewer-orm": "^0.0.0"
+  }
+}
