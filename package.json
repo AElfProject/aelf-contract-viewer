@@ -4,6 +4,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "commit": "git-cz"
+  },
   "dependencies": {
     "aelf-sdk": "^3.2.19"
   },
