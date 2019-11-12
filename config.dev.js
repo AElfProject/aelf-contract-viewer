@@ -8,13 +8,13 @@ module.exports = {
     connectionLimit: 25
   },
   scan: {
-    interval: 20000,
+    interval: 20 * 1000,
     concurrentQueryLimit: 25,
     host: 'http://192.168.197.51:8000',
     maxInsert: 100
   },
   decompiler: {
-    interval: 10 * 60 * 1000,
+    interval: 20 * 1000,
     remoteApi: 'http://192.168.197.35:5566/getfiles'
   },
   wallet: {

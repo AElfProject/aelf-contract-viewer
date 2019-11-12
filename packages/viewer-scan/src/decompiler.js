@@ -100,8 +100,7 @@ class Decompiler {
     const lastId = await Decompiler.getLastId();
     console.log(`start decompiling in loop from ${lastId + 1}`);
     this.scheduler.setCallback(async () => {
-      const lastIdInLoop = await Decompiler.getLastId();
-      await this.callback(lastIdInLoop);
+      await this.queryInBatch();
     });
     this.scheduler.startTimer();
   }
