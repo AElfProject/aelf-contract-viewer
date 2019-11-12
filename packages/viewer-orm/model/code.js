@@ -12,7 +12,8 @@ const {
   TEXT,
   DATE,
   NOW,
-  col
+  col,
+  Op
 } = Sequelize;
 
 const codeDescription = {
@@ -78,7 +79,10 @@ class Code extends Model {
     return Code.findOne({
       attributes: ['id'],
       where: {
-        codeHash
+        codeHash,
+        event: {
+          [Op.ne]: 'AuthorChanged'
+        }
       }
     });
   }
@@ -86,6 +90,11 @@ class Code extends Model {
   static getMaxId() {
     return Code.findOne({
       attributes: ['id'],
+      where: {
+        event: {
+          [Op.ne]: 'AuthorChanged'
+        }
+      },
       order: [
         ['id', 'DESC']
       ]

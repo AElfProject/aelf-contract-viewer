@@ -32,7 +32,6 @@ module.exports = {
     await queryInterface.addIndex(
       tableName,
       {
-        unique: true,
         fields: [
           {
             attribute: 'code_hash'
@@ -64,6 +63,11 @@ module.exports = {
         name: 'block_height'
       }
     );
+    // add constraint
+    // await queryInterface.addConstraint(tableName, ['code_hash', 'author'], {
+    //   type: 'unique',
+    //   name: 'hash_author'
+    // });
   },
   down: queryInterface => queryInterface.dropTable(tableName)
 };
