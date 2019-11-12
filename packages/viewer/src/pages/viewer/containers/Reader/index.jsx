@@ -67,8 +67,11 @@ const sketchParagraph = {
   width: '100%'
 };
 
+const ViewerFallback = <Skeleton active paragraph={sketchParagraph} />;
+
 const Reader = () => {
   const address = useSearchParam('address');
+  const codeHash = useSearchParam('codeHash');
   const [files, setFiles] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [history, setHistory] = useState([]);
@@ -100,6 +103,25 @@ const Reader = () => {
         message.error(e.message || e.msg);
         // setFetched(true);
       });
+    } else if (codeHash) {
+      request(API_PATH.GET_FILES, {
+        codeHash
+      }, { method: 'GET' })
+        .then(data => {
+          if (Object.keys(data).length === 0) {
+            throw new Error('There is no such contract');
+          }
+          const {
+            result,
+            defaultFile
+          } = handleFiles(data);
+          setFiles(result);
+          setViewerConfig(defaultFile);
+          setFetched(true);
+        })
+        .catch(e => {
+          message.error(e.message || e.msg);
+        });
     } else {
       message.error('There is no such contract');
       // setFetched(true);
@@ -124,7 +146,7 @@ const Reader = () => {
               files={files}
               onChange={onFileChange}
             />
-            <Suspense fallback={<Skeleton active paragraph={sketchParagraph} />}>
+            <Suspense fallback={ViewerFallback}>
               <Viewer
                 content={viewerConfig.content || ''}
                 name={viewerConfig.name || ''}
