@@ -54,7 +54,7 @@ function isContractDeployedOrUpdated(transaction) {
     Logs,
     Status
   } = transaction;
-  if (Status.toUpperCase() === 'MINED' && Logs && Logs.length > 0) {
+  if (Status && Status.toUpperCase() === 'MINED' && Logs && Logs.length > 0) {
     const result = Logs.filter(v => {
       const {
         Address,

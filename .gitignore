@@ -221,3 +221,7 @@ Temporary Items
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+.node-xmlhttprequest*
+packages/viewer-api/app/public/
+packages/viewer/dist/
