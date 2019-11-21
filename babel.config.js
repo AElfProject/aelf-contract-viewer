@@ -17,8 +17,7 @@ module.exports = api => {
         'lodash',
         {
           id: [
-            'lodash',
-            'recompose'
+            'lodash'
           ]
         }
       ],

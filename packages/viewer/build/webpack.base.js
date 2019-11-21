@@ -118,7 +118,7 @@ const baseConfig = {
       'process.env.LOCALE': JSON.stringify(process.env.LOCALE || 'zh')
     }),
     new MonacoWebpackPlugin({
-      languages: ['markdown', 'xml', 'csharp'],
+      languages: ['xml', 'csharp'],
       features: [
         'bracketMatching', 'wordHighlighter', 'comment', 'find', 'coreCommands',
         'links', 'hover', 'quickCommand', 'goToDefinitionCommands', 'goToDefinitionMouse',

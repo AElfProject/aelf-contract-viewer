@@ -32,6 +32,11 @@ class HistoryController extends Controller {
         try {
           AElf.utils.base58.decode(address);
           result = await app.model.Files.getFilesByAddress(address);
+          const contractInfo = await app.model.Contracts.getInfoByAddress(address);
+          result = {
+            ...result.toJSON(),
+            ...contractInfo.toJSON()
+          };
         } catch (e) {
           throw new Error('The address you passed is not valid');
         }

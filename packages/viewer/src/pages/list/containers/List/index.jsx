@@ -6,26 +6,78 @@ import React, { useState, useEffect } from 'react';
 import Search from 'antd/lib/input/Search';
 import 'antd/lib/input/style';
 import {
+  Divider,
   message,
-  Pagination
+  Pagination,
+  Table,
+  Tag
 } from 'antd';
 import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
-import ListItem from '../../components/ListItem';
+import config from '../../../../common/config';
 import './index.less';
+
+const ListColumn = [
+  {
+    title: 'Contract Address',
+    dataIndex: 'address',
+    key: 'address',
+    render: address => (
+      <a href={`${config.viewer.viewerUrl}?address=${address}`}>
+        {address}
+      </a>
+    )
+  },
+  {
+    title: 'Contract Type',
+    dataIndex: 'isSystemContract',
+    key: 'isSystemContract',
+    render: isSystemContract => (
+      <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? 'System' : 'User'}</Tag>
+    )
+  },
+  {
+    title: 'Author',
+    dataIndex: 'author',
+    key: 'author',
+    render: address => (
+      <a href={`${config.viewer.addressUrl}/${address}`}>
+        {address}
+      </a>
+    )
+  },
+  {
+    title: 'Last Updated At',
+    dataIndex: 'updateTime',
+    key: 'updateTime'
+  }
+];
+
+const fetchingStatusMap = {
+  FETCHING: 'fetching',
+  ERROR: 'error',
+  SUCCESS: 'success'
+};
+
+const Total = total => (
+  <span>Total <span className="contract-list-total">{total}</span> Items</span>
+);
 
 const List = () => {
   const [list, setList] = useState([]);
+  const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [pagination, setPagination] = useState({
     total: 0,
-    pageSize: 10,
+    pageSize: 20,
     pageNum: 1
   });
 
   const getList = pager => {
+    setFetchingStatus(fetchingStatusMap.FETCHING);
     request(API_PATH.GET_LIST, pager, {
       method: 'GET'
     }).then(result => {
+      setFetchingStatus(fetchingStatusMap.SUCCESS);
       const {
         list: resultList,
         total
@@ -36,6 +88,7 @@ const List = () => {
         total
       });
     }).catch(e => {
+      setFetchingStatus(fetchingStatusMap.ERROR);
       console.error(e);
       message.error('Network error');
     });
@@ -57,6 +110,7 @@ const List = () => {
   const onSearch = value => {
     const newPagination = {
       ...pagination,
+      pageNum: 1,
       address: value
     };
     getList(newPagination);
@@ -65,33 +119,23 @@ const List = () => {
   return (
     <div className="contract-list">
       <div className="contract-list-search">
+        <h2>Contract List</h2>
         <Search
           className="contract-list-search-input"
           placeholder="Input contract address"
-          enterButton
+          size="large"
           onSearch={onSearch}
         />
       </div>
+      <Divider />
       <div className="contract-list-content">
-        {list.map(v => {
-          const {
-            address,
-            author,
-            isSystemContract,
-            serial,
-            updateTime
-          } = v;
-          return (
-            <ListItem
-              key={address}
-              address={address}
-              author={author}
-              updateTime={updateTime}
-              isSystemContract={isSystemContract}
-              serial={serial}
-            />
-          );
-        })}
+        <Table
+          dataSource={list}
+          columns={ListColumn}
+          loading={fetchingStatus === fetchingStatusMap.FETCHING}
+          rowKey="address"
+          pagination={false}
+        />
       </div>
       <div className="contract-list-pagination">
         <Pagination
@@ -100,7 +144,7 @@ const List = () => {
           pageSize={pagination.pageSize || 20}
           hideOnSinglePage
           onChange={onPageNumChange}
-          showTotal={total => `Total ${total} items`}
+          showTotal={Total}
         />
       </div>
     </div>

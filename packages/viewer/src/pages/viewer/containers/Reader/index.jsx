@@ -8,14 +8,32 @@ import React, {
   lazy,
   Suspense
 } from 'react';
+import PropTypes from 'prop-types';
 import { useSearchParam } from 'react-use';
-import { If, Then, Else } from 'react-if';
-import { Skeleton, message } from 'antd';
-// import Viewer from '../../components/Viewer';
+import {
+  Switch,
+  Case
+} from 'react-if';
+import {
+  Result,
+  Skeleton,
+  message,
+  Steps,
+  Divider,
+  Typography,
+  Icon
+} from 'antd';
 import FileTree from '../../components/FileTree';
+import Header from '../../components/Header';
+import SaveAsZip from '../../components/Save';
 import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
 import './index.less';
+import config from '../../../../common/config';
+import {
+  LinkIcon,
+  CodeIcon
+} from '../../common/Icon';
 
 const Viewer = lazy(() => import(/* webpackChunkName: "viewer" */ '../../components/Viewer'));
 
@@ -69,18 +87,99 @@ const sketchParagraph = {
 
 const ViewerFallback = <Skeleton active paragraph={sketchParagraph} />;
 
+const { Step } = Steps;
+const { Paragraph } = Typography;
+
+const StepDescription = props => {
+  const {
+    author,
+    codeHash,
+    txId,
+    blockHeight
+  } = props;
+  return (
+    <>
+      <div className="description-item">
+        <span>Author: </span>
+        <a
+          href={`${config.viewer.addressUrl}/${author}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {author}
+          <LinkIcon
+            className="gap-left-small"
+          />
+        </a>
+      </div>
+      <div className="description-item">
+        <span>Code Hash: </span>
+        <Paragraph copyable>{codeHash}</Paragraph>
+      </div>
+      <div className="description-item">
+        <span>Transaction Id: </span>
+        <a
+          href={`${config.viewer.txUrl}/${txId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {txId}
+          <LinkIcon
+            className="gap-left-small"
+          />
+        </a>
+      </div>
+      <div className="description-item">
+        <span>Block Height: </span>
+        <a
+          href={`${config.viewer.blockUrl}/${blockHeight}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {blockHeight}
+          <LinkIcon
+            className="gap-left-small"
+          />
+        </a>
+      </div>
+    </>
+  );
+};
+
+StepDescription.propTypes = {
+  author: PropTypes.string.isRequired,
+  codeHash: PropTypes.string.isRequired,
+  txId: PropTypes.string.isRequired,
+  blockHeight: PropTypes.number.isRequired
+};
+
+const EventMap = {
+  CodeUpdated: 'Code Updated',
+  AuthorChanged: 'Author Changed',
+  ContractDeployed: 'Contract Deployed'
+};
+
+const fetchingStatusMap = {
+  FETCHING: 'fetching',
+  ERROR: 'error',
+  SUCCESS: 'success'
+};
+
 const Reader = () => {
   const address = useSearchParam('address');
   const codeHash = useSearchParam('codeHash');
   const [files, setFiles] = useState([]);
+  const [contractInfo, setContractInfo] = useState({});
+  const [error, setError] = useState({});
   // eslint-disable-next-line no-unused-vars
   const [history, setHistory] = useState([]);
-  const [hasFetched, setFetched] = useState(false);
+  const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [viewerConfig, setViewerConfig] = useState({});
   useEffect(() => {
+    let promise;
     if (address) {
-      setFetched(false);
-      Promise.all([
+      setFetchingStatus(fetchingStatusMap.FETCHING);
+      promise = Promise.all([
         request(API_PATH.GET_HISTORY, {
           address
         }, { method: 'GET' }),
@@ -91,40 +190,44 @@ const Reader = () => {
         if (historyList.length === 0) {
           throw new Error('There is no such contract');
         }
-        const {
-          result,
-          defaultFile
-        } = handleFiles(filesData);
-        setFiles(result);
-        setViewerConfig(defaultFile);
         setHistory(historyList);
-        setFetched(true);
-      }).catch(e => {
-        message.error(e.message || e.msg);
-        // setFetched(true);
+        return filesData;
       });
     } else if (codeHash) {
-      request(API_PATH.GET_FILES, {
+      setFetchingStatus(fetchingStatusMap.FETCHING);
+      promise = request(API_PATH.GET_FILES, {
         codeHash
       }, { method: 'GET' })
         .then(data => {
           if (Object.keys(data).length === 0) {
             throw new Error('There is no such contract');
           }
-          const {
-            result,
-            defaultFile
-          } = handleFiles(data);
-          setFiles(result);
-          setViewerConfig(defaultFile);
-          setFetched(true);
-        })
-        .catch(e => {
-          message.error(e.message || e.msg);
+          return data;
         });
     } else {
+      setFetchingStatus(fetchingStatusMap.ERROR);
       message.error('There is no such contract');
-      // setFetched(true);
+      setError(new Error('There is no such contract'));
+    }
+    if (promise) {
+      promise.then(data => {
+        const {
+          result,
+          defaultFile
+        } = handleFiles(data);
+        setFiles(result);
+        setViewerConfig(defaultFile);
+        setFetchingStatus(fetchingStatusMap.SUCCESS);
+        const info = {
+          ...data
+        };
+        delete info.files;
+        setContractInfo(info);
+      }).catch(e => {
+        message.error(e.message || e.msg);
+        setError(e);
+        setFetchingStatus(fetchingStatusMap.ERROR);
+      });
     }
   }, [address]);
 
@@ -138,30 +241,75 @@ const Reader = () => {
   };
 
   return (
-    <div className="contract-reader">
-      <If condition={hasFetched}>
-        <Then>
+    <div className="reader">
+      <Switch>
+        <Case condition={fetchingStatus === fetchingStatusMap.SUCCESS}>
           <>
-            <FileTree
-              files={files}
-              onChange={onFileChange}
+            <Header
+              address={contractInfo.address || ''}
+              author={contractInfo.author || ''}
+              isSystemContract={contractInfo.isSystemContract || false}
             />
-            <Suspense fallback={ViewerFallback}>
-              <Viewer
-                content={viewerConfig.content || ''}
-                name={viewerConfig.name || ''}
-                path={viewerConfig.path || ''}
+            <h2>
+              <CodeIcon
+                className="gap-right"
               />
-            </Suspense>
+              Contract Info
+              <SaveAsZip
+                className="gap-left"
+                files={files}
+                fileName={contractInfo.address || 'contract'}
+              />
+            </h2>
+            <div className="contract-reader">
+              <FileTree
+                files={files}
+                onChange={onFileChange}
+              />
+              <Suspense fallback={ViewerFallback}>
+                <Viewer
+                  content={viewerConfig.content || ''}
+                  name={viewerConfig.name || ''}
+                  path={viewerConfig.path || ''}
+                />
+              </Suspense>
+            </div>
+            <div
+              className="contract-history"
+            >
+              <h2><Icon className="gap-right" type="history" />History</h2>
+              <Divider />
+              <Steps
+                progressDot
+                current={0}
+                direction="vertical"
+              >
+                {history.map(v => (
+                  <Step
+                    key={v.txId}
+                    title={EventMap[v.event]}
+                    subTitle={v.updateTime}
+                    description={<StepDescription {...v} />}
+                  />
+                ))}
+              </Steps>
+            </div>
           </>
-        </Then>
-        <Else>
+        </Case>
+        <Case condition={fetchingStatus === fetchingStatusMap.FETCHING}>
           <Skeleton
             active
             paragraph={sketchParagraph}
           />
-        </Else>
-      </If>
+        </Case>
+        <Case condition={fetchingStatus === fetchingStatusMap.ERROR}>
+          <Result
+            status="error"
+            title={error.message || error.msg || 'Error Happened'}
+            subTitle="Please make sure your URL parameter address is an valid contract address"
+          />
+        </Case>
+      </Switch>
     </div>
   );
 };

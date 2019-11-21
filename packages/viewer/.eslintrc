@@ -37,6 +37,8 @@
     "max-len": ["error", { "code": 120}],
     "class-methods-use-this": "off",
     "no-plusplus": "off",
-    "no-extraneous-dependencies": "off"
+    "no-extraneous-dependencies": "off",
+    "react/jsx-props-no-spreading": "warn",
+    "react/jsx-one-expression-per-line": "warn"
   }
 }

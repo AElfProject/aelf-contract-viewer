@@ -7,11 +7,19 @@ module.exports = {
     database: 'aelf_viewer',
     connectionLimit: 25
   },
+  scanSql: {
+    host: '127.0.0.1',
+    port: '3306',
+    user: 'root',
+    password: 'password',
+    database: 'aelf_main_chain',
+    connectionLimit: 25
+  },
   scan: {
     interval: 20 * 1000,
-    concurrentQueryLimit: 25,
+    concurrentQueryLimit: 5,
     host: 'http://192.168.197.51:8000',
-    maxInsert: 100
+    buffer: 100
   },
   decompiler: {
     interval: 20 * 1000,
@@ -22,5 +30,11 @@ module.exports = {
   },
   contracts: {
     parliament: 'AElf.ContractNames.Parliament'
+  },
+  viewer: {
+    viewerUrl: './contract-viewer.html',
+    addressUrl: '/address',
+    txUrl: '/tx',
+    blockUrl: '/block'
   }
 };

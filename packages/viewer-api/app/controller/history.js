@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
+const moment = require('moment');
 const Controller = require('../core/baseController');
 
 const getListRules = {
@@ -22,8 +23,17 @@ class HistoryController extends Controller {
       } = ctx.request.query;
       try {
         AElf.utils.base58.decode(address);
-        const result = await app.model.Code.getHistory(address);
-        this.sendBody(result);
+        let result = await app.model.Code.getHistory(address);
+        if (!result) {
+          result = [];
+        }
+        this.sendBody(result.map(v => {
+          const tmp = v.toJSON();
+          return {
+            ...tmp,
+            updateTime: moment(tmp.updateTime).utcOffset(0).format('YYYY/MM/DD HH:mm:ssZ')
+          };
+        }));
       } catch (e) {
         throw new Error('The address you passed is not valid');
       }

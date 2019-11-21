@@ -108,7 +108,7 @@ const Viewer = props => {
 
   return (
     <div className="contract-viewer-monaco">
-      <div className="contract-viewer-monaco-title">
+      <div className="contract-viewer-monaco-title gap-bottom-small">
         <div className="contract-viewer-monaco-title-path">{path}</div>
         <div className="contract-viewer-monaco-title-opt">
           <Button
