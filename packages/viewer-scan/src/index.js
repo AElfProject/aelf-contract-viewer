@@ -2,15 +2,12 @@
  * @file index
  * @author atom-yang
  */
-const {
-  Scanner
-} = require('aelf-block-scan');
 const AElf = require('aelf-sdk');
 const {
   Blocks
 } = require('viewer-orm/model/blocks');
 const config = require('./config');
-const DBOperation = require('./dbOperation');
+const Scanner = require('./scan');
 const Decompiler = require('./decompiler');
 
 function cleanup() {
@@ -18,27 +15,29 @@ function cleanup() {
   process.exit(1);
 }
 
-process.on('unhandledRejection', () => {
+process.on('unhandledRejection', err => {
   console.log('unhandledRejection');
+  console.error(err);
   cleanup();
 });
 
 async function init() {
-  const lastHeight = await Blocks.getLastHeight();
-  const scanner = new Scanner(new DBOperation({}), {
+  const lastId = await Blocks.getLastIncId();
+  if (lastId === 0) {
+    await Blocks.insertIncId(0);
+  }
+  const scanner = new Scanner({
     ...config.scan,
-    startHeight: lastHeight + 1,
-    missingHeightList: [],
-    aelfInstance: new AElf(new AElf.providers.HttpProvider(config.scan.host))
+    aelf: new AElf(new AElf.providers.HttpProvider(config.scan.host))
   });
   const decompiler = new Decompiler(config.decompiler);
   try {
-    await scanner.start();
+    await scanner.init();
     console.log('start loop');
     setTimeout(() => {
       console.log('start decompiler DLL');
       decompiler.init().catch(console.error);
-    }, 60000);
+    }, 120000);
   } catch (err) {
     console.error(`root catch ${err.toString()}`);
     cleanup();

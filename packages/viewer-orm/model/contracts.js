@@ -64,11 +64,9 @@ const contractsDescription = {
 
 class Contracts extends Model {
   static getInfoByAddress(address) {
-    return Contracts.findAll({
+    return Contracts.findOne({
       where: {
-        address: {
-          [Op.substring]: address
-        }
+        address
       }
     });
   }

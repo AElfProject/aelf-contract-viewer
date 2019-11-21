@@ -19,33 +19,33 @@ const blocksDescription = {
     primaryKey: true,
     field: 'id'
   },
-  lastBlockHeight: {
+  lastTxIncId: {
     type: BIGINT,
     allowNull: false,
-    field: 'last_block_height'
+    field: 'last_tx_inc_id'
   }
 };
 
 class Blocks extends Model {
-  static async getLastHeight() {
+  static async getLastIncId() {
     const result = await Blocks.findAll({
       order: [
         ['id', 'DESC']
       ],
       limit: 1
     });
-    return result.length > 0 ? result[0].lastBlockHeight : 0;
+    return result.length > 0 ? result[0].lastTxIncId : 0;
   }
 
-  static insertHeight(height) {
+  static insertIncId(id) {
     return Blocks.create({
-      lastBlockHeight: height
+      lastTxIncId: id
     });
   }
 
-  static updateLastBlockHeight(height, ...args) {
+  static updateLastIncId(id, ...args) {
     return Blocks.update({
-      lastBlockHeight: height
+      lastTxIncId: id
     }, {
       where: {
         id: {

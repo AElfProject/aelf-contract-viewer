@@ -6,17 +6,27 @@
 let config;
 
 if (process.env.NODE_ENV === 'production') {
-  config = require('../../../config.prod').sql;
+  config = require('../../../config.prod');
 } else {
-  config = require('../../../config.dev').sql;
+  config = require('../../../config.dev');
 }
 
 config = {
-  ...config,
-  username: config.user,
-  dialect: 'mysql',
-  define: {
-    timestamp: false
+  sql: {
+    ...config.sql,
+    username: config.sql.user,
+    dialect: 'mysql',
+    define: {
+      timestamp: false
+    }
+  },
+  scanSql: {
+    ...config.scanSql,
+    username: config.scanSql.user,
+    dialect: 'mysql',
+    define: {
+      timestamp: false
+    }
   }
 };
 

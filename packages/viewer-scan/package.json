@@ -13,7 +13,7 @@
     "clean": "rimraf ./*.log"
   },
   "dependencies": {
-    "aelf-block-scan": "^0.1.6",
+    "aelf-block-scan": "^0.2.0",
     "axios": "^0.19.0",
     "lodash": "^4.17.15",
     "pm2": "^4.1.2",

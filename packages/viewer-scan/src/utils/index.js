@@ -13,6 +13,25 @@ const contractMethods = [
   'ChangeGenesisOwner'
 ];
 
+function isContractRelated(transaction) {
+  const {
+    addressTo,
+    method,
+    txStatus
+  } = transaction;
+  if (txStatus.toUpperCase() !== 'MINED') {
+    return false;
+  }
+  if (
+    addressTo === config.contracts.zero.address
+    && contractMethods.includes(method)
+  ) {
+    return true;
+  }
+  return addressTo === config.contracts.parliament.address
+    && method.toUpperCase() === 'RELEASE';
+}
+
 // eslint-disable-next-line no-unused-vars
 function isContractProposalCreated(transaction) {
   const {
@@ -138,8 +157,11 @@ function contractTransactionFormatted(transaction) {
   const {
     Logs,
     TransactionId,
-    BlockNumber
+    BlockNumber,
+    time
   } = transaction;
+  let contractTime = time;
+  contractTime = contractTime.startsWith('1970') ? config.chainInitTime : contractTime;
   const contractDeployed = Logs.filter(v => {
     const {
       Address,
@@ -151,11 +173,13 @@ function contractTransactionFormatted(transaction) {
     .then(res => res.map(merged => ({
       ...merged,
       blockHeight: BlockNumber,
-      txId: TransactionId
+      txId: TransactionId,
+      time: contractTime
     })));
 }
 
 module.exports = {
   isContractDeployedOrUpdated,
-  contractTransactionFormatted
+  contractTransactionFormatted,
+  isContractRelated
 };

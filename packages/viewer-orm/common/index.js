@@ -31,8 +31,15 @@ async function authenticate(database) {
   }
 }
 
-const sequelize = new Sequelize(config.database, config.username, config.password, config);
+const { sql, scanSql } = config;
+
+const sequelize = new Sequelize(sql.database, sql.username, sql.password, sql);
+const scanSequelize = new Sequelize(scanSql.database, scanSql.username, scanSql.password, scanSql);
 authenticate(sequelize).catch(e => {
+  console.error(e);
+  process.exit(1);
+});
+authenticate(scanSequelize).catch(e => {
   console.error(e);
   process.exit(1);
 });
@@ -43,7 +50,15 @@ const commonModelOptions = {
   sequelize
 };
 
+const scanModelOptions = {
+  timestamps: false,
+  initialAutoIncrement: 1,
+  sequelize: scanSequelize
+};
+
 module.exports = {
   commonModelOptions,
-  sequelize
+  scanModelOptions,
+  sequelize,
+  scanSequelize
 };
