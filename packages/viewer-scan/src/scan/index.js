@@ -2,6 +2,7 @@
  * @file scanner
  * @author atom-yang
  */
+const lodash = require('lodash');
 const {
   Blocks
 } = require('viewer-orm/model/blocks');
@@ -18,12 +19,14 @@ const {
   Transactions
 } = require('viewer-orm/model/transactions');
 const {
-  sequelize
-} = require('viewer-orm/common');
+  Proposal
+} = require('viewer-orm/model/proposal');
 const {
+  isZeroContractOrProposalReleased,
+  isContractProposalCreated,
+  contractTransactionFormatted,
   isContractRelated,
-  isContractDeployedOrUpdated,
-  contractTransactionFormatted
+  proposalCreatedFormatter
 } = require('../utils');
 const config = require('../config');
 
@@ -101,102 +104,117 @@ class Scanner {
         return;
       }
       console.log('transactions in loop', results.length);
-      await this.formatAndInsert(results, currentMaxId);
+      await this.formatAndInsert(
+        await this.getTransactions(results),
+        currentMaxId
+      );
     });
     this.scheduler.startTimer();
   }
 
   async formatAndInsert(transactions, maxId) {
-    const transactionIds = transactions.filter(isContractRelated);
+    await this.insertProposal(transactions);
+    await this.insertContract(transactions);
+    await Blocks.updateLastIncId(maxId);
+  }
+
+  async insertProposal(transactions) {
+    const result = transactions.filter(isContractProposalCreated);
+    await Proposal.bulkCreate(result.map(proposalCreatedFormatter));
+  }
+
+  async insertContract(transactions) {
+    const result = transactions.filter(isZeroContractOrProposalReleased);
+    await this.insertTransaction(result);
+  }
+
+  async insertTransaction(transactions) {
+    /* eslint-disable arrow-body-style */
+    let transactionList = await Promise.all(transactions.filter(isContractRelated).map(contractTransactionFormatted));
+    transactionList = lodash.sortBy(transactionList, ['blockHeight', t => parseInt(t.serialNumber, 10)]);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const item of transactionList) {
+      const {
+        codeHash,
+        address,
+        category,
+        author,
+        eventName,
+        isSystemContract,
+        serialNumber,
+        time,
+        code,
+        txId,
+        blockHeight
+      } = item;
+      const codeData = {
+        address,
+        codeHash,
+        author,
+        code,
+        event: eventName,
+        txId,
+        blockHeight,
+        updateTime: time
+      };
+      const contractUpdated = {
+        category,
+        author,
+        isSystemContract,
+        serial: serialNumber,
+        updateTime: time
+      };
+      if (eventName === 'ContractDeployed') {
+        contractUpdated.address = address;
+        // eslint-disable-next-line no-await-in-loop
+        await Contracts.create(contractUpdated);
+      } else if (eventName === 'CodeUpdated') {
+        // eslint-disable-next-line no-await-in-loop
+        const lastUpdated = await Code.getLastUpdated(address);
+        const {
+          author: oldAuthor
+        } = lastUpdated;
+        contractUpdated.author = oldAuthor;
+        codeData.author = oldAuthor;
+        // eslint-disable-next-line no-await-in-loop
+        await Contracts.update(contractUpdated, {
+          where: {
+            address
+          }
+        });
+      } else if (eventName === 'AuthorChanged') {
+        // eslint-disable-next-line no-await-in-loop
+        const lastUpdated = await Code.getLastUpdated(address);
+        const {
+          codeHash: oldCodeHash,
+          code: oldCode
+        } = lastUpdated;
+        codeData.codeHash = oldCodeHash;
+        codeData.code = oldCode;
+        // eslint-disable-next-line no-await-in-loop
+        await Contracts.update(contractUpdated, {
+          where: {
+            address
+          }
+        });
+      }
+      // eslint-disable-next-line no-await-in-loop
+      await Code.create(codeData);
+    }
+  }
+
+  async getTransactions(transactions = []) {
     let result = [];
-    for (let i = 0; i < transactionIds.length; i += this.options.concurrentQueryLimit) {
+    for (let i = 0; i < transactions.length; i += this.options.concurrentQueryLimit) {
       // eslint-disable-next-line no-await-in-loop
       const list = await Promise.all(
-        transactionIds
+        transactions
           .slice(i, i + this.options.concurrentQueryLimit)
           .map(this.getTransaction)
       );
       result = [...result, ...list];
     }
-    await this.insertTransaction(result, maxId);
-  }
-
-  async insertTransaction(transactions, maxId) {
-    let transactionList = [];
-    /* eslint-disable arrow-body-style */
-    transactionList = await Promise.all(transactions.filter(isContractDeployedOrUpdated).map(transaction => {
-      return contractTransactionFormatted(transaction).then(result => {
-        return result.map(v => ({
-          ...v
-        }));
-      });
-    }));
-    transactionList = transactionList.reduce((acc, i) => acc.concat(i), []);
-    sequelize.transaction(t => Blocks.updateLastIncId(maxId, { transaction: t })
-      .then(() => {
-        return Promise.all(transactionList.filter(v => v.eventName === 'ContractDeployed').map(v => {
-          const {
-            address,
-            category,
-            author,
-            isSystemContract,
-            serialNumber,
-            time
-          } = v;
-          return Contracts.create({
-            address,
-            category,
-            author,
-            isSystemContract,
-            serial: serialNumber,
-            updateTime: time
-          }, { transaction: t });
-        }));
-      }))
-      .then(() => {
-        console.log('contract deployed committed');
-        return sequelize.transaction(t => {
-          return Promise.all(transactionList.filter(v => v.eventName !== 'ContractDeployed').map(v => {
-            const {
-              address,
-              category,
-              author,
-              isSystemContract,
-              serialNumber,
-              time
-            } = v;
-            return Contracts.update({
-              category,
-              author,
-              isSystemContract,
-              serial: serialNumber,
-              updateTime: time
-            }, {
-              where: {
-                address
-              }
-            }, { transaction: t });
-          }));
-        });
-      })
-      .then(() => {
-        console.log('contract updated committed');
-        return sequelize.transaction(t => {
-          return Code.bulkCreate(transactionList.map(v => ({
-            address: v.address,
-            codeHash: v.codeHash,
-            author: v.author,
-            code: v.code,
-            event: v.eventName,
-            txId: v.txId,
-            blockHeight: v.blockHeight,
-            updateTime: v.time
-          })), { transaction: t });
-        });
-      })
-      .then(() => {
-        console.log('code updated');
-      });
+    return result;
   }
 
   async getTransaction({ txId, time }) {

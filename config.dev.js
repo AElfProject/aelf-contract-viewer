@@ -32,7 +32,7 @@ module.exports = {
     parliament: 'AElf.ContractNames.Parliament'
   },
   viewer: {
-    viewerUrl: './contract-viewer.html',
+    viewerUrl: './viewer.html',
     addressUrl: '/address',
     txUrl: '/tx',
     blockUrl: '/block'

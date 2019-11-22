@@ -44,12 +44,16 @@ function getContractAddress(contracts) {
     const address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
       sync: true
     });
+    const proto = AElf.pbjs.Root.fromDescriptor(aelf.chain.getContractFileDescriptorSet(address, {
+      sync: true
+    }));
     const contract = aelf.chain.contractAt(address, wallet, {
       sync: true
     });
     contractAddress[key] = {
       address,
-      contract
+      contract,
+      proto
     };
     console.log(key, contractAddress[key].address);
   });
