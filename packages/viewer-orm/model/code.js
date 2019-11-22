@@ -110,6 +110,18 @@ class Code extends Model {
     });
   }
 
+  static async getLastUpdated(address) {
+    return Code.findOne({
+      attributes: ['author', 'codeHash', 'code'],
+      where: {
+        address
+      },
+      order: [
+        ['updateTime', 'DESC']
+      ]
+    });
+  }
+
   static getHistory(address) {
     return Code.findAll({
       attributes: {
