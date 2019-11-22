@@ -22,7 +22,6 @@
     "i18next": "^19.0.0",
     "i18next-browser-languagedetector": "^4.0.1",
     "jszip": "^3.2.2",
-    "lodash": "^4.17.15",
     "lodash-decorators": "^6.0.1",
     "memoize-one": "^5.1.1",
     "monaco-editor": "^0.18.1",

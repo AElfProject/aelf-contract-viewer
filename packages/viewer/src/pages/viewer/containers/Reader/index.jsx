@@ -11,6 +11,8 @@ import React, {
 import PropTypes from 'prop-types';
 import { useSearchParam } from 'react-use';
 import {
+  If,
+  Then,
   Switch,
   Case
 } from 'react-if';
@@ -20,7 +22,6 @@ import {
   message,
   Steps,
   Divider,
-  Typography,
   Icon
 } from 'antd';
 import FileTree from '../../components/FileTree';
@@ -88,7 +89,6 @@ const sketchParagraph = {
 const ViewerFallback = <Skeleton active paragraph={sketchParagraph} />;
 
 const { Step } = Steps;
-const { Paragraph } = Typography;
 
 const StepDescription = props => {
   const {
@@ -114,7 +114,14 @@ const StepDescription = props => {
       </div>
       <div className="description-item">
         <span>Code Hash: </span>
-        <Paragraph copyable>{codeHash}</Paragraph>
+        <a
+          href={`${config.viewer.viewerUrl}?codeHash=${codeHash}`}
+        >
+          {codeHash}
+          <LinkIcon
+            className="gap-left-small"
+          />
+        </a>
       </div>
       <div className="description-item">
         <span>Transaction Id: </span>
@@ -274,26 +281,30 @@ const Reader = () => {
                 />
               </Suspense>
             </div>
-            <div
-              className="contract-history"
-            >
-              <h2><Icon className="gap-right" type="history" />History</h2>
-              <Divider />
-              <Steps
-                progressDot
-                current={0}
-                direction="vertical"
-              >
-                {history.map(v => (
-                  <Step
-                    key={v.txId}
-                    title={EventMap[v.event]}
-                    subTitle={v.updateTime}
-                    description={<StepDescription {...v} />}
-                  />
-                ))}
-              </Steps>
-            </div>
+            <If condition={!!address}>
+              <Then>
+                <div
+                  className="contract-history"
+                >
+                  <h2><Icon className="gap-right" type="history" />History</h2>
+                  <Divider />
+                  <Steps
+                    progressDot
+                    current={0}
+                    direction="vertical"
+                  >
+                    {history.map(v => (
+                      <Step
+                        key={v.txId}
+                        title={EventMap[v.event]}
+                        subTitle={v.updateTime}
+                        description={<StepDescription {...v} />}
+                      />
+                    ))}
+                  </Steps>
+                </div>
+              </Then>
+            </If>
           </>
         </Case>
         <Case condition={fetchingStatus === fetchingStatusMap.FETCHING}>
