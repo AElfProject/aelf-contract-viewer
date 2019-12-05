@@ -41,7 +41,11 @@ const ListColumn = [
     dataIndex: 'author',
     key: 'author',
     render: address => (
-      <a href={`${config.viewer.addressUrl}/${address}`}>
+      <a
+        href={`${config.viewer.addressUrl}/${address}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {address}
       </a>
     )
@@ -68,7 +72,7 @@ const List = () => {
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [pagination, setPagination] = useState({
     total: 0,
-    pageSize: 20,
+    pageSize: 10,
     pageNum: 1
   });
 
@@ -119,7 +123,7 @@ const List = () => {
   return (
     <div className="contract-list">
       <div className="contract-list-search">
-        <h2>Contract List</h2>
+        <h2>&nbsp;</h2>
         <Search
           className="contract-list-search-input"
           placeholder="Input contract address"

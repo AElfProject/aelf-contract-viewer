@@ -17,7 +17,7 @@ const ROOT = path.resolve(__dirname, '..');
 
 const PUBLIC_PATH = isProdMode ? config.outputPath : '/';
 
-const OUTPUT_PATH = path.resolve(__dirname, '..', 'dist/contract');
+const OUTPUT_PATH = path.resolve(__dirname, '..', 'dist/viewer');
 
 const PAGES = glob.sync('src/pages/*/index.jsx').map(page => {
   const name = page.slice(4, -10).replace(/\//g, '-').toLowerCase();

@@ -24,7 +24,7 @@ const baseConfig = {
   entry: ENTRIES,
   output: {
     path: OUTPUT_PATH,
-    // publicPath: PUBLIC_PATH
+    publicPath: PUBLIC_PATH
   },
   resolve: {
     modules: [

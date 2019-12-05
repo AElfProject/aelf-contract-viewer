@@ -265,7 +265,7 @@ const Reader = () => {
               <SaveAsZip
                 className="gap-left"
                 files={files}
-                fileName={contractInfo.address || 'contract'}
+                fileName={address || codeHash || 'contract'}
               />
             </h2>
             <div className="contract-reader">

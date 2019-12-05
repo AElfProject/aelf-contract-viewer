@@ -73,5 +73,7 @@
     "webpack-dev-server": "^3.9.0",
     "webpack-merge": "^4.2.2"
   },
-  "theme": {}
+  "theme": {
+    "primary-color": "#5c28a9"
+  }
 }
