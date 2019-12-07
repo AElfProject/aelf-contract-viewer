@@ -13,6 +13,12 @@ const {
   Code
 } = require('viewer-orm/model/code');
 
+function timeout(time) {
+  return new Promise(resolve => {
+    setTimeout(resolve, time);
+  });
+}
+
 class Decompiler {
   constructor(config) {
     this.options = config;
@@ -34,6 +40,7 @@ class Decompiler {
   }
 
   async getData(codeContent, queryTime = 1) {
+    await timeout(5000);
     try {
       const result = await axios.post(this.options.remoteApi, {
         base64string: codeContent
@@ -44,7 +51,7 @@ class Decompiler {
       }
       throw data;
     } catch (e) {
-      console.log('error occurred when querying files');
+      console.error('error occurred when querying files', e);
       const nextTime = queryTime + 1;
       if (nextTime > 3) {
         throw e;
