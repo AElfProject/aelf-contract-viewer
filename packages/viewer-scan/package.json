@@ -8,8 +8,9 @@
   "main": "src/index.js",
   "scripts": {
     "scan": "npm run scan:prod",
-    "scan:dev": "npm run clean && cross-env NODE_ENV=development pm2 start src/index.js --name aelf-viewer-scan --time",
-    "scan:prod": "cross-env NODE_ENV=production pm2 start src/index.js --name aelf-viewer-scan --exp-backoff-restart-delay=1000 --time",
+    "dev": "npm run clean && cross-env NODE_ENV=development pm2 start src/index.js --name aelf-viewer-scan --time",
+    "start": "cross-env NODE_ENV=production pm2 start src/index.js --name aelf-viewer-scan --exp-backoff-restart-delay=1000 --time",
+    "stop": "pm2 stop aelf-viewer-scan",
     "clean": "rimraf ./*.log"
   },
   "dependencies": {
