@@ -106,7 +106,7 @@ const StepDescription = props => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {author}
+          {`ELF_${author}_${config.viewer.chainId}`}
           <LinkIcon
             className="gap-left-small"
           />

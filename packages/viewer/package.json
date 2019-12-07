@@ -74,6 +74,7 @@
     "webpack-merge": "^4.2.2"
   },
   "theme": {
-    "primary-color": "#5c28a9"
+    "primary-color": "#5c28a9",
+    "table-row-hover-bg": "#F7F8F9"
   }
 }

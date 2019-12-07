@@ -32,7 +32,7 @@ const Header = props => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {address}
+          {`ELF_${address}_${config.viewer.chainId}`}
           <LinkIcon />
         </a>
       </h2>
@@ -48,7 +48,7 @@ const Header = props => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {author}
+                  {`ELF_${author}_${config.viewer.chainId}`}
                   <LinkIcon />
                 </a>
               </div>

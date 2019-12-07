@@ -22,9 +22,11 @@ const ListColumn = [
     title: 'Contract Address',
     dataIndex: 'address',
     key: 'address',
+    ellipsis: true,
+    width: 400,
     render: address => (
       <a href={`${config.viewer.viewerUrl}?address=${address}`}>
-        {address}
+        {`ELF_${address}_${config.viewer.chainId}`}
       </a>
     )
   },
@@ -40,13 +42,15 @@ const ListColumn = [
     title: 'Author',
     dataIndex: 'author',
     key: 'author',
+    ellipsis: true,
+    width: 400,
     render: address => (
       <a
         href={`${config.viewer.addressUrl}/${address}`}
         target="_blank"
         rel="noopener noreferrer"
       >
-        {address}
+        {`ELF_${address}_${config.viewer.chainId}`}
       </a>
     )
   },

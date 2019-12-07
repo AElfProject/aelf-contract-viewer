@@ -35,6 +35,7 @@ module.exports = {
     viewerUrl: './viewer.html',
     addressUrl: '/address',
     txUrl: '/tx',
-    blockUrl: '/block'
+    blockUrl: '/block',
+    chainId: 'AELF'
   }
 };

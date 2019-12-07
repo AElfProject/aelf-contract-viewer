@@ -10,7 +10,7 @@
     "app"
   ],
   "scripts": {
-    "start": "cross-env NODE_ENV=production EGG_SERVER_ENV=prod eg-scripts start --port 7740 --daemon --title=egg-viewer-api --framework ../../../node_modules/egg",
+    "start": "cross-env NODE_ENV=production EGG_SERVER_ENV=prod egg-scripts start --port 7740 --daemon --title=egg-viewer-api --framework ../../../node_modules/egg",
     "stop": "egg-scripts stop --title=egg-viewer-api",
     "dev": "cross-env NODE_ENV=development EGG_SERVER_ENV=local egg-bin dev --port 7740 --framework ../../../node_modules/egg",
     "debug": "egg-bin debug --port 7740"
