@@ -147,9 +147,10 @@ const List = () => {
       </div>
       <div className="contract-list-pagination">
         <Pagination
-          total={pagination.total || 0}
-          current={pagination.pageNum || 1}
-          pageSize={pagination.pageSize || 20}
+          showQuickJumper
+          total={pagination.total}
+          current={pagination.pageNum}
+          pageSize={pagination.pageSize}
           hideOnSinglePage
           onChange={onPageNumChange}
           showTotal={Total}
