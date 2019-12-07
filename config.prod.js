@@ -16,13 +16,13 @@ module.exports = {
     connectionLimit: 25
   },
   scan: {
-    interval: 20 * 1000,
+    interval: 5 * 60 * 1000,
     concurrentQueryLimit: 5,
     host: 'http://192.168.197.51:8000',
     buffer: 100
   },
   decompiler: {
-    interval: 20 * 1000,
+    interval: 5 * 60 * 1000,
     remoteApi: 'http://192.168.197.35:5566/getfiles'
   },
   wallet: {
@@ -35,6 +35,7 @@ module.exports = {
     viewerUrl: './viewer.html',
     addressUrl: '/address',
     txUrl: '/tx',
-    blockUrl: '/block'
+    blockUrl: '/block',
+    chainId: 'AELF'
   }
 };

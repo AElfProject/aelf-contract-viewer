@@ -40,7 +40,7 @@ class Decompiler {
   }
 
   async getData(codeContent, queryTime = 1) {
-    await timeout(5000);
+    await timeout(10 * 1000);
     try {
       const result = await axios.post(this.options.remoteApi, {
         base64string: codeContent
