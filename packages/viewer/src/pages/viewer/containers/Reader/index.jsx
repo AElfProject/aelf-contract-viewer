@@ -45,7 +45,7 @@ function getDefaultFile(files = [], names = [], index = 0, path = '') {
   }
   const newPath = `${path}${filtered[0].name}/`;
   if (index === names.length - 1) {
-    if (Array.isArray(filtered[0].files)) {
+    if (Array.isArray(filtered[0].files) && filtered[0].files.length > 0) {
       return {
         ...filtered[0].files[0],
         path: `${newPath}${filtered[0].files[0].name}`
