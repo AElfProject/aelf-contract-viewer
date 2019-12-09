@@ -37,7 +37,7 @@ async function init() {
     setTimeout(() => {
       console.log('start decompiler DLL');
       decompiler.init().catch(console.error);
-    }, 120000);
+    }, config.scan.interval + 2 * 60 * 1000);
   } catch (err) {
     console.error(`root catch ${err.toString()}`);
     cleanup();
