@@ -44,6 +44,8 @@ class Decompiler {
     try {
       const result = await axios.post(this.options.remoteApi, {
         base64string: codeContent
+      }, {
+        timeout: 60 * 1000
       });
       const { data } = result;
       if (data && +data.code === 0) {
