@@ -17,5 +17,6 @@ module.exports = appInfo => {
       enable: process.env.NODE_ENV === 'production'
     }
   };
+  config.proxy = true;
   return config;
 };
