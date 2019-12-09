@@ -25,6 +25,7 @@ const prodConfig = {
   },
   output: {
     path: OUTPUT_PATH,
+    // path: path.resolve(OUTPUT_PATH, './static'),
     filename: '[name].[chunkhash:5].js'
   },
   plugins: [

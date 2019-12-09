@@ -3,5 +3,6 @@
  * @author atom-yang
  */
 module.exports = {
-  outputPath: '/viewer'
+  outputPath: '/viewer/'
+  // outputPath: '/viewer/static/'
 };

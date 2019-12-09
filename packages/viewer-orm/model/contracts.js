@@ -63,12 +63,16 @@ const contractsDescription = {
 };
 
 class Contracts extends Model {
-  static getInfoByAddress(address) {
-    return Contracts.findOne({
+  static async getInfoByAddress(address) {
+    const result = await Contracts.findOne({
       where: {
         address
       }
     });
+    if (result) {
+      return result.toJSON();
+    }
+    return {};
   }
 
   static async getList(params) {

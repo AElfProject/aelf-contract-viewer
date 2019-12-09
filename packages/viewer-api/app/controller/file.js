@@ -34,8 +34,8 @@ class HistoryController extends Controller {
           result = await app.model.Files.getFilesByAddress(address);
           const contractInfo = await app.model.Contracts.getInfoByAddress(address);
           result = {
-            ...result.toJSON(),
-            ...contractInfo.toJSON()
+            ...result,
+            ...contractInfo
           };
         } catch (e) {
           throw new Error('The address you passed is not valid');

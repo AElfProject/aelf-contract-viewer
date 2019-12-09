@@ -55,7 +55,7 @@ class Files extends Model {
     if (!status) {
       throw new Error('Contract decompile failed');
     }
-    return result;
+    return result.toJSON();
   }
 
   static getLatestCodeHash() {

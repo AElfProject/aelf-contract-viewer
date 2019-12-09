@@ -69,7 +69,7 @@ function handleFiles(data) {
   let defaultFile;
   let result;
   try {
-    result = JSON.parse(data.files);
+    result = JSON.parse(data.files || '[]');
   } catch (e) {
     result = data.files;
   } finally {
@@ -218,6 +218,12 @@ const Reader = () => {
     }
     if (promise) {
       promise.then(data => {
+        const {
+          files: resFiles
+        } = data;
+        if (!resFiles) {
+          throw new Error('Pleasing waiting for contract decompile');
+        }
         const {
           result,
           defaultFile
