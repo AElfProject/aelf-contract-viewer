@@ -6,7 +6,8 @@ import React, {
   useEffect,
   useState,
   lazy,
-  Suspense
+  Suspense,
+  useContext
 } from 'react';
 import PropTypes from 'prop-types';
 import { useSearchParam } from 'react-use';
@@ -22,13 +23,15 @@ import {
   message,
   Steps,
   Divider,
-  Icon
+  Icon,
+  Alert
 } from 'antd';
 import FileTree from '../../components/FileTree';
 import Header from '../../components/Header';
 import SaveAsZip from '../../components/Save';
 import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
+import { GlobalContext } from '../../common/context';
 import './index.less';
 import config from '../../../../common/config';
 import {
@@ -173,6 +176,10 @@ const fetchingStatusMap = {
 };
 
 const Reader = () => {
+  const global = useContext(GlobalContext);
+  const {
+    isMobile = false
+  } = global;
   const address = useSearchParam('address');
   const codeHash = useSearchParam('codeHash');
   const [files, setFiles] = useState([]);
@@ -263,6 +270,15 @@ const Reader = () => {
               author={contractInfo.author || ''}
               isSystemContract={contractInfo.isSystemContract || false}
             />
+            <If condition={isMobile}>
+              <Then>
+                <Alert
+                  message="Have a better experience on PC browser"
+                  type="warning"
+                  className="gap-bottom"
+                />
+              </Then>
+            </If>
             <h2>
               <CodeIcon
                 className="gap-right"
