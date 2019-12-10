@@ -26,7 +26,8 @@ const {
   isContractProposalCreated,
   contractTransactionFormatted,
   isContractRelated,
-  proposalCreatedFormatter
+  proposalCreatedFormatter,
+  removeFailedOrOtherMethod
 } = require('../utils');
 const config = require('../config');
 
@@ -98,11 +99,12 @@ class Scanner {
       if (currentMaxId - lastIncId <= this.options.buffer) {
         return;
       }
-      const results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
+      let results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
       await Blocks.updateLastIncId(currentMaxId);
       if (!results || (results && results.length === 0)) {
         return;
       }
+      results = results.filter(removeFailedOrOtherMethod);
       console.log('transactions in loop', results.length);
       await this.formatAndInsert(
         await this.getTransactions(results),

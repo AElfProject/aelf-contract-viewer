@@ -26,6 +26,16 @@ const eventNames = [
   'AuthorChanged'
 ];
 
+function removeFailedOrOtherMethod(transaction) {
+  const {
+    txStatus,
+    method,
+  } = transaction;
+  return txStatus
+    && txStatus.toUpperCase() === 'MINED'
+    && (contractMethods.includes(method) || [...proposalMethods, 'CreateProposal'].includes(method));
+}
+
 function isZeroContractOrProposalReleased(transaction) {
   const {
     Transaction,
@@ -310,5 +320,6 @@ module.exports = {
   contractTransactionFormatted,
   isContractRelated,
   isZeroContractOrProposalReleased,
-  proposalCreatedFormatter
+  proposalCreatedFormatter,
+  removeFailedOrOtherMethod
 };
