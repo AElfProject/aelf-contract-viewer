@@ -138,7 +138,8 @@ function proposalCreatedFormatter(transaction) {
     Logs,
     Transaction,
     BlockNumber,
-    TransactionId
+    TransactionId,
+    time
   } = transaction;
   const {
     Params,
@@ -173,7 +174,8 @@ function proposalCreatedFormatter(transaction) {
     createdTxId: TransactionId,
     createdBlockHeight: BlockNumber,
     expiredTime,
-    organizationAddress
+    organizationAddress,
+    createdTime: time
   };
 }
 

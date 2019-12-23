@@ -100,24 +100,24 @@ class Scanner {
         return;
       }
       let results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
-      await Blocks.updateLastIncId(currentMaxId);
+      results = results || [];
+      results = results.filter(removeFailedOrOtherMethod);
       if (!results || (results && results.length === 0)) {
         return;
       }
-      results = results.filter(removeFailedOrOtherMethod);
       console.log('transactions in loop', results.length);
       await this.formatAndInsert(
-        await this.getTransactions(results),
-        currentMaxId
+        await this.getTransactions(results)
       );
+      await Blocks.updateLastIncId(currentMaxId);
     });
     this.scheduler.startTimer();
   }
 
-  async formatAndInsert(transactions, maxId) {
+  async formatAndInsert(transactions) {
     await this.insertProposal(transactions);
     await this.insertContract(transactions);
-    await Blocks.updateLastIncId(maxId);
+    // await Blocks.updateLastIncId(maxId);
   }
 
   async insertProposal(transactions) {
