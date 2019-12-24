@@ -3,12 +3,13 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
+const moment = require('moment');
 const {
   Proposal
 } = require('viewer-orm/model/proposal');
 const config = require('../config');
 
-const contractMethods = [
+const zeroContractRelatedMethods = [
   'DeploySmartContract',
   'DeploySystemSmartContract',
   'UpdateSmartContract',
@@ -16,15 +17,39 @@ const contractMethods = [
   'ChangeGenesisOwner'
 ];
 
-const proposalMethods = [
+const zeroProposalCreatedMethods = [
+  'ReleaseApprovedContract'
+];
+
+const proposalCreatedMethods = [
+  'CreateProposal'
+];
+
+const zeroReleasedMethods = [
+  'ReleaseCodeCheckedContract'
+];
+
+const proposalReleasedMethods = [
   'Release'
 ];
 
-const eventNames = [
+const relatedMethods = [
+  ...zeroContractRelatedMethods,
+  ...proposalCreatedMethods,
+  ...zeroReleasedMethods,
+  ...proposalReleasedMethods,
+  ...zeroProposalCreatedMethods
+];
+
+const contractRelatedEventNames = [
   'ContractDeployed',
   'CodeUpdated',
   'AuthorChanged'
 ];
+
+const proposalCreatedEventName = 'ProposalCreated';
+
+const codeCheckCreatedEventName = 'CodeCheckRequired';
 
 function removeFailedOrOtherMethod(transaction) {
   const {
@@ -33,7 +58,7 @@ function removeFailedOrOtherMethod(transaction) {
   } = transaction;
   return txStatus
     && txStatus.toUpperCase() === 'MINED'
-    && (contractMethods.includes(method) || [...proposalMethods, 'CreateProposal'].includes(method));
+    && relatedMethods.includes(method);
 }
 
 function isZeroContractOrProposalReleased(transaction) {
@@ -45,37 +70,20 @@ function isZeroContractOrProposalReleased(transaction) {
     To,
     MethodName
   } = Transaction;
-  if (Status.toUpperCase() !== 'MINED') {
-    return false;
-  }
-  if (
-    To === config.contracts.zero.address
-    && contractMethods.includes(MethodName)
-  ) {
-    return true;
-  }
-  return To === config.contracts.parliament.address
-    && MethodName.toUpperCase() === 'RELEASE';
+  return Status.toUpperCase() === 'MINED'
+    // eslint-disable-next-line max-len
+    && (To === config.contracts.zero.address && [...zeroContractRelatedMethods, ...zeroReleasedMethods].includes(MethodName))
+    || (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName));
 }
 
-function isContractProposalCreated(transaction) {
-  const {
-    Transaction,
-    Status
-  } = transaction;
-  const {
-    To,
-    MethodName,
-    Params
-  } = Transaction;
-  if (Status.toUpperCase() === 'MINED'
-    && To === config.contracts.parliament.address
-    && MethodName === 'CreateProposal') {
+function isProposalCreated(methodName, to, params) {
+  if (to === config.contracts.parliament.address
+    && proposalCreatedMethods.includes(methodName)) {
     let paramsJson;
     try {
-      paramsJson = JSON.parse(Params);
+      paramsJson = JSON.parse(params);
     } catch (e) {
-      paramsJson = Params;
+      paramsJson = params;
     }
     const {
       toAddress,
@@ -89,6 +97,25 @@ function isContractProposalCreated(transaction) {
       ].includes(contractMethodName);
   }
   return false;
+}
+
+function isZeroProposalCreated(methodName, to) {
+  return to === config.contracts.zero.address
+  && zeroProposalCreatedMethods.includes(methodName);
+}
+
+function isContractProposalCreated(transaction) {
+  const {
+    Transaction,
+    Status
+  } = transaction;
+  const {
+    To,
+    MethodName,
+    Params
+  } = Transaction;
+  return Status.toUpperCase() === 'MINED'
+    && (isProposalCreated(MethodName, To, Params) || isZeroProposalCreated(MethodName, To));
 }
 
 function deserialize(dataType, serialized) {
@@ -135,7 +162,7 @@ function deserializeLog(log) {
 
 function proposalCreatedFormatter(transaction) {
   const {
-    Logs,
+    Logs = [],
     Transaction,
     BlockNumber,
     TransactionId,
@@ -143,7 +170,9 @@ function proposalCreatedFormatter(transaction) {
   } = transaction;
   const {
     Params,
-    From
+    From,
+    MethodName,
+    To
   } = Transaction;
   let paramsParsed;
   try {
@@ -152,21 +181,44 @@ function proposalCreatedFormatter(transaction) {
     paramsParsed = Params;
   }
   const {
-    contractMethodName,
-    toAddress,
-    params,
-    expiredTime,
-    organizationAddress
-  } = paramsParsed;
+    proposalId
+  } = deserializeLog(Logs.filter(v => v.Name === proposalCreatedEventName)[0]);
+  if (isProposalCreated(MethodName, To, paramsParsed)) {
+    const {
+      contractMethodName,
+      toAddress,
+      params,
+      expiredTime,
+      organizationAddress
+    } = paramsParsed;
+    const {
+      code
+    } = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params);
+    return {
+      contractAddress: toAddress,
+      contractMethod: contractMethodName,
+      proposalId,
+      proposer: From,
+      code,
+      released: false,
+      createdTxId: TransactionId,
+      createdBlockHeight: BlockNumber,
+      expiredTime,
+      organizationAddress,
+      createdTime: time
+    };
+  }
   const {
     code
-  } = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params);
-  const {
-    proposalId
-  } = deserializeLog(Logs[0]);
+  } = deserializeLog(Logs.filter(v => v.Name === codeCheckCreatedEventName)[0]);
+  const { organizationAddress } = config.contracts.parliament;
+  const expiredTime = moment(time)
+    .add(10, 'm')
+    .utcOffset(0)
+    .format();
   return {
-    contractAddress: toAddress,
-    contractMethod: contractMethodName,
+    contractAddress: To,
+    contractMethod: MethodName,
     proposalId,
     proposer: From,
     code,
@@ -191,7 +243,7 @@ function isContractRelated(transaction) {
         Name
       } = v;
       return Address === config.contracts.zero.address
-        && eventNames.includes(Name);
+        && contractRelatedEventNames.includes(Name);
     });
     return result.length > 0;
   }
@@ -205,7 +257,7 @@ async function getContractLogResult(Logs) {
       Name
     } = v;
     return Address === config.contracts.zero.address
-      && eventNames.includes(Name);
+      && contractRelatedEventNames.includes(Name);
   })[0];
   const deserializeResult = deserializeLog(log);
   const result = {
@@ -214,7 +266,7 @@ async function getContractLogResult(Logs) {
   switch (log.Name) {
     case 'ContractDeployed':
       result.codeHash = deserializeResult.codeHash;
-      result.author = deserializeResult.creator;
+      result.author = deserializeResult.author;
       break;
     case 'CodeUpdated':
       result.codeHash = deserializeResult.newCodeHash;
@@ -273,13 +325,14 @@ async function contractTransactionFormatted(transaction) {
     ...contractInfo
   };
   if (
-    To === config.contracts.parliament.address
-    && proposalMethods.includes(MethodName)
+    (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName))
+    || (To === config.contracts.zero.address && zeroReleasedMethods.includes(MethodName))
   ) {
+    const proposalId = params.proposalId || params;
     // 通过提案进行的合约部署或者更新
     const {
       code
-    } = await Proposal.getCode(params);
+    } = await Proposal.getCode(proposalId);
     await Proposal.update({
       released: true,
       releasedTxId: TransactionId,
@@ -287,7 +340,7 @@ async function contractTransactionFormatted(transaction) {
       releasedTime: contractTime
     }, {
       where: {
-        proposalId: params
+        proposalId
       }
     });
     // const tmp = await config.contracts.parliament.contract.GetProposal.call(params);

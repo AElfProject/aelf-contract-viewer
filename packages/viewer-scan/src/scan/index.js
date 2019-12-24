@@ -102,6 +102,7 @@ class Scanner {
       let results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
       results = results || [];
       results = results.filter(removeFailedOrOtherMethod);
+      await Blocks.updateLastIncId(currentMaxId);
       if (!results || (results && results.length === 0)) {
         return;
       }
@@ -109,7 +110,6 @@ class Scanner {
       await this.formatAndInsert(
         await this.getTransactions(results)
       );
-      await Blocks.updateLastIncId(currentMaxId);
     });
     this.scheduler.startTimer();
   }
@@ -117,7 +117,6 @@ class Scanner {
   async formatAndInsert(transactions) {
     await this.insertProposal(transactions);
     await this.insertContract(transactions);
-    // await Blocks.updateLastIncId(maxId);
   }
 
   async insertProposal(transactions) {

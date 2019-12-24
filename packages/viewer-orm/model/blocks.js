@@ -43,7 +43,7 @@ class Blocks extends Model {
     });
   }
 
-  static updateLastIncId(id, ...args) {
+  static updateLastIncId(id, options = {}) {
     return Blocks.update({
       lastTxIncId: id
     }, {
@@ -51,8 +51,9 @@ class Blocks extends Model {
         id: {
           [Op.gt]: 0
         }
-      }
-    }, ...args);
+      },
+      ...options
+    });
   }
 }
 

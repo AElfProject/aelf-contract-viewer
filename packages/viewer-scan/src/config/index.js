@@ -55,6 +55,9 @@ function getContractAddress(contracts) {
       contract,
       proto
     };
+    if (key === 'parliament') {
+      contractAddress[key].organizationAddress = contract.GetDefaultOrganizationAddress.call({ sync: true });
+    }
     console.log(key, contractAddress[key].address);
   });
   return contractAddress;

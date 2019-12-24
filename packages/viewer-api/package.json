@@ -21,7 +21,6 @@
     "egg-scripts": "^2.11.1",
     "egg-validate": "^2.0.2",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
     "viewer-orm": "^0.0.0"
   },
   "devDependencies": {
