@@ -39,8 +39,8 @@ let positions = {};
 
 const Viewer = props => {
   const [editor, setEditor] = useState(null);
-  const [isReadOnly, setReadOnly] = useState(true);
-  const eidtorEl = useRef(null);
+  const [isReadOnly] = useState(true);
+  const editorEl = useRef(null);
   const {
     content,
     name,
@@ -63,7 +63,7 @@ const Viewer = props => {
       editor.revealLine(position.lineNumber);
       editor.setScrollTop(position.top);
     } else {
-      const monacoEditor = monaco.editor.create(eidtorEl.current, {
+      const monacoEditor = monaco.editor.create(editorEl.current, {
         lineNumbers: 'on',
         readOnly: isReadOnly,
         language,
@@ -93,10 +93,6 @@ const Viewer = props => {
     }
   }, [isReadOnly]);
 
-  const handleEdit = () => {
-    setReadOnly(!isReadOnly);
-  };
-
   const handleCopy = () => {
     try {
       copy(editor.getValue());
@@ -112,12 +108,6 @@ const Viewer = props => {
         <div className="contract-viewer-monaco-title-path">{path}</div>
         <div className="contract-viewer-monaco-title-opt">
           <Button
-            onClick={handleEdit}
-            type="circle"
-            icon="edit"
-            title="Edit code"
-          />
-          <Button
             onClick={handleCopy}
             type="circle"
             icon="copy"
@@ -125,7 +115,7 @@ const Viewer = props => {
           />
         </div>
       </div>
-      <div className="contract-viewer-monaco-code" ref={eidtorEl} />
+      <div className="contract-viewer-monaco-code" ref={editorEl} />
     </div>
   );
 };

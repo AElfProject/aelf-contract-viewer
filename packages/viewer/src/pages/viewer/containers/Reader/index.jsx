@@ -26,6 +26,10 @@ import {
   Icon,
   Alert
 } from 'antd';
+import {
+  innerHeight,
+  sendMessage
+} from '../../../../common/utils';
 import FileTree from '../../components/FileTree';
 import Header from '../../components/Header';
 import SaveAsZip from '../../components/Save';
@@ -95,6 +99,7 @@ const { Step } = Steps;
 
 const StepDescription = props => {
   const {
+    address,
     author,
     codeHash,
     txId,
@@ -118,7 +123,7 @@ const StepDescription = props => {
       <div className="description-item">
         <span>Code Hash: </span>
         <a
-          href={`${config.viewer.viewerUrl}?codeHash=${codeHash}`}
+          href={`${config.viewer.viewerUrl}?codeHash=${codeHash}&address=${address}`}
         >
           {codeHash}
           <LinkIcon
@@ -157,6 +162,7 @@ const StepDescription = props => {
 };
 
 StepDescription.propTypes = {
+  address: PropTypes.string.isRequired,
   author: PropTypes.string.isRequired,
   codeHash: PropTypes.string.isRequired,
   txId: PropTypes.string.isRequired,
@@ -190,8 +196,26 @@ const Reader = () => {
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [viewerConfig, setViewerConfig] = useState({});
   useEffect(() => {
+    innerHeight().then(height => {
+      sendMessage({ height });
+    }).catch(err => {
+      console.error(err);
+    });
+  }, []);
+  useEffect(() => {
     let promise;
-    if (address) {
+    if (codeHash && address) {
+      setFetchingStatus(fetchingStatusMap.FETCHING);
+      promise = request(API_PATH.GET_FILES, {
+        codeHash,
+        address
+      }, { method: 'GET' }).then(filesData => {
+        if (Object.keys(filesData || {}).length === 0) {
+          throw new Error('There is no such contract');
+        }
+        return filesData;
+      });
+    } else if (address && !codeHash) {
       setFetchingStatus(fetchingStatusMap.FETCHING);
       promise = Promise.all([
         request(API_PATH.GET_HISTORY, {
@@ -207,17 +231,6 @@ const Reader = () => {
         setHistory(historyList);
         return filesData;
       });
-    } else if (codeHash) {
-      setFetchingStatus(fetchingStatusMap.FETCHING);
-      promise = request(API_PATH.GET_FILES, {
-        codeHash
-      }, { method: 'GET' })
-        .then(data => {
-          if (Object.keys(data).length === 0) {
-            throw new Error('There is no such contract');
-          }
-          return data;
-        });
     } else {
       setFetchingStatus(fetchingStatusMap.ERROR);
       message.error('There is no such contract');
@@ -303,7 +316,7 @@ const Reader = () => {
                 />
               </Suspense>
             </div>
-            <If condition={!!address}>
+            <If condition={!codeHash}>
               <Then>
                 <div
                   className="contract-history"

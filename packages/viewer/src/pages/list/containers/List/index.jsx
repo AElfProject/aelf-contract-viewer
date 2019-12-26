@@ -16,6 +16,7 @@ import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
 import config from '../../../../common/config';
 import './index.less';
+import { innerHeight, sendMessage } from '../../../../common/utils';
 
 const ListColumn = [
   {
@@ -103,6 +104,11 @@ const List = () => {
   };
 
   useEffect(() => {
+    innerHeight().then(height => {
+      sendMessage({ height });
+    }).catch(err => {
+      console.error(err);
+    });
     getList(pagination);
   }, []);
 

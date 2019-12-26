@@ -28,6 +28,11 @@ class HistoryController extends Controller {
       let result;
       if (codeHash) {
         result = await app.model.Files.getFilesByCodeHash(codeHash);
+        const contractInfo = await app.model.Contracts.getInfoByAddress(address);
+        result = {
+          ...contractInfo,
+          ...result
+        };
       } else if (address) {
         try {
           AElf.utils.base58.decode(address);
