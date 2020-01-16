@@ -54,6 +54,13 @@ const contractsDescription = {
     field: 'serial',
     comment: 'the serial number of contract'
   },
+  version: {
+    type: STRING(255),
+    allowNull: false,
+    field: 'version',
+    defaultValue: '1',
+    comment: 'current contract version'
+  },
   updateTime: {
     type: DATE,
     allowNull: false,

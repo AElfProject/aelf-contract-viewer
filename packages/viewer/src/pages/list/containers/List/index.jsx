@@ -40,6 +40,11 @@ const ListColumn = [
     )
   },
   {
+    title: 'Version',
+    dataIndex: 'version',
+    key: 'version'
+  },
+  {
     title: 'Author',
     dataIndex: 'author',
     key: 'author',
