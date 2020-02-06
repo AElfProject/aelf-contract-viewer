@@ -267,9 +267,11 @@ async function getContractLogResult(Logs) {
     case 'ContractDeployed':
       result.codeHash = deserializeResult.codeHash;
       result.author = deserializeResult.author;
+      result.version = deserializeResult.version;
       break;
     case 'CodeUpdated':
       result.codeHash = deserializeResult.newCodeHash;
+      result.version = deserializeResult.version;
       break;
     case 'AuthorChanged':
       result.author = deserializeResult.newAuthor;

@@ -102,14 +102,15 @@ class Scanner {
       let results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
       results = results || [];
       results = results.filter(removeFailedOrOtherMethod);
-      await Blocks.updateLastIncId(currentMaxId);
       if (!results || (results && results.length === 0)) {
+        await Blocks.updateLastIncId(currentMaxId);
         return;
       }
       console.log('transactions in loop', results.length);
       await this.formatAndInsert(
         await this.getTransactions(results)
       );
+      await Blocks.updateLastIncId(currentMaxId);
     });
     this.scheduler.startTimer();
   }
@@ -146,7 +147,8 @@ class Scanner {
         time,
         code,
         txId,
-        blockHeight
+        blockHeight,
+        version = '1'
       } = item;
       const codeData = {
         address,
@@ -156,12 +158,14 @@ class Scanner {
         event: eventName,
         txId,
         blockHeight,
+        version,
         updateTime: time
       };
       const contractUpdated = {
         category,
         author,
         isSystemContract,
+        version,
         serial: serialNumber,
         updateTime: time
       };
@@ -188,10 +192,12 @@ class Scanner {
         const lastUpdated = await Code.getLastUpdated(address);
         const {
           codeHash: oldCodeHash,
-          code: oldCode
+          code: oldCode,
+          version: oldVersion
         } = lastUpdated;
         codeData.codeHash = oldCodeHash;
         codeData.code = oldCode;
+        codeData.version = oldVersion;
         // eslint-disable-next-line no-await-in-loop
         await Contracts.update(contractUpdated, {
           where: {

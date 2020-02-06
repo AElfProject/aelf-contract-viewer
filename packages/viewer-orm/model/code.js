@@ -66,6 +66,13 @@ const codeDescription = {
     field: 'block_height',
     comment: 'correspond block height'
   },
+  version: {
+    type: STRING(255),
+    allowNull: false,
+    field: 'version',
+    defaultValue: '-1',
+    comment: 'related contract version'
+  },
   updateTime: {
     type: DATE,
     allowNull: false,

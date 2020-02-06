@@ -127,8 +127,7 @@ class Transactions extends Model {
         },
         addressTo: {
           [Op.in]: addressTo
-        },
-        txStatus: 'Mined'
+        }
       },
       order: [
         ['id', 'ASC']

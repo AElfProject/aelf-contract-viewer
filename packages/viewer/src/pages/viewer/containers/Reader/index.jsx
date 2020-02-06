@@ -103,6 +103,7 @@ const StepDescription = props => {
     author,
     codeHash,
     txId,
+    version,
     blockHeight
   } = props;
   return (
@@ -126,9 +127,14 @@ const StepDescription = props => {
           href={`${config.viewer.viewerUrl}?codeHash=${codeHash}&address=${address}`}
         >
           {codeHash}
-          <LinkIcon
-            className="gap-left-small"
-          />
+        </a>
+      </div>
+      <div className="description-item">
+        <span>Version: </span>
+        <a
+          href={`${config.viewer.viewerUrl}?codeHash=${codeHash}&address=${address}`}
+        >
+          {version}
         </a>
       </div>
       <div className="description-item">
@@ -163,6 +169,7 @@ const StepDescription = props => {
 
 StepDescription.propTypes = {
   address: PropTypes.string.isRequired,
+  version: PropTypes.string.isRequired,
   author: PropTypes.string.isRequired,
   codeHash: PropTypes.string.isRequired,
   txId: PropTypes.string.isRequired,
