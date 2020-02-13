@@ -23,6 +23,13 @@ const proposalDescription = {
     primaryKey: true,
     field: 'id'
   },
+  contractName: {
+    type: STRING(255),
+    allowNull: false,
+    defaultValue: '-1',
+    field: 'contract_name',
+    comment: 'user defined contract name'
+  },
   contractAddress: {
     type: STRING(64),
     allowNull: false,

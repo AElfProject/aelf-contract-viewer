@@ -7,6 +7,9 @@ const moment = require('moment');
 const {
   Proposal
 } = require('viewer-orm/model/proposal');
+const {
+  ContractNames
+} = require('viewer-orm/model/contractNames');
 const config = require('../config');
 
 const zeroContractRelatedMethods = [
@@ -160,7 +163,7 @@ function deserializeLog(log) {
   return result;
 }
 
-function proposalCreatedFormatter(transaction) {
+async function proposalCreatedFormatter(transaction) {
   const {
     Logs = [],
     Transaction,
@@ -216,7 +219,7 @@ function proposalCreatedFormatter(transaction) {
     .add(10, 'm')
     .utcOffset(0)
     .format();
-  return {
+  const result = {
     contractAddress: To,
     contractMethod: MethodName,
     proposalId,
@@ -229,6 +232,14 @@ function proposalCreatedFormatter(transaction) {
     organizationAddress,
     createdTime: time
   };
+  if (MethodName === 'ReleaseApprovedContract' && To === config.contracts.zero.address) {
+    const preProposalId = paramsParsed.proposalId || '';
+    const contractName = await ContractNames.getContractName(preProposalId);
+    if (contractName) {
+      result.contractName = contractName;
+    }
+  }
+  return result;
 }
 
 function isContractRelated(transaction) {
@@ -333,7 +344,8 @@ async function contractTransactionFormatted(transaction) {
     const proposalId = params.proposalId || params;
     // 通过提案进行的合约部署或者更新
     const {
-      code
+      code,
+      contractName
     } = await Proposal.getCode(proposalId);
     await Proposal.update({
       released: true,
@@ -357,10 +369,11 @@ async function contractTransactionFormatted(transaction) {
     // } = deserialize(dataType, proposalParams);
     result = {
       ...result,
-      code
+      code,
+      contractName
     };
   } else {
-    // 零合约进行的合约部署/更新/作者更新
+    // 零合约直接进行的合约部署/更新/作者更新，例如区块1的系统合约部署
     const {
       code
     } = params;

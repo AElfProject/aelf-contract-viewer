@@ -1,5 +1,5 @@
 /**
- * @file blocks model
+ * @file transactions model
  * @author atom-yang
  */
 const Sequelize = require('sequelize');

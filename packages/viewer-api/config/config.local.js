@@ -2,6 +2,8 @@
  * @file config file
  * @author atom-yang
  */
+const { constants, scan } = require('../../../config.dev');
+
 module.exports = appInfo => {
   exports = {};
   const config = exports;
@@ -17,5 +19,11 @@ module.exports = appInfo => {
       enable: process.env.NODE_ENV === 'production'
     }
   };
-  return config;
+  return {
+    ...config,
+    constants: {
+      ...constants,
+      endpoint: scan.host
+    }
+  };
 };

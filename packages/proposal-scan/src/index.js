@@ -8,7 +8,6 @@ const {
 } = require('viewer-orm/model/scanCursor');
 const config = require('./config');
 const Scanner = require('./scan');
-const Decompiler = require('./decompiler');
 
 function cleanup() {
   console.log('cleanup');
@@ -22,7 +21,6 @@ process.on('unhandledRejection', err => {
 });
 
 async function init() {
-  // const lastId = await Blocks.getLastIncId();
   const lastId = await ScanCursor.getLastId(config.scannerName);
   if (lastId === 0) {
     await ScanCursor.insertIncId(0, config.scannerName);
@@ -31,14 +29,8 @@ async function init() {
     ...config.scan,
     aelf: new AElf(new AElf.providers.HttpProvider(config.scan.host))
   });
-  const decompiler = new Decompiler(config.decompiler);
   try {
     await scanner.init();
-    console.log('start loop');
-    setTimeout(() => {
-      console.log('start decompiler DLL');
-      decompiler.init().catch(console.error);
-    }, config.scan.interval + 10 * 60 * 1000);
   } catch (err) {
     console.error(`root catch ${err.toString()}`);
     cleanup();

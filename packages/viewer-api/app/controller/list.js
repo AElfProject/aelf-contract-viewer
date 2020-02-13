@@ -54,6 +54,28 @@ class ListController extends Controller {
       this.sendBody();
     }
   }
+
+  async getAllContracts() {
+    const { ctx, app } = this;
+    try {
+      const {
+        search = ''
+      } = ctx.request.query;
+      // todo: 空search的情况下，考虑从缓存获取数据
+      const list = await app.model.Contracts.getAllList(search);
+      this.sendBody({
+        list: list.map(v => ({
+          ...v,
+          address: v.address,
+          contractName: +v.contractName === -1 ? '' : v.contractName
+        })),
+        total: list.length
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
 }
 
 module.exports = ListController;

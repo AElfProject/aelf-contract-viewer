@@ -16,6 +16,9 @@ config = {
     ...config.sql,
     username: config.sql.user,
     dialect: 'mysql',
+    dialectOptions: {
+      supportBigNumbers: true
+    },
     define: {
       timestamp: false
     }
@@ -24,6 +27,9 @@ config = {
     ...config.scanSql,
     username: config.scanSql.user,
     dialect: 'mysql',
+    dialectOptions: {
+      supportBigNumbers: true
+    },
     define: {
       timestamp: false
     }

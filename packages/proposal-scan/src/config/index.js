@@ -58,7 +58,6 @@ function getContractAddress(contracts) {
     if (key === 'parliament') {
       contractAddress[key].organizationAddress = contract.GetDefaultOrganizationAddress.call({ sync: true });
     }
-    console.log(key, contractAddress[key].address);
   });
   return contractAddress;
 }
@@ -67,6 +66,6 @@ config.contracts = {
   ...getContractAddress(config.contracts)
 };
 
-config.scannerName = 'viewer-scan';
+config.scannerName = 'proposal-scan';
 
 module.exports = config;

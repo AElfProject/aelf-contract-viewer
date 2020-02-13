@@ -24,6 +24,13 @@ const contractsDescription = {
     primaryKey: true,
     field: 'id'
   },
+  contractName: {
+    type: STRING(255),
+    allowNull: false,
+    defaultValue: '-1',
+    field: 'contract_name',
+    comment: 'user defined contract name'
+  },
   address: {
     type: STRING(64),
     allowNull: false,
@@ -80,6 +87,25 @@ class Contracts extends Model {
       return result.toJSON();
     }
     return {};
+  }
+
+  static async getAllList(search) {
+    let list;
+    if (search) {
+      list = await Contracts.findAll({
+        attributes: ['address', 'contractName', 'isSystemContract'],
+        where: {
+          address: {
+            [Op.substring]: search
+          }
+        }
+      });
+    } else {
+      list = await Contracts.findAll({
+        attributes: ['address', 'contractName', 'isSystemContract']
+      });
+    }
+    return list;
   }
 
   static async getList(params) {

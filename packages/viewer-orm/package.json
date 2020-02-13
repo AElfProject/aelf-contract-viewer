@@ -7,11 +7,14 @@
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
-    "create-db": "sequelize db:create",
-    "generate": "sequelize migration:generate",
+    "create-db": "cross-env NODE_ENV=production sequelize db:create",
+    "create-db:dev": "cross-env NODE_ENV=development sequelize db:create",
+    "generate": "cross-env NODE_ENV=production sequelize migration:generate",
+    "generate:dev": "cross-env NODE_ENV=development sequelize migration:generate",
     "migrate": "sequelize db:migrate",
-    "undo": "sequelize db:migrate:undo",
-    "undo-all": "sequelize db:migrate:undo:all"
+    "migrate:dev": "cross-env NODE_ENV=development sequelize db:migrate",
+    "undo-all": "sequelize db:migrate:undo:all",
+    "undo-all:dev": "cross-env NODE_ENV=development sequelize db:migrate:undo:all"
   },
   "dependencies": {
     "axios": "^0.19.0",
