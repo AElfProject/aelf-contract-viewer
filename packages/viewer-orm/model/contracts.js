@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 
 const {
   Model,

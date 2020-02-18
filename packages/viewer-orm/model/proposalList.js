@@ -2,8 +2,9 @@
  * @file proposal list model
  * @author atom-yang
  */
+const moment = require('moment');
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
 const {
@@ -14,7 +15,8 @@ const {
   DATE,
   NOW,
   TEXT,
-  Op
+  Op,
+  BOOLEAN
 } = Sequelize;
 
 const {
@@ -24,7 +26,7 @@ const {
   }
 } = config;
 
-const organizationDescription = {
+const proposalListDescription = {
   id: {
     type: BIGINT,
     autoIncrement: true,
@@ -53,8 +55,7 @@ const organizationDescription = {
   proposalId: {
     type: STRING(255),
     allowNull: false,
-    field: 'proposal_id',
-    unique: true
+    field: 'proposal_id'
   },
   proposer: {
     type: STRING(255),
@@ -81,7 +82,7 @@ const organizationDescription = {
     defaultValue: NOW,
     field: 'expired_time'
   },
-  // todo: 需要除以token的decimals
+  // 除以token的decimals
   approvals: {
     type: BIGINT,
     allowNull: false,
@@ -98,22 +99,14 @@ const organizationDescription = {
     defaultValue: 0
   },
   status: {
+    // 无执行失败的情况，因为无法判断是否是失败
     type: ENUM(
-      proposalStatus.PENDING,
+      proposalStatus.NOT_PASSED,
       proposalStatus.APPROVED,
-      proposalStatus.REJECTED,
-      proposalStatus.ABSTAINED,
-      proposalStatus.MINED,
-      proposalStatus.FAILED
+      proposalStatus.MINED
     ),
     allowNull: false,
     comment: 'proposal status'
-  },
-  updateTime: {
-    type: DATE,
-    allowNull: false,
-    defaultValue: NOW,
-    field: 'update_time'
   },
   releasedTxId: {
     type: STRING(255),
@@ -128,11 +121,17 @@ const organizationDescription = {
     defaultValue: NOW,
     field: 'released_time'
   },
-  contractRelated: {
-    type: ENUM('NO', 'DEPLOY', 'UPDATE'),
+  createdBy: {
+    type: ENUM('USER', 'SYSTEM_CONTRACT'),
     allowNull: false,
-    field: 'contract_related',
-    defaultValue: 'NO',
+    field: 'created_by',
+    defaultValue: 'USER',
+  },
+  isContractDeployed: {
+    type: BOOLEAN,
+    allowNull: false,
+    field: 'is_contract_deployed',
+    defaultValue: false,
   },
   proposalType: {
     type: ENUM(
@@ -147,6 +146,55 @@ const organizationDescription = {
 };
 
 class ProposalList extends Model {
+  static async getProposal(proposalId) {
+    const result = await ProposalList.findOne({
+      attributes: {
+        exclude: ['contractParams']
+      },
+      where: {
+        proposalId
+      }
+    });
+    if (result) {
+      return result.toJSON();
+    }
+    return false;
+  }
+
+  static getExistProposalIds(proposalIds) {
+    return ProposalList.findAll({
+      attributes: ['proposalId'],
+      where: {
+        proposalId: {
+          [Op.in]: proposalIds
+        }
+      }
+    }).then(results => results.map(item => item.proposalId));
+  }
+
+  static async isExist(proposalId) {
+    const result = await ProposalList.findAll({
+      attributes: ['id'],
+      where: {
+        proposalId
+      }
+    });
+    return result.length > 0;
+  }
+
+  static async getAllProposalInfo(proposalId, options = {}) {
+    const result = await ProposalList.findOne({
+      where: {
+        proposalId
+      },
+      ...options
+    });
+    if (result) {
+      return result.toJSON();
+    }
+    return false;
+  }
+
   static async getParams(proposalId) {
     const result = await ProposalList.findOne({
       attributes: ['contractParams'],
@@ -175,8 +223,11 @@ class ProposalList extends Model {
       if (status === 'expired') {
         whereCondition = {
           ...whereCondition,
+          expiredTime: {
+            [Op.lt]: moment().utcOffset(0).format()
+          },
           status: {
-            [Op.in]: [proposalStatus.PENDING, proposalStatus.APPROVED]
+            [Op.in]: [proposalStatus.NOT_PASSED, proposalStatus.APPROVED]
           }
         };
       } else {
@@ -189,9 +240,7 @@ class ProposalList extends Model {
     if (isContract) {
       whereCondition = {
         ...whereCondition,
-        contractRelated: {
-          [Op.in]: ['DEPLOY', 'UPDATE']
-        }
+        isContractDeployed: true
       };
     }
     if ((search || '').trim().length > 0) {
@@ -241,12 +290,12 @@ class ProposalList extends Model {
   }
 }
 
-ProposalList.init(organizationDescription, {
+ProposalList.init(proposalListDescription, {
   ...commonModelOptions,
   tableName: 'proposal_list'
 });
 
 module.exports = {
   ProposalList,
-  organizationDescription
+  proposalListDescription
 };

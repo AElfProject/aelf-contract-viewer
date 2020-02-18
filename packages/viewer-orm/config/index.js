@@ -3,15 +3,10 @@
  * @author atom-yang
  */
 /* eslint-disable global-require */
-let config;
-
-if (process.env.NODE_ENV === 'production') {
-  config = require('../../../config.prod');
-} else {
-  config = require('../../../config.dev');
-}
+let config = require('../../../config');
 
 config = {
+  ...config,
   sql: {
     ...config.sql,
     username: config.sql.user,

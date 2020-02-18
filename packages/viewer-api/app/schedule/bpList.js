@@ -17,22 +17,22 @@ class BPList extends Subscription {
   }
 
   async subscribe() {
-    const { ctx } = this;
-    const { app } = ctx;
+    const { app } = this;
     let list;
     try {
       const contract = await getContract(app.config.constants.endpoint, 'AElf.ContractNames.Consensus');
-      list = contract.GetCurrentMinerList.call();
+      list = await contract.GetCurrentMinerList.call();
       list = list.pubkeys;
     } catch (e) {
       list = [];
     }
     list = list.map(pub => {
-      let pubKey = Buffer.from(pub, 'base64').toString('hex');
+      let pubKey = Buffer.from(pub, 'base64');
       const keyPair = defaultEc.keyFromPublic(pubKey);
       pubKey = keyPair.getPublic();
       return AElf.wallet.getAddressFromPubKey(pubKey);
     });
+    app.logger.info('bp list', list);
     app.cache.BPList = list;
   }
 }

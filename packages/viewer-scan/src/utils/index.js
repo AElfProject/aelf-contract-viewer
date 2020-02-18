@@ -76,11 +76,11 @@ function isZeroContractOrProposalReleased(transaction) {
   return Status.toUpperCase() === 'MINED'
     // eslint-disable-next-line max-len
     && (To === config.contracts.zero.address && [...zeroContractRelatedMethods, ...zeroReleasedMethods].includes(MethodName))
-    || (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName));
+    || (To === config.controller.contractAddress && proposalReleasedMethods.includes(MethodName));
 }
 
 function isProposalCreated(methodName, to, params) {
-  if (to === config.contracts.parliament.address
+  if (to === config.controller.contractAddress
     && proposalCreatedMethods.includes(methodName)) {
     let paramsJson;
     try {
@@ -214,7 +214,7 @@ async function proposalCreatedFormatter(transaction) {
   const {
     code
   } = deserializeLog(Logs.filter(v => v.Name === codeCheckCreatedEventName)[0]);
-  const { organizationAddress } = config.contracts.parliament;
+  const { organizationAddress } = config.controller;
   const expiredTime = moment(time)
     .add(10, 'm')
     .utcOffset(0)
@@ -338,7 +338,7 @@ async function contractTransactionFormatted(transaction) {
     ...contractInfo
   };
   if (
-    (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName))
+    (To === config.controller.contractAddress && proposalReleasedMethods.includes(MethodName))
     || (To === config.contracts.zero.address && zeroReleasedMethods.includes(MethodName))
   ) {
     const proposalId = params.proposalId || params;
@@ -357,16 +357,6 @@ async function contractTransactionFormatted(transaction) {
         proposalId
       }
     });
-    // const tmp = await config.contracts.parliament.contract.GetProposal.call(params);
-    // const {
-    //   contractMethodName,
-    //   params: proposalParams
-    // } = tmp;
-    // const dataType = config.contracts.zero.proto.lookupType(contractMethodName);
-    // const {
-    //   code,
-    //   category
-    // } = deserialize(dataType, proposalParams);
     result = {
       ...result,
       code,

@@ -12,8 +12,10 @@
   "dependencies": {
     "aelf-block-scan": "^0.3.1",
     "aelf-sdk": "^3.2.19",
+    "decimal.js": "^10.2.0",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "sequelize": "^5.21.4"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
@@ -29,9 +31,9 @@
     "eslint-plugin-react-hooks": "^2.2.0",
     "git-cz": "^3.3.0",
     "husky": "^3.0.9",
+    "lerna": "^3.18.3",
     "lint-staged": "^9.4.2",
-    "rimraf": "^3.0.0",
-    "lerna": "^3.18.3"
+    "rimraf": "^3.0.0"
   },
   "husky": {
     "hooks": {

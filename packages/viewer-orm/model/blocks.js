@@ -1,65 +1,55 @@
 /**
- * @file blocks model
+ * @file transactions model
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { scanModelOptions } = require('../common/scan');
 
 const {
   Model,
   BIGINT,
-  Op
+  STRING
 } = Sequelize;
 
 const blocksDescription = {
   id: {
     type: BIGINT,
-    autoIncrement: true,
     allowNull: false,
     primaryKey: true,
     field: 'id'
   },
-  lastTxIncId: {
+  chainId: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'chain_id'
+  },
+  blockHash: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'block_hash'
+  },
+  blockHeight: {
     type: BIGINT,
     allowNull: false,
-    field: 'last_tx_inc_id'
+    field: 'block_height'
   }
 };
 
 class Blocks extends Model {
-  static async getLastIncId() {
-    const result = await Blocks.findAll({
+  static async getHighestHeight() {
+    return Blocks.findOne({
+      attributes: ['blockHeight'],
       order: [
-        ['id', 'DESC']
+        ['blockHeight', 'DESC']
       ],
       limit: 1
-    });
-    return result.length > 0 ? result[0].lastTxIncId : 0;
-  }
-
-  static insertIncId(id) {
-    return Blocks.create({
-      lastTxIncId: id
-    });
-  }
-
-  static updateLastIncId(id, options = {}) {
-    return Blocks.update({
-      lastTxIncId: id
-    }, {
-      where: {
-        id: {
-          [Op.gt]: 0
-        }
-      },
-      ...options
     });
   }
 }
 
 Blocks.init(blocksDescription, {
-  ...commonModelOptions,
-  tableName: 'blocks'
+  ...scanModelOptions,
+  tableName: 'blocks_0'
 });
 
 module.exports = {

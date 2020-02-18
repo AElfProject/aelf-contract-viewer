@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
 const {
@@ -11,7 +11,7 @@ const {
   BIGINT,
   STRING,
   ENUM,
-  JSON,
+  TEXT,
   DATE,
   NOW,
   Op
@@ -43,7 +43,7 @@ const organizationDescription = {
     type: STRING(255),
     allowNull: false,
     field: 'tx_id',
-    unique: true,
+    defaultValue: 'none',
     comment: 'tx id of creating org'
   },
   creator: {
@@ -65,10 +65,10 @@ const organizationDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'create_at'
+    field: 'created_at'
   },
   releaseThreshold: {
-    type: JSON,
+    type: TEXT('long'),
     allowNull: false,
     field: 'release_threshold',
     get() {
@@ -78,10 +78,13 @@ const organizationDescription = {
       } catch (e) {
         return data || {};
       }
+    },
+    set(value) {
+      this.setDataValue('releaseThreshold', JSON.stringify(value));
     }
   },
   leftOrgInfo: {
-    type: JSON,
+    type: TEXT('long'),
     allowNull: false,
     field: 'left_org_info',
     get() {
@@ -91,6 +94,9 @@ const organizationDescription = {
       } catch (e) {
         return data || {};
       }
+    },
+    set(value) {
+      this.setDataValue('leftOrgInfo', JSON.stringify(value));
     }
   }
 };
@@ -153,6 +159,16 @@ class Organizations extends Model {
         }
       }
     });
+  }
+
+  static async isExist(orgAddress) {
+    const result = await Organizations.findAll({
+      attributes: ['id'],
+      where: {
+        orgAddress
+      }
+    });
+    return result.length > 0;
   }
 }
 

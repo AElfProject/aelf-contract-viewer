@@ -2,7 +2,6 @@
  * @file index
  * @author atom-yang
  */
-const AElf = require('aelf-sdk');
 const {
   ScanCursor
 } = require('viewer-orm/model/scanCursor');
@@ -22,12 +21,12 @@ process.on('unhandledRejection', err => {
 
 async function init() {
   const lastId = await ScanCursor.getLastId(config.scannerName);
-  if (lastId === 0) {
+  if (lastId === false) {
     await ScanCursor.insertIncId(0, config.scannerName);
   }
   const scanner = new Scanner({
     ...config.scan,
-    aelf: new AElf(new AElf.providers.HttpProvider(config.scan.host))
+    aelf: config.aelf
   });
   try {
     await scanner.init();

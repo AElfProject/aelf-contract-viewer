@@ -182,7 +182,6 @@ class ProposalsController extends Controller {
                 return {
                   ...item,
                   organizationInfo: organizations[item.orgAddress],
-                  isContractRelated: item.contractRelated !== 'NO',
                   canVote: true,
                   votedStatus: ParVotedIds[item.proposalId] || 'none'
                 };
@@ -193,7 +192,6 @@ class ProposalsController extends Controller {
                 return {
                   ...item,
                   organizationInfo: organizations[item.orgAddress],
-                  isContractRelated: item.contractRelated !== 'NO',
                   canVote: false,
                   votedStatus: 'none'
                 };
@@ -211,7 +209,6 @@ class ProposalsController extends Controller {
               return {
                 ...item,
                 organizationInfo: organizations[item.orgAddress],
-                isContractRelated: item.contractRelated !== 'NO',
                 canVote: true,
                 votedStatus: referVotedIds[item.proposalId] || 'none'
               };
@@ -241,7 +238,6 @@ class ProposalsController extends Controller {
               return {
                 ...item,
                 organizationInfo: organizations[item.orgAddress],
-                isContractRelated: item.contractRelated !== 'NO',
                 canVote: auditOrgs[item.orgAddress],
                 votedStatus: assoVotedIds[item.proposalId] || 'none'
               };
@@ -255,7 +251,6 @@ class ProposalsController extends Controller {
           return {
             ...item,
             organizationInfo: organizations[item.orgAddress],
-            isContractRelated: item.contractRelated !== 'NO',
             canVote: false,
             votedStatus: 'none'
           };
@@ -299,6 +294,23 @@ class ProposalsController extends Controller {
         throw new Error('contract name has been taken');
       }
       this.sendBody({});
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async getTokenList() {
+    const { ctx, app } = this;
+    try {
+      app.validator.validate(this.contractNameRules, ctx.request.query);
+      const {
+        search = ''
+      } = ctx.request.query;
+      const list = await app.model.Tokens.getTokenList(search);
+      this.sendBody({
+        list
+      });
     } catch (e) {
       this.error(e);
       this.sendBody();

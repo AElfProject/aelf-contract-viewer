@@ -2,7 +2,7 @@
  * @file config file
  * @author atom-yang
  */
-const { constants, scan } = require('../../../config.dev');
+const { constants, scan } = require('../../../config');
 
 module.exports = appInfo => {
   exports = {};

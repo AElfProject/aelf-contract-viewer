@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
 const {
@@ -86,6 +86,12 @@ const votesDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW
+  },
+  claimedTime: {
+    type: DATE,
+    allowNull: false,
+    defaultValue: NOW,
+    field: 'claimed_time'
   }
 };
 

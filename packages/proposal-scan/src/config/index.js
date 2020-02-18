@@ -3,14 +3,7 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
-/* eslint-disable global-require */
-let config;
-
-if (process.env.NODE_ENV === 'production') {
-  config = require('../../../../config.prod');
-} else {
-  config = require('../../../../config.dev');
-}
+let config = require('../../../../config');
 
 function getContractAddress(contracts) {
   const contractAddress = {};
@@ -32,7 +25,6 @@ function getContractAddress(contracts) {
   } = aelf.chain.getBlockByHeight(2, false, {
     sync: true
   }).Header;
-  config.chainInitTime = Time;
 
   contractAddress.zero = {
     address: GenesisContractAddress,
@@ -53,18 +45,51 @@ function getContractAddress(contracts) {
     contractAddress[key] = {
       address,
       contract,
-      proto
+      proto,
+      type: config.constants.proposalTypes[key.toUpperCase()]
     };
     if (key === 'parliament') {
-      contractAddress[key].organizationAddress = contract.GetDefaultOrganizationAddress.call({ sync: true });
+      contractAddress[key].defaultOrganizationAddress = contract.GetDefaultOrganizationAddress.call({ sync: true });
     }
   });
-  return contractAddress;
+  const deployController = genContract.GetContractDeploymentController.call({
+    sync: true
+  });
+  const codeController = genContract.GetCodeCheckController.call({
+    sync: true
+  });
+  const sideChainController = contractAddress.crossChain.contract.GetSideChainLifetimeController.call({
+    sync: true
+  });
+  return {
+    aelf,
+    wallet,
+    chainInitTime: Time,
+    contracts: contractAddress,
+    controller: {
+      ProposeNewContract: deployController,
+      ProposeUpdateContract: deployController,
+      ProposeContractCodeCheck: codeController,
+      RequestSideChainCreation: sideChainController
+    }
+  };
 }
 
-config.contracts = {
+config = {
+  ...config,
   ...getContractAddress(config.contracts)
 };
+
+config.constants.addressProposalTypesMap = Object.values(config.contracts).reduce((acc, v) => {
+  const {
+    address,
+    type
+  } = v;
+  return !type ? acc : {
+    ...acc,
+    [address]: type
+  };
+}, {});
 
 config.scannerName = 'proposal-scan';
 

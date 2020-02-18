@@ -19,6 +19,9 @@ const {
   Transactions
 } = require('viewer-orm/model/transactions');
 const {
+  Blocks
+} = require('viewer-orm/model/blocks');
+const {
   Proposal
 } = require('viewer-orm/model/proposal');
 const {
@@ -50,7 +53,7 @@ class Scanner {
     this.getTransaction = this.getTransaction.bind(this);
     this.addressTo = [
       config.contracts.zero.address,
-      config.contracts.parliament.address
+      config.controller.contractAddress
     ];
   }
 
@@ -59,11 +62,11 @@ class Scanner {
   }
 
   async getMaxId() {
-    const result = await Transactions.getMaxId();
+    const result = await Blocks.getHighestHeight();
     if (!result) {
       return 0;
     }
-    return result.id;
+    return result.blockHeight;
   }
 
   async gap() {
@@ -78,7 +81,7 @@ class Scanner {
     }
     let leftPages = Math.ceil((parseInt(maxId, 10) - startId) / pageSize);
     for (let pageNum = pageStart; pageNum <= leftPages; pageNum += 1) {
-      console.log(`start query from id ${pageNum * pageSize + 1} to ${(pageNum + 1) * pageSize}`);
+      console.log(`start query from block height ${pageNum * pageSize + 1} to ${(pageNum + 1) * pageSize}`);
       // eslint-disable-next-line no-await-in-loop
       const results = await Transactions.getTransactionsByPage(pageSize, pageNum, this.addressTo);
       const maxIdInTransactions = results.sort((a, b) => b.id - a.id)[0].id;
@@ -151,9 +154,12 @@ class Scanner {
         code,
         txId,
         blockHeight,
-        contractName = '',
         version = '1'
       } = item;
+      let { contractName } = item;
+      if (config.systemAddressNameMap[address]) {
+        contractName = config.systemAddressNameMap[address];
+      }
       const codeData = {
         address,
         codeHash,

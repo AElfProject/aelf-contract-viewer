@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 
 const {
   Model,
@@ -42,7 +42,7 @@ class ScanCursor extends Model {
       ],
       limit: 1
     });
-    return result.length > 0 ? result[0].lastId : 0;
+    return result.length > 0 ? result[0].lastId : false;
   }
 
   static insertIncId(id, name) {

@@ -3,14 +3,7 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
-/* eslint-disable global-require */
-let config;
-
-if (process.env.NODE_ENV === 'production') {
-  config = require('../../../../config.prod');
-} else {
-  config = require('../../../../config.dev');
-}
+let config = require('../../../../config');
 
 function getContractAddress(contracts) {
   const contractAddress = {};
@@ -32,7 +25,6 @@ function getContractAddress(contracts) {
   } = aelf.chain.getBlockByHeight(2, false, {
     sync: true
   }).Header;
-  config.chainInitTime = Time;
 
   contractAddress.zero = {
     address: GenesisContractAddress,
@@ -60,10 +52,37 @@ function getContractAddress(contracts) {
     }
     console.log(key, contractAddress[key].address);
   });
-  return contractAddress;
+  const systemAddressNameMap = config.contractNames.reduce((acc, name) => {
+    const address = genContract.GetContractAddressByName.call(AElf.utils.sha256(name), {
+      sync: true
+    });
+    if (address) {
+      return {
+        ...acc,
+        [address]: name
+      };
+    }
+    return acc;
+  }, {});
+  systemAddressNameMap[GenesisContractAddress] = 'Genesis';
+  const codeController = genContract.GetCodeCheckController.call({
+    sync: true
+  });
+  return {
+    aelf,
+    wallet,
+    chainInitTime: Time,
+    contracts: contractAddress,
+    systemAddressNameMap,
+    controller: {
+      organizationAddress: codeController.ownerAddress,
+      contractAddress: codeController.ownerAddress
+    }
+  };
 }
 
-config.contracts = {
+config = {
+  ...config,
   ...getContractAddress(config.contracts)
 };
 

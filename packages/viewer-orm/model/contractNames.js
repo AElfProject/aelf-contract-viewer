@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 
 const {
   Model,
@@ -25,6 +25,7 @@ const contractNamesDescription = {
   contractName: {
     type: STRING(255),
     allowNull: false,
+    unique: true,
     defaultValue: '-1',
     field: 'contract_name',
     comment: 'user defined contract name'
@@ -68,7 +69,10 @@ class ContractNames extends Model {
         proposalId
       }
     });
-    return name.length > 0 ? name[0].contractName : null;
+    if (name) {
+      return name.contractName;
+    }
+    return null;
   }
 
   static async isExist(contractName) {
@@ -78,7 +82,7 @@ class ContractNames extends Model {
         contractName
       }
     });
-    return isExist.length > 0;
+    return !!isExist;
   }
 
   static async addName(params) {

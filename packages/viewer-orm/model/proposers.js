@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
 const {
@@ -16,9 +16,7 @@ const {
   Model,
   BIGINT,
   STRING,
-  ENUM,
-  DATE,
-  NOW
+  ENUM
 } = Sequelize;
 
 // organization proposers
@@ -53,11 +51,6 @@ const proposersDescription = {
     allowNull: false,
     field: 'proposal_type',
     comment: 'audit model of proposal'
-  },
-  createAt: {
-    type: DATE,
-    allowNull: false,
-    defaultValue: NOW
   }
 };
 
