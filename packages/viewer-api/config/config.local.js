@@ -19,6 +19,18 @@ module.exports = appInfo => {
       enable: process.env.NODE_ENV === 'production'
     }
   };
+
+  config.validate = {
+    convert: true
+  };
+
+  // config.swagger = {
+  //   enable: true,
+  //   mountPath: '/swagger', // swagger-ui  address  <domain>/test-mount
+  //   swaggerFilePath: '/test-swagger.json', // swagger file default path
+  //   enableGoogleFont: false,
+  // };
+
   return {
     ...config,
     constants: {

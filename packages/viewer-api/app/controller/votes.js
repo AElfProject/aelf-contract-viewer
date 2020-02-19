@@ -12,14 +12,14 @@ class VotesController extends Controller {
       required: true
     },
     pre: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       min: 1,
       required: false
     },
     pageSize: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       min: 10,
       required: true
     },
@@ -31,11 +31,32 @@ class VotesController extends Controller {
     }
   };
 
+  personalVotedRules = {
+    proposalType: {
+      type: 'enum',
+      values: Object.values(this.app.config.constants.proposalTypes),
+      required: true
+    },
+    proposalId: {
+      type: 'string',
+      required: true,
+      min: 64,
+      max: 64
+    },
+    address: {
+      type: 'string',
+      required: true
+    }
+  };
+
 
   async getPersonalList() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.paramRules, ctx.request.query);
+      const errors = app.validator.validate(this.personalVotedRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         proposalId,
         proposalType,
@@ -47,7 +68,7 @@ class VotesController extends Controller {
       if (!isAudit) {
         throw new Error('need log in and sign');
       }
-      const list = app.model.Votes.personalVoteHistory(address, proposalType, proposalId);
+      const list = await app.model.Votes.personalVoteHistory(address, proposalType, proposalId);
       this.sendBody({
         list
       });
@@ -60,7 +81,10 @@ class VotesController extends Controller {
   async getList() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.paramRules, ctx.request.query);
+      const errors = app.validator.validate(this.votedListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         proposalId,
         proposalType,

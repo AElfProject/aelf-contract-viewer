@@ -98,6 +98,7 @@ class Scanner {
     };
     this.formatAndInsert = this.formatAndInsert.bind(this);
     this.getTransaction = this.getTransaction.bind(this);
+    this.lastIncId = 0;
     this.scheduler = new Scheduler({
       interval: options.proposalInterval
     });
@@ -173,9 +174,10 @@ class Scanner {
       range = 1000
     } = this.options;
     for (let i = lastIncId; i <= maxId; i += range) {
-      console.log(`query from ${i + 1} to ${i + range} in gap`);
+      const end = Math.min(i + range, maxId);
+      console.log(`query from ${i + 1} to ${end} in gap`);
       // eslint-disable-next-line no-await-in-loop
-      await this.formatAndInsert(i, i + range);
+      await this.formatAndInsert(i, end);
       // eslint-disable-next-line no-await-in-loop
       await sleep(2000);
       // eslint-disable-next-line no-await-in-loop
@@ -183,16 +185,19 @@ class Scanner {
     }
   }
 
-  loop() {
+  async loop() {
     console.log('\nstart querying in loop\n');
+    this.lastIncId = await ScanCursor.getLastId(config.scannerName);
     this.scheduler.setCallback(async () => {
       const currentMaxId = await this.getMaxId();
-      const lastIncId = await ScanCursor.getLastId(config.scannerName);
+      const { lastIncId } = this;
       if (+currentMaxId === +lastIncId) {
         console.log('jump this loop');
         return;
       }
-      await this.formatAndInsert(lastIncId, currentMaxId, true);
+      console.log(`query from ${lastIncId + 1} to ${currentMaxId} in gap`);
+      await this.formatAndInsert(lastIncId, currentMaxId);
+      this.lastIncId = currentMaxId;
     });
     this.scheduler.startTimer();
   }

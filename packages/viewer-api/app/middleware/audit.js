@@ -53,13 +53,17 @@ function verify(msg, publicKey, signature = '') {
 
 module.exports = options => {
   return async function audit(ctx, next) {
+    const isLocal = ctx.app.config.env === 'local';
     const {
       address,
       signature,
       pubKey,
       timestamp
     } = ctx.request.query;
-    if (address && signature) {
+    if (isLocal && address) {
+      ctx.isAudit = true;
+      await next();
+    } else if (address && signature) {
       try {
         ctx.validator(auditRules, {
           address,

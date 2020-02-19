@@ -266,6 +266,11 @@ class ProposalList extends Model {
             contractAddress: {
               [Op.substring]: search
             }
+          },
+          {
+            contractMethod: {
+              [Op.substring]: search
+            }
           }
         ]
       };

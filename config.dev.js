@@ -5,15 +5,15 @@ module.exports = {
     user: 'root',
     password: 'password',
     database: 'aelf_viewer',
-    connectionLimit: 25,
-    logging: false
+    connectionLimit: 25
   },
   scanSql: {
     host: '127.0.0.1',
     port: '3306',
     user: 'root',
     password: 'password',
-    database: 'aelf_main_chain'
+    database: 'aelf_main_chain',
+    connectionLimit: 25
   },
   redis: {
     host: '127.0.0.1',

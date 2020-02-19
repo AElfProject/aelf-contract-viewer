@@ -8,7 +8,7 @@ class OrganizationsController extends Controller {
   organizationsRules = {
     proposalType: {
       type: 'enum',
-      values: Object.keys(this.app.config.constants.proposalTypes),
+      values: Object.values(this.app.config.constants.proposalTypes),
       required: true
     },
     search: {
@@ -18,15 +18,15 @@ class OrganizationsController extends Controller {
       trim: true
     },
     pageSize: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       default: 6,
       min: 6,
       required: false
     },
     pageNum: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       min: 1,
       required: false
     }
@@ -35,7 +35,7 @@ class OrganizationsController extends Controller {
   auditListRules = {
     proposalType: {
       type: 'enum',
-      values: Object.keys(this.app.config.constants.proposalTypes),
+      values: Object.values(this.app.config.constants.proposalTypes),
       required: true
     },
     search: {
@@ -55,7 +55,10 @@ class OrganizationsController extends Controller {
     const { ctx, app } = this;
     const { config } = app;
     try {
-      app.validator.validate(this.auditListRules, ctx.request.query);
+      const errors = app.validator.validate(this.auditListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         address,
         search,
@@ -64,8 +67,8 @@ class OrganizationsController extends Controller {
       let list;
       // 根据用户地址查询有权限使用的组织全列表
       if (proposalType === config.constants.proposalTypes.PARLIAMENT) {
-        const { BPList } = app.cache;
-        const isBp = BPList.include(address);
+        const { BPList = [] } = app.cache;
+        const isBp = BPList.includes(address);
         // 如果为BP节点，则所有的Parliament组织均可创建提案
         const organizationList = await app.model.Organizations.getAuditOrganizations(proposalType, search);
         list = organizationList.filter(item => {
@@ -76,7 +79,8 @@ class OrganizationsController extends Controller {
           return isBp || !proposerAuthorityRequired;
         }).map(v => v.orgAddress);
       } else {
-        list = await app.model.Proposers.getOrganizations(proposalType, address);
+        list = await app.model.Proposers.getOrganizations(proposalType, address, search);
+        list = list.map(item => item.orgAddress);
       }
       this.sendBody(list);
     } catch (e) {
@@ -88,7 +92,10 @@ class OrganizationsController extends Controller {
   async getList() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.organizationsRules, ctx.request.query);
+      const errors = app.validator.validate(this.organizationsRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         pageSize = 6,
         pageNum,

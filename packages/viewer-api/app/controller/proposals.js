@@ -4,6 +4,25 @@
  */
 const Controller = require('../core/baseController');
 
+const paramRules = {
+  proposalId: {
+    type: 'string',
+    trim: true,
+    required: true,
+    max: 64,
+    min: 64
+  }
+};
+
+const tokenSearchRules = {
+  search: {
+    type: 'string',
+    required: false,
+    allowEmpty: true,
+    trim: true
+  }
+};
+
 class ProposalsController extends Controller {
   proposalListRules = {
     proposalType: {
@@ -14,7 +33,8 @@ class ProposalsController extends Controller {
     status: {
       type: 'enum',
       values: [ 'all', ...Object.values(this.app.config.constants.proposalStatus), 'expired' ],
-      required: true,
+      default: 'all',
+      required: false,
     },
     search: {
       type: 'string',
@@ -23,15 +43,15 @@ class ProposalsController extends Controller {
       trim: true
     },
     pageSize: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       default: 6,
       min: 6,
       required: false
     },
     pageNum: {
-      type: 'number',
-      convertType: true,
+      type: 'int',
+      convertType: 'int',
       min: 1,
       required: false
     },
@@ -39,16 +59,6 @@ class ProposalsController extends Controller {
       type: 'bool',
       default: false,
       required: false
-    }
-  };
-
-  paramRules = {
-    proposalId: {
-      type: 'string',
-      trim: true,
-      required: true,
-      max: 64,
-      min: 64
     }
   };
 
@@ -82,9 +92,7 @@ class ProposalsController extends Controller {
     address: {
       type: 'string',
       trim: true,
-      required: true,
-      min: 64,
-      max: 64
+      required: true
     }
   };
 
@@ -101,7 +109,10 @@ class ProposalsController extends Controller {
   async getParam() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.paramRules, ctx.request.query);
+      const errors = app.validator.validate(paramRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         proposalId
       } = ctx.request.query;
@@ -122,14 +133,17 @@ class ProposalsController extends Controller {
     const { config } = app;
     const { constants: { proposalTypes } } = config;
     try {
-      app.validator.validate(this.proposalListRules, ctx.request.query);
+      const errors = app.validator.validate(this.proposalListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const { isAudit } = ctx;
       const {
         address,
         search,
         isContract = false,
-        pageSize,
-        pageNum,
+        pageSize = 6,
+        pageNum = 1,
         status,
         proposalType
       } = ctx.request.query;
@@ -169,8 +183,8 @@ class ProposalsController extends Controller {
         switch (proposalType) {
           case proposalTypes.PARLIAMENT:
             // 议会形式
-            const { BPList } = app.cache;
-            const isBp = BPList.include(address);
+            const { BPList = [] } = app.cache;
+            const isBp = BPList.includes(address);
             if (isBp) {
               // 有权限进行投票
               const ParVotedIds = await app.model.Votes.hasVoted(
@@ -270,7 +284,10 @@ class ProposalsController extends Controller {
   async checkContractName() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.checkContractNameRules, ctx.request.query);
+      const errors = app.validator.validate(this.checkContractNameRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         contractName,
       } = ctx.request.query;
@@ -286,9 +303,11 @@ class ProposalsController extends Controller {
 
   async addContractName() {
     const { ctx, app } = this;
-    // todo: 校验body
     try {
-      app.validator.validate(this.contractNameRules, ctx.request.body);
+      const errors = app.validator.validate(this.contractNameRules, ctx.request.body);
+      if (errors) {
+        throw errors;
+      }
       const result = await app.model.ContractNames.addName(ctx.request.body);
       if (result === false) {
         throw new Error('contract name has been taken');
@@ -303,7 +322,10 @@ class ProposalsController extends Controller {
   async getTokenList() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(this.contractNameRules, ctx.request.query);
+      const errors = app.validator.validate(tokenSearchRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         search = ''
       } = ctx.request.query;

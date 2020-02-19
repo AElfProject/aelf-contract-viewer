@@ -16,7 +16,8 @@ const {
   Model,
   BIGINT,
   STRING,
-  ENUM
+  ENUM,
+  Op
 } = Sequelize;
 
 // organization proposers
@@ -55,13 +56,22 @@ const proposersDescription = {
 };
 
 class Proposers extends Model {
-  static async getOrganizations(proposalType, proposer) {
+  static async getOrganizations(proposalType, proposer, search = '') {
+    let whereCondition = {
+      proposer,
+      proposalType
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        orgAddress: {
+          [Op.substring]: search
+        }
+      };
+    }
     const result = await Proposers.findAll({
       attributes: ['orgAddress', 'proposer'],
-      where: {
-        proposer,
-        proposalType
-      }
+      where: whereCondition
     });
     return result || [];
   }

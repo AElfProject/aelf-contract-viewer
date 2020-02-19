@@ -96,7 +96,7 @@ const votesDescription = {
 };
 
 class Votes extends Model {
-  static async personalVoteHistory(voter, proposalType, proposalId) {
+  static personalVoteHistory(voter, proposalType, proposalId) {
     return Votes.findAll({
       attributes: [
         'txId',
