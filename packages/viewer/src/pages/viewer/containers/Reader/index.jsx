@@ -303,7 +303,7 @@ const Reader = () => {
               <CodeIcon
                 className="gap-right"
               />
-              Contract Info
+              合约代码
               <SaveAsZip
                 className="gap-left"
                 files={files}
