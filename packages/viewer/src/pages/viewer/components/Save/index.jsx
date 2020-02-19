@@ -30,7 +30,7 @@ const SaveAsZip = props => {
       const blob = await getZip(files);
       saveAs(blob, `${fileName}.zip`);
     } catch (e) {
-      message.error('Download failed');
+      message.error('下载失败');
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +58,7 @@ SaveAsZip.propTypes = {
 };
 
 SaveAsZip.defaultProps = {
-  title: 'Download zip file'
+  title: '下载合约zip文件'
 };
 
 export default SaveAsZip;

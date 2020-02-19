@@ -32,7 +32,7 @@ const Header = props => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {`ELF_${address}_${config.viewer.chainId}`}
+          {`${config.viewer.prefix}_${address}_${config.viewer.chainId}`}
           <LinkIcon />
         </a>
       </h2>
@@ -41,14 +41,14 @@ const Header = props => {
         <If condition={!!author}>
           <Then>
             <div className="contract-viewer-header-desc-item">
-              <div className="gap-right">Author:</div>
+              <div className="gap-right">合约作者:</div>
               <div>
                 <a
                   href={`${config.viewer.addressUrl}/${author}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {`ELF_${author}_${config.viewer.chainId}`}
+                  {`${config.viewer.prefix}_${author}_${config.viewer.chainId}`}
                   <LinkIcon />
                 </a>
               </div>
@@ -56,8 +56,8 @@ const Header = props => {
           </Then>
         </If>
         <div className="contract-viewer-header-desc-item">
-          <div className="gap-right">Contract Type:</div>
-          <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? 'System' : 'User'}</Tag>
+          <div className="gap-right">合约类型:</div>
+          <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? '系统' : '用户'}</Tag>
         </div>
       </div>
     </div>

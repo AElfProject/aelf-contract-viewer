@@ -32,6 +32,7 @@ module.exports = {
     parliament: 'AElf.ContractNames.Parliament'
   },
   viewer: {
+    prefix: 'CASIC',
     viewerUrl: './viewer.html',
     addressUrl: '/address',
     txUrl: '/tx',

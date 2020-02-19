@@ -96,9 +96,9 @@ const Viewer = props => {
   const handleCopy = () => {
     try {
       copy(editor.getValue());
-      message.success('Copied!');
+      message.success('复制成功!');
     } catch (e) {
-      message.error('Copy failed, please copy by yourself.');
+      message.error('复制失败，请手动复制');
     }
   };
 

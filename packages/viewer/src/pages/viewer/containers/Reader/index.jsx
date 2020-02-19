@@ -109,20 +109,20 @@ const StepDescription = props => {
   return (
     <>
       <div className="description-item">
-        <span>Author: </span>
+        <span>合约作者: </span>
         <a
           href={`${config.viewer.addressUrl}/${author}`}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {`ELF_${author}_${config.viewer.chainId}`}
+          {`${config.viewer.prefix}_${author}_${config.viewer.chainId}`}
           <LinkIcon
             className="gap-left-small"
           />
         </a>
       </div>
       <div className="description-item">
-        <span>Code Hash: </span>
+        <span>合约代码Hash: </span>
         <a
           href={`${config.viewer.viewerUrl}?codeHash=${codeHash}&address=${address}`}
         >
@@ -130,7 +130,7 @@ const StepDescription = props => {
         </a>
       </div>
       <div className="description-item">
-        <span>Version: </span>
+        <span>合约版本: </span>
         <a
           href={`${config.viewer.viewerUrl}?codeHash=${codeHash}&address=${address}`}
         >
@@ -138,7 +138,7 @@ const StepDescription = props => {
         </a>
       </div>
       <div className="description-item">
-        <span>Transaction Id: </span>
+        <span>交易Id: </span>
         <a
           href={`${config.viewer.txUrl}/${txId}`}
           target="_blank"
@@ -151,7 +151,7 @@ const StepDescription = props => {
         </a>
       </div>
       <div className="description-item">
-        <span>Block Height: </span>
+        <span>交易区块高度: </span>
         <a
           href={`${config.viewer.blockUrl}/${blockHeight}`}
           target="_blank"
@@ -177,9 +177,9 @@ StepDescription.propTypes = {
 };
 
 const EventMap = {
-  CodeUpdated: 'Code Updated',
-  AuthorChanged: 'Author Changed',
-  ContractDeployed: 'Contract Deployed'
+  CodeUpdated: '更新合约',
+  AuthorChanged: '更改合约作者',
+  ContractDeployed: '合约部署'
 };
 
 const fetchingStatusMap = {
@@ -218,7 +218,7 @@ const Reader = () => {
         address
       }, { method: 'GET' }).then(filesData => {
         if (Object.keys(filesData || {}).length === 0) {
-          throw new Error('There is no such contract');
+          throw new Error('暂无此合约');
         }
         return filesData;
       });
@@ -233,15 +233,15 @@ const Reader = () => {
         }, { method: 'GET' })
       ]).then(([historyList, filesData]) => {
         if (historyList.length === 0) {
-          throw new Error('There is no such contract');
+          throw new Error('暂无此合约');
         }
         setHistory(historyList);
         return filesData;
       });
     } else {
       setFetchingStatus(fetchingStatusMap.ERROR);
-      message.error('There is no such contract');
-      setError(new Error('There is no such contract'));
+      message.error('暂无此合约');
+      setError(new Error('暂无此合约'));
     }
     if (promise) {
       promise.then(data => {
@@ -249,7 +249,7 @@ const Reader = () => {
           files: resFiles
         } = data;
         if (!resFiles) {
-          throw new Error('Pleasing waiting for contract decompile');
+          throw new Error('代码正在反编译中，请稍等...');
         }
         const {
           result,
@@ -293,7 +293,7 @@ const Reader = () => {
             <If condition={isMobile}>
               <Then>
                 <Alert
-                  message="Have a better experience on PC browser"
+                  message="在PC浏览器上打开以获得最佳的浏览效果"
                   type="warning"
                   className="gap-bottom"
                 />
@@ -328,7 +328,7 @@ const Reader = () => {
                 <div
                   className="contract-history"
                 >
-                  <h2><Icon className="gap-right" type="history" />History</h2>
+                  <h2><Icon className="gap-right" type="history" />合约历史</h2>
                   <Divider />
                   <Steps
                     progressDot
@@ -358,8 +358,8 @@ const Reader = () => {
         <Case condition={fetchingStatus === fetchingStatusMap.ERROR}>
           <Result
             status="error"
-            title={error.message || error.msg || 'Error Happened'}
-            subTitle="Please make sure your URL parameter address is an valid contract address"
+            title={error.message || error.msg || '网络错误，请稍后重试'}
+            subTitle="请确认合约地址无误"
           />
         </Case>
       </Switch>

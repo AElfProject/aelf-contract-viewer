@@ -20,32 +20,32 @@ import { innerHeight, sendMessage } from '../../../../common/utils';
 
 const ListColumn = [
   {
-    title: 'Contract Address',
+    title: '合约地址',
     dataIndex: 'address',
     key: 'address',
     ellipsis: true,
     width: 400,
     render: address => (
       <a href={`${config.viewer.viewerUrl}?address=${address}`}>
-        {`ELF_${address}_${config.viewer.chainId}`}
+        {`${config.viewer.prefix}_${address}_${config.viewer.chainId}`}
       </a>
     )
   },
   {
-    title: 'Contract Type',
+    title: '合约类型',
     dataIndex: 'isSystemContract',
     key: 'isSystemContract',
     render: isSystemContract => (
-      <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? 'System' : 'User'}</Tag>
+      <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? '系统' : '用户'}</Tag>
     )
   },
   {
-    title: 'Version',
+    title: '合约版本',
     dataIndex: 'version',
     key: 'version'
   },
   {
-    title: 'Author',
+    title: '合约作者',
     dataIndex: 'author',
     key: 'author',
     ellipsis: true,
@@ -56,12 +56,12 @@ const ListColumn = [
         target="_blank"
         rel="noopener noreferrer"
       >
-        {`ELF_${address}_${config.viewer.chainId}`}
+        {`${config.viewer.prefix}_${address}_${config.viewer.chainId}`}
       </a>
     )
   },
   {
-    title: 'Last Updated At',
+    title: '更新时间',
     dataIndex: 'updateTime',
     key: 'updateTime'
   }
@@ -74,7 +74,7 @@ const fetchingStatusMap = {
 };
 
 const Total = total => (
-  <span>Total <span className="contract-list-total">{total}</span> Items</span>
+  <span>共<span className="contract-list-total">{total}</span>个</span>
 );
 
 const List = () => {
@@ -104,7 +104,7 @@ const List = () => {
     }).catch(e => {
       setFetchingStatus(fetchingStatusMap.ERROR);
       console.error(e);
-      message.error('Network error');
+      message.error('网络错误');
     });
   };
 
@@ -141,7 +141,7 @@ const List = () => {
         <h2>&nbsp;</h2>
         <Search
           className="contract-list-search-input"
-          placeholder="Input contract address"
+          placeholder="输入合约地址"
           size="large"
           onSearch={onSearch}
         />
