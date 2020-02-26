@@ -16,10 +16,11 @@ class BaseController extends Controller {
   }
 
   error(err) {
+    const errors = Array.isArray(err) ? err : [ err.toString() ];
     this.ctx.body = {
-      msg: err.message,
+      msg: err.message || errors[0].message,
       code: err.code || 500,
-      errors: err.errors
+      errors
     };
   }
 

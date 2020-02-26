@@ -4,8 +4,8 @@
  */
 const lodash = require('lodash');
 const {
-  Blocks
-} = require('viewer-orm/model/blocks');
+  ScanCursor
+} = require('viewer-orm/model/scanCursor');
 const {
   Scheduler
 } = require('aelf-block-scan');
@@ -18,6 +18,9 @@ const {
 const {
   Transactions
 } = require('viewer-orm/model/transactions');
+const {
+  Blocks
+} = require('viewer-orm/model/blocks');
 const {
   Proposal
 } = require('viewer-orm/model/proposal');
@@ -50,7 +53,7 @@ class Scanner {
     this.getTransaction = this.getTransaction.bind(this);
     this.addressTo = [
       config.contracts.zero.address,
-      config.contracts.parliament.address
+      config.controller.contractAddress
     ];
   }
 
@@ -59,11 +62,11 @@ class Scanner {
   }
 
   async getMaxId() {
-    const result = await Transactions.getMaxId();
+    const result = await Blocks.getHighestHeight();
     if (!result) {
       return 0;
     }
-    return result.id;
+    return result.blockHeight;
   }
 
   async gap() {
@@ -78,7 +81,7 @@ class Scanner {
     }
     let leftPages = Math.ceil((parseInt(maxId, 10) - startId) / pageSize);
     for (let pageNum = pageStart; pageNum <= leftPages; pageNum += 1) {
-      console.log(`start query from id ${pageNum * pageSize + 1} to ${(pageNum + 1) * pageSize}`);
+      console.log(`start query from block height ${pageNum * pageSize + 1} to ${(pageNum + 1) * pageSize}`);
       // eslint-disable-next-line no-await-in-loop
       const results = await Transactions.getTransactionsByPage(pageSize, pageNum, this.addressTo);
       const maxIdInTransactions = results.sort((a, b) => b.id - a.id)[0].id;
@@ -95,7 +98,8 @@ class Scanner {
     console.log('start querying in loop');
     this.scheduler.setCallback(async () => {
       const currentMaxId = await this.getMaxId();
-      const lastIncId = await Blocks.getLastIncId();
+      // const lastIncId = await Blocks.getLastIncId();
+      const lastIncId = await ScanCursor.getLastId(config.scannerName);
       if (currentMaxId - lastIncId <= this.options.buffer) {
         return;
       }
@@ -103,14 +107,16 @@ class Scanner {
       results = results || [];
       results = results.filter(removeFailedOrOtherMethod);
       if (!results || (results && results.length === 0)) {
-        await Blocks.updateLastIncId(currentMaxId);
+        // await Blocks.updateLastIncId(currentMaxId);
+        await ScanCursor.updateLastIncId(currentMaxId, config.scannerName);
         return;
       }
       console.log('transactions in loop', results.length);
       await this.formatAndInsert(
         await this.getTransactions(results)
       );
-      await Blocks.updateLastIncId(currentMaxId);
+      // await Blocks.updateLastIncId(currentMaxId);
+      await ScanCursor.updateLastIncId(currentMaxId, config.scannerName);
     });
     this.scheduler.startTimer();
   }
@@ -122,7 +128,7 @@ class Scanner {
 
   async insertProposal(transactions) {
     const result = transactions.filter(isContractProposalCreated);
-    await Proposal.bulkCreate(result.map(proposalCreatedFormatter));
+    await Proposal.bulkCreate(await Promise.all(result.map(proposalCreatedFormatter)));
   }
 
   async insertContract(transactions) {
@@ -150,6 +156,10 @@ class Scanner {
         blockHeight,
         version = '1'
       } = item;
+      let { contractName } = item;
+      if (config.systemAddressNameMap[address]) {
+        contractName = config.systemAddressNameMap[address];
+      }
       const codeData = {
         address,
         codeHash,
@@ -159,11 +169,13 @@ class Scanner {
         txId,
         blockHeight,
         version,
+        contractName,
         updateTime: time
       };
       const contractUpdated = {
         category,
         author,
+        contractName,
         isSystemContract,
         version,
         serial: serialNumber,
@@ -177,10 +189,15 @@ class Scanner {
         // eslint-disable-next-line no-await-in-loop
         const lastUpdated = await Code.getLastUpdated(address);
         const {
-          author: oldAuthor
+          author: oldAuthor,
+          contractName: oldContractName
         } = lastUpdated;
         contractUpdated.author = oldAuthor;
         codeData.author = oldAuthor;
+        // 上一个name不为空并且这一次name为空的情况下，使用上次的name
+        if (+oldContractName !== -1 && +contractName === -1) {
+          contractUpdated.contractName = oldContractName;
+        }
         // eslint-disable-next-line no-await-in-loop
         await Contracts.update(contractUpdated, {
           where: {
@@ -188,16 +205,19 @@ class Scanner {
           }
         });
       } else if (eventName === 'AuthorChanged') {
+        // 作者更新，一般来说不需要走提案，只更新作者，代码，版本，codeHash都需要数据从上一条拿
         // eslint-disable-next-line no-await-in-loop
         const lastUpdated = await Code.getLastUpdated(address);
         const {
           codeHash: oldCodeHash,
           code: oldCode,
-          version: oldVersion
+          version: oldVersion,
+          contractName: oldContractName
         } = lastUpdated;
         codeData.codeHash = oldCodeHash;
         codeData.code = oldCode;
         codeData.version = oldVersion;
+        codeData.contractName = oldContractName;
         // eslint-disable-next-line no-await-in-loop
         await Contracts.update(contractUpdated, {
           where: {

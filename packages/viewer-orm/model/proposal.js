@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 
 const {
   Model,
@@ -22,6 +22,13 @@ const proposalDescription = {
     allowNull: false,
     primaryKey: true,
     field: 'id'
+  },
+  contractName: {
+    type: STRING(255),
+    allowNull: false,
+    defaultValue: '-1',
+    field: 'contract_name',
+    comment: 'user defined contract name'
   },
   contractAddress: {
     type: STRING(64),

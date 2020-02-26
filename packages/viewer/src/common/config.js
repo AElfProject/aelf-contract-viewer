@@ -2,9 +2,8 @@
  * @file config
  * @author atom-yang
  */
-import prodConfig from '../../../../config.prod';
-import devConfig from '../../../../config.dev';
+import config from '../../../../config.json';
 
-const config = process.env.NODE_ENV === 'production' ? prodConfig : devConfig;
-
-export default config;
+export default {
+  ...config
+};

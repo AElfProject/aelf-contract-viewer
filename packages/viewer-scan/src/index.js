@@ -2,10 +2,9 @@
  * @file index
  * @author atom-yang
  */
-const AElf = require('aelf-sdk');
 const {
-  Blocks
-} = require('viewer-orm/model/blocks');
+  ScanCursor
+} = require('viewer-orm/model/scanCursor');
 const config = require('./config');
 const Scanner = require('./scan');
 const Decompiler = require('./decompiler');
@@ -22,13 +21,14 @@ process.on('unhandledRejection', err => {
 });
 
 async function init() {
-  const lastId = await Blocks.getLastIncId();
-  if (lastId === 0) {
-    await Blocks.insertIncId(0);
+  // const lastId = await Blocks.getLastIncId();
+  const lastId = await ScanCursor.getLastId(config.scannerName);
+  if (lastId === false) {
+    await ScanCursor.insertIncId(0, config.scannerName);
   }
   const scanner = new Scanner({
     ...config.scan,
-    aelf: new AElf(new AElf.providers.HttpProvider(config.scan.host))
+    aelf: config.aelf
   });
   const decompiler = new Decompiler(config.decompiler);
   try {

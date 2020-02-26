@@ -1,0 +1,20 @@
+{
+  "name": "proposal-scan",
+  "version": "0.0.0",
+  "description": "Scanner of proposal",
+  "author": "atom-young <atom.yang@aelf.io>",
+  "homepage": "",
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "npm run clean && cross-env NODE_ENV=development pm2 start src/index.js --name aelf-proposal-scan --time",
+    "start": "cross-env NODE_ENV=production pm2 start src/index.js --name aelf-proposal-scan --exp-backoff-restart-delay=1000 --time",
+    "stop": "pm2 stop aelf-proposal-scan",
+    "clean": "rimraf ./*.log"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "pm2": "^4.1.2",
+    "viewer-orm": "^0.0.0"
+  }
+}

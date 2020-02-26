@@ -54,6 +54,47 @@ class ListController extends Controller {
       this.sendBody();
     }
   }
+
+  async getAllContracts() {
+    const { ctx, app } = this;
+    try {
+      const {
+        search = ''
+      } = ctx.request.query;
+      // todo: 空search的情况下，考虑从缓存获取数据
+      const list = await app.model.Contracts.getAllList(search);
+      this.sendBody({
+        list: list.map(v => ({
+          isSystemContract: v.isSystemContract,
+          address: v.address,
+          contractName: +v.contractName === -1 ? '' : v.contractName
+        })),
+        total: list.length
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async getContractName() {
+    const { ctx, app } = this;
+    try {
+      const {
+        address = ''
+      } = ctx.request.query;
+      if (!address) {
+        throw new Error('invalid parameter address');
+      }
+      const name = await app.model.Contracts.getContractName(address);
+      this.sendBody({
+        name
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
 }
 
 module.exports = ListController;

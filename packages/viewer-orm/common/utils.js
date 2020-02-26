@@ -2,8 +2,6 @@
  * @file common
  * @author atom-yang
  */
-const Sequelize = require('sequelize');
-const config = require('../config');
 
 const AUTH_RETRIES = Symbol('authenticateRetries');
 
@@ -19,7 +17,9 @@ async function authenticate(database) {
 
   try {
     await database.authenticate();
+    console.log(`database ${database.config.database} authenticated`);
   } catch (e) {
+    console.error(e);
     if (e.name !== 'SequelizeConnectionRefusedError') throw e;
     if (database[AUTH_RETRIES] >= 3) throw e;
 
@@ -31,34 +31,6 @@ async function authenticate(database) {
   }
 }
 
-const { sql, scanSql } = config;
-
-const sequelize = new Sequelize(sql.database, sql.username, sql.password, sql);
-const scanSequelize = new Sequelize(scanSql.database, scanSql.username, scanSql.password, scanSql);
-authenticate(sequelize).catch(e => {
-  console.error(e);
-  process.exit(1);
-});
-authenticate(scanSequelize).catch(e => {
-  console.error(e);
-  process.exit(1);
-});
-
-const commonModelOptions = {
-  timestamps: false,
-  initialAutoIncrement: 1,
-  sequelize
-};
-
-const scanModelOptions = {
-  timestamps: false,
-  initialAutoIncrement: 1,
-  sequelize: scanSequelize
-};
-
 module.exports = {
-  commonModelOptions,
-  scanModelOptions,
-  sequelize,
-  scanSequelize
+  authenticate
 };

@@ -7,6 +7,9 @@ const moment = require('moment');
 const {
   Proposal
 } = require('viewer-orm/model/proposal');
+const {
+  ContractNames
+} = require('viewer-orm/model/contractNames');
 const config = require('../config');
 
 const zeroContractRelatedMethods = [
@@ -73,11 +76,11 @@ function isZeroContractOrProposalReleased(transaction) {
   return Status.toUpperCase() === 'MINED'
     // eslint-disable-next-line max-len
     && (To === config.contracts.zero.address && [...zeroContractRelatedMethods, ...zeroReleasedMethods].includes(MethodName))
-    || (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName));
+    || (To === config.controller.contractAddress && proposalReleasedMethods.includes(MethodName));
 }
 
 function isProposalCreated(methodName, to, params) {
-  if (to === config.contracts.parliament.address
+  if (to === config.controller.contractAddress
     && proposalCreatedMethods.includes(methodName)) {
     let paramsJson;
     try {
@@ -160,7 +163,7 @@ function deserializeLog(log) {
   return result;
 }
 
-function proposalCreatedFormatter(transaction) {
+async function proposalCreatedFormatter(transaction) {
   const {
     Logs = [],
     Transaction,
@@ -211,12 +214,12 @@ function proposalCreatedFormatter(transaction) {
   const {
     code
   } = deserializeLog(Logs.filter(v => v.Name === codeCheckCreatedEventName)[0]);
-  const { organizationAddress } = config.contracts.parliament;
+  const { organizationAddress } = config.controller;
   const expiredTime = moment(time)
     .add(10, 'm')
     .utcOffset(0)
     .format();
-  return {
+  const result = {
     contractAddress: To,
     contractMethod: MethodName,
     proposalId,
@@ -229,6 +232,14 @@ function proposalCreatedFormatter(transaction) {
     organizationAddress,
     createdTime: time
   };
+  if (MethodName === 'ReleaseApprovedContract' && To === config.contracts.zero.address) {
+    const preProposalId = paramsParsed.proposalId || '';
+    const contractName = await ContractNames.getContractName(preProposalId);
+    if (contractName) {
+      result.contractName = contractName;
+    }
+  }
+  return result;
 }
 
 function isContractRelated(transaction) {
@@ -327,13 +338,14 @@ async function contractTransactionFormatted(transaction) {
     ...contractInfo
   };
   if (
-    (To === config.contracts.parliament.address && proposalReleasedMethods.includes(MethodName))
+    (To === config.controller.contractAddress && proposalReleasedMethods.includes(MethodName))
     || (To === config.contracts.zero.address && zeroReleasedMethods.includes(MethodName))
   ) {
     const proposalId = params.proposalId || params;
     // 通过提案进行的合约部署或者更新
     const {
-      code
+      code,
+      contractName
     } = await Proposal.getCode(proposalId);
     await Proposal.update({
       released: true,
@@ -345,22 +357,13 @@ async function contractTransactionFormatted(transaction) {
         proposalId
       }
     });
-    // const tmp = await config.contracts.parliament.contract.GetProposal.call(params);
-    // const {
-    //   contractMethodName,
-    //   params: proposalParams
-    // } = tmp;
-    // const dataType = config.contracts.zero.proto.lookupType(contractMethodName);
-    // const {
-    //   code,
-    //   category
-    // } = deserialize(dataType, proposalParams);
     result = {
       ...result,
-      code
+      code,
+      contractName
     };
   } else {
-    // 零合约进行的合约部署/更新/作者更新
+    // 零合约直接进行的合约部署/更新/作者更新，例如区块1的系统合约部署
     const {
       code
     } = params;

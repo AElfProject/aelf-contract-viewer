@@ -16,7 +16,7 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 // import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution';
 import './index.less';
 
-const languageDector = [
+const languageDetector = [
   {
     language: 'csharp',
     test: /\.cs$/
@@ -32,7 +32,7 @@ const languageDector = [
 ];
 
 function getLanguage(name) {
-  return languageDector.filter(v => v.test.test(name))[0].language;
+  return languageDetector.filter(v => v.test.test(name))[0].language;
 }
 
 let positions = {};

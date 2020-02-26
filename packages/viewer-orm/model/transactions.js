@@ -1,9 +1,9 @@
 /**
- * @file blocks model
+ * @file transactions model
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { scanModelOptions } = require('../common');
+const { scanModelOptions } = require('../common/scan');
 
 const {
   Model,
@@ -116,13 +116,32 @@ class Transactions extends Model {
     });
   }
 
+  static async getTransactionsInRange(minId, currentMaxId, whereCondition) {
+    const result = await Transactions.findAll({
+      attributes: ['txId', 'addressTo', 'blockHeight', 'method', 'time', 'txStatus'],
+      where: {
+        blockHeight: {
+          [Op.between]: [minId + 1, currentMaxId]
+        },
+        ...whereCondition
+      },
+      order: [
+        ['blockHeight', 'ASC']
+      ]
+    });
+    if (!result) {
+      return [];
+    }
+    return result;
+  }
+
   static async getTransactionsById(minId, currentMaxId, addressTo) {
     const result = await Transactions.findAll({
       attributes: {
         exclude: ['paramsTo', 'chainId', 'addressFrom', 'params', 'quantity']
       },
       where: {
-        id: {
+        blockHeight: {
           [Op.between]: [minId + 1, currentMaxId]
         },
         addressTo: {
@@ -130,7 +149,7 @@ class Transactions extends Model {
         }
       },
       order: [
-        ['id', 'ASC']
+        ['blockHeight', 'ASC']
       ]
     });
     if (!result) {

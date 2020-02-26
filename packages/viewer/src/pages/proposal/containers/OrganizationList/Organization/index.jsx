@@ -1,0 +1,336 @@
+/**
+ * @file organization item
+ * @author atom-yang
+ */
+import React, { useMemo } from 'react';
+import roundTo from 'round-to';
+import { Switch, Case } from 'react-if';
+import PropTypes from 'prop-types';
+import {
+  Card,
+  Row,
+  Select,
+  Col,
+  Icon,
+  Divider
+} from 'antd';
+import config from '../../../../../common/config';
+import Circle from '../../../components/Circle';
+import constants, {
+  LOG_STATUS,
+  organizationInfoPropTypes
+} from '../../../common/constants';
+import './index.less';
+
+const {
+  viewer
+} = config;
+
+const { Option } = Select;
+
+const {
+  proposalTypes,
+  proposalActions
+} = constants;
+
+const Title = props => {
+  const {
+    proposalType
+  } = props;
+  return (
+    <div className="organization-list-item-title">
+      <span className="gap-right-small">{proposalType} Organization</span>
+    </div>
+  );
+};
+Title.propTypes = {
+  proposalType: PropTypes.oneOf(Object.values(proposalTypes)).isRequired
+};
+
+function getRate(number) {
+  return roundTo(number * 100, 2);
+}
+
+export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpCount = 1) {
+  const abstractVoteTotal = 10000;
+  const {
+    minimalApprovalThreshold,
+    maximalRejectionThreshold,
+    maximalAbstentionThreshold,
+    minimalVoteThreshold
+  } = releaseThreshold;
+  let total;
+  let coef = 1;
+  let precision = 0;
+  if (proposalType === proposalType.ASSOCIATION) {
+    const {
+      organizationMemberList: {
+        organizationMembers
+      }
+    } = leftOrgInfo;
+    total = organizationMembers.length;
+  } else if (proposalType === proposalTypes.PARLIAMENT) {
+    coef = bpCount / abstractVoteTotal;
+    total = abstractVoteTotal;
+  } else {
+    precision = 2;
+    total = minimalVoteThreshold;
+  }
+  const result = {
+    [proposalActions.APPROVE]: {
+      value: minimalApprovalThreshold,
+      maxValue: total,
+      num: roundTo(minimalApprovalThreshold * coef, precision),
+      rate: `${getRate(minimalApprovalThreshold / total)}%`
+    },
+    [proposalActions.REJECT]: {
+      value: maximalRejectionThreshold,
+      maxValue: total,
+      num: roundTo(maximalRejectionThreshold * coef, precision),
+      rate: `${getRate(maximalRejectionThreshold / total)}%`
+    },
+    [proposalActions.ABSTAIN]: {
+      value: maximalAbstentionThreshold,
+      maxValue: total,
+      num: roundTo(maximalAbstentionThreshold * coef, precision),
+      rate: `${getRate(maximalAbstentionThreshold / total)}%`
+    },
+    Total: {
+      value: minimalVoteThreshold,
+      maxValue: total,
+      num: roundTo(minimalVoteThreshold * coef, precision),
+      rate: `${getRate(minimalVoteThreshold / total)}%`
+    }
+  };
+  return result;
+}
+
+export function getOrganizationLeftInfo(proposalType, leftOrgInfo, bpList, parliamentProposerList) {
+  const {
+    tokenSymbol,
+    proposerAuthorityRequired,
+    proposerWhiteList = {},
+    organizationMemberList = {}
+  } = leftOrgInfo;
+  let {
+    proposers = []
+  } = proposerWhiteList;
+  let {
+    organizationMembers = []
+  } = organizationMemberList;
+  if (proposalType === proposalTypes.PARLIAMENT) {
+    organizationMembers = [...bpList];
+    if (proposerAuthorityRequired === true) {
+      proposers = [...bpList, ...parliamentProposerList];
+      proposers = [...new Set(proposers)];
+    }
+  }
+  const proposerList = proposers.length > 0 ? (
+    // eslint-disable-next-line max-len
+    <Select size="small" defaultValue={proposers[0]}>{proposers.map(v => (<Option key={v} value={v}>{`ELF_${v}_${viewer.chainId}`}</Option>))}</Select>
+  ) : 'None';
+  const members = organizationMembers.length > 0 ? (
+    // eslint-disable-next-line max-len
+    <Select size="small" defaultValue={organizationMembers[0]}>{organizationMembers.map(v => (<Option key={v} value={v}>{`ELF_${v}_${viewer.chainId}`}</Option>))}</Select>
+  ) : 'None';
+  return (
+    <Switch>
+      <Case condition={proposalType === proposalTypes.REFERENDUM}>
+        <>
+          <div className="gap-bottom-small card-list-desc-item">
+            <span className="sub-title">Token:</span>
+            <span>{tokenSymbol}</span>
+          </div>
+          <div className="gap-bottom-small card-list-desc-item">
+            <span className="sub-title">Members:</span>
+            <span>All Users</span>
+          </div>
+          <div className="card-list-desc-item">
+            <span className="sub-title">Proposer White List:</span>
+            <span>{proposerList}</span>
+          </div>
+        </>
+      </Case>
+      <Case condition={proposalType === proposalTypes.PARLIAMENT}>
+        <>
+          <div className="gap-bottom-small card-list-desc-item">
+            <span className="sub-title">Members:</span>
+            <span>{members}</span>
+          </div>
+          <div className="card-list-desc-item">
+            <span className="sub-title">Proposer White List:</span>
+            <span>{proposerAuthorityRequired === false ? 'All Users' : proposerList}</span>
+          </div>
+        </>
+      </Case>
+      <Case condition={proposalType === proposalTypes.ASSOCIATION}>
+        <>
+          <div className="gap-bottom-small card-list-desc-item">
+            <span className="sub-title">Members:</span>
+            <span>{members}</span>
+          </div>
+          <div className="card-list-desc-item">
+            <span className="sub-title">Proposer White List:</span>
+            <span>{proposerList}</span>
+          </div>
+        </>
+      </Case>
+    </Switch>
+  );
+}
+
+const Organization = props => {
+  const {
+    proposalType,
+    releaseThreshold,
+    leftOrgInfo,
+    orgAddress,
+    creator,
+    updatedAt,
+    logStatus,
+    bpList,
+    editOrganization,
+    parliamentProposerList
+  } = props;
+  const votesData = useMemo(() => getCircleValues(proposalType, releaseThreshold, leftOrgInfo), [
+    proposalType,
+    releaseThreshold,
+    leftOrgInfo
+  ]);
+  const leftOrg = useMemo(() => getOrganizationLeftInfo(proposalType, leftOrgInfo, bpList, parliamentProposerList), [
+    leftOrgInfo,
+    bpList,
+    parliamentProposerList
+  ]);
+  const handleEdit = () => {
+    editOrganization(orgAddress);
+  };
+
+  return (
+    <div className="organization-list-item gap-bottom">
+      <Card
+        title={(
+          <Title
+            proposalType={proposalType}
+          />
+        )}
+      >
+        <div className="organization-list-item-id">
+          <div className="gap-right-large text-ellipsis">
+            {orgAddress}
+          </div>
+          {logStatus === LOG_STATUS.LOGGED
+            ? (<Icon type="edit" color="purple" onClick={handleEdit} />) : null}
+        </div>
+        <Divider />
+        <div className="organization-list-item-info">
+          <div className="organization-list-item-info-item">
+            <span className="sub-title gap-right">Author:</span>
+            <span className="text-ellipsis">
+              <a
+                href={`${viewer.addressUrl}/${creator}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {`ELF_${creator}_${viewer.chainId}`}
+              </a>
+            </span>
+          </div>
+          <div className="organization-list-item-info-item">
+            <span className="sub-title gap-right">Update Time:</span>
+            <span className="text-ellipsis">{updatedAt}</span>
+          </div>
+        </div>
+        <Divider />
+        <div className="organization-list-item-votes">
+          <p>Voting Data: Votes (Votes / Minimum Votes)</p>
+          <Row
+            gutter={16}
+            className="organization-list-item-vote-chart"
+          >
+            <Col span={4} offset={1}>
+              <Circle
+                className="organization-list-item-vote-chart-circle"
+                type={proposalActions.APPROVE}
+                {...votesData[proposalActions.APPROVE]}
+              />
+            </Col>
+            <Col span={4} offset={2}>
+              <Circle
+                className="organization-list-item-vote-chart-circle"
+                type={proposalActions.REJECT}
+                {...votesData[proposalActions.REJECT]}
+              />
+            </Col>
+            <Col span={4} offset={2}>
+              <Circle
+                className="organization-list-item-vote-chart-circle"
+                type={proposalActions.ABSTAIN}
+                {...votesData[proposalActions.ABSTAIN]}
+              />
+            </Col>
+            <Col span={4} offset={2}>
+              <Circle
+                className="organization-list-item-vote-chart-circle"
+                type="Total"
+                {...votesData.Total}
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={6}>
+              <div className="organization-list-item-vote-desc text-center">
+                <div className="text-ellipsis" title="Approved Votes">Approved Votes</div>
+                <div>
+                  <span className="sub-title gap-right-small">{votesData[proposalActions.APPROVE].num}</span>
+                  <span>({votesData[proposalActions.APPROVE].rate})</span>
+                </div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="organization-list-item-vote-desc text-center">
+                <div className="text-ellipsis" title="Rejected Votes">Rejected Votes</div>
+                <div>
+                  <span className="sub-title gap-right-small">{votesData[proposalActions.REJECT].num}</span>
+                  <span>({votesData[proposalActions.REJECT].rate})</span>
+                </div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="organization-list-item-vote-desc text-center">
+                <div className="text-ellipsis" title="Abstained Votes">Abstained Votes</div>
+                <div>
+                  <span className="sub-title gap-right-small">{votesData[proposalActions.ABSTAIN].num}</span>
+                  <span>({votesData[proposalActions.ABSTAIN].rate})</span>
+                </div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="organization-list-item-vote-desc text-center">
+                <div className="text-ellipsis" title="Total Votes">Total Votes</div>
+                <div>
+                  <span className="sub-title gap-right-small">{votesData.Total.num}</span>
+                  <span>({votesData.Total.rate})</span>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </div>
+        <Divider />
+        <div className="organization-list-item-extra">
+          {leftOrg}
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+Organization.propTypes = {
+  ...organizationInfoPropTypes,
+  logStatus: PropTypes.oneOf(Object.values(LOG_STATUS)).isRequired,
+  bpList: PropTypes.arrayOf(PropTypes.string).isRequired,
+  editOrganization: PropTypes.func.isRequired,
+  parliamentProposerList: PropTypes.arrayOf(PropTypes.string).isRequired
+};
+
+export default Organization;

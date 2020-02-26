@@ -3,7 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
-const { commonModelOptions } = require('../common');
+const { commonModelOptions } = require('../common/viewer');
 
 const {
   Model,
@@ -23,6 +23,13 @@ const contractsDescription = {
     allowNull: false,
     primaryKey: true,
     field: 'id'
+  },
+  contractName: {
+    type: STRING(255),
+    allowNull: false,
+    defaultValue: '-1',
+    field: 'contract_name',
+    comment: 'user defined contract name'
   },
   address: {
     type: STRING(64),
@@ -70,6 +77,19 @@ const contractsDescription = {
 };
 
 class Contracts extends Model {
+  static async getContractName(address) {
+    const result = await Contracts.findOne({
+      attributes: ['contractName'],
+      where: {
+        address
+      }
+    });
+    if (result && +result.contractName !== -1) {
+      return result.contractName;
+    }
+    return '';
+  }
+
   static async getInfoByAddress(address) {
     const result = await Contracts.findOne({
       where: {
@@ -80,6 +100,25 @@ class Contracts extends Model {
       return result.toJSON();
     }
     return {};
+  }
+
+  static async getAllList(search) {
+    let list;
+    if (search) {
+      list = await Contracts.findAll({
+        attributes: ['address', 'contractName', 'isSystemContract'],
+        where: {
+          address: {
+            [Op.substring]: search
+          }
+        }
+      });
+    } else {
+      list = await Contracts.findAll({
+        attributes: ['address', 'contractName', 'isSystemContract']
+      });
+    }
+    return list;
   }
 
   static async getList(params) {
@@ -107,6 +146,16 @@ class Contracts extends Model {
       total,
       list
     };
+  }
+
+  static async isExistName(contractName) {
+    const isExist = await Contracts.findOne({
+      attributes: ['id'],
+      where: {
+        contractName
+      }
+    });
+    return !!isExist;
   }
 }
 

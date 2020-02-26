@@ -1,0 +1,83 @@
+{
+  "wallet": {
+    "privateKey": "f6e512a3c259e5f9af981d7f99d245aa5bc52fe448495e0b0dd56e8406be6f71"
+  },
+  "contracts": {
+    "parliament": "AElf.ContractNames.Parliament",
+    "referendum": "AElf.ContractNames.Referendum",
+    "association": "AElf.ContractNames.Association",
+    "crossChain": "AElf.ContractNames.CrossChain"
+  },
+  "contractNames": [
+    "AElf.ContractNames.Election",
+    "AElf.ContractNames.Profit",
+    "AElf.ContractNames.Vote",
+    "AElf.ContractNames.Treasury",
+    "AElf.ContractNames.Token",
+    "AElf.ContractNames.TokenHolder",
+    "AElf.ContractNames.TokenConverter",
+    "AElf.ContractNames.Consensus",
+    "AElf.ContractNames.Parliament",
+    "AElf.ContractNames.CrossChain",
+    "AElf.ContractNames.Association",
+    "AElf.ContractNames.Configuration",
+    "AElf.ContractNames.Referendum",
+    "AElf.ContractNames.Economic"
+  ],
+  "viewer": {
+    "viewerUrl": "./viewer.html",
+    "addressUrl": "/address",
+    "txUrl": "/tx",
+    "blockUrl": "/block",
+    "chainId": "AELF",
+    "contractAddress": [
+      {
+        "contractName": "Genesis",
+        "description": "contract Genesis",
+        "contractAddress": "2gaQh4uxg6tzyH1ADLoDxvHA14FMpzEiMqsQ6sDG5iHT8cmjp8"
+      },
+      {
+        "description": "contract Token",
+        "contractAddress": "25CecrU94dmMdbhC3LWMKxtoaL4Wv8PChGvVJM6PxkHAyvXEhB",
+        "contractName": "Token"
+      },
+      {
+        "description": "contract Parliament",
+        "contractAddress": "R8nWLhsyLsY9Di4ULKQ41ddV8j1HbLikT3RjbLBDPGxnJFCv3",
+        "contractName": "Parliament"
+      },
+      {
+        "description": "contract Association",
+        "contractAddress": "29RDBXTqwnpWPSPHGatYsQXW2E17YrQUCj7QhcEZDnhPb6ThHW",
+        "contractName": "Association"
+      },
+      {
+        "description": "contract Referendum",
+        "contractAddress": "2F5C128Srw5rHCXoSY2C7uT5sAku48mkgiaTTp1Hiprhbb7ED9",
+        "contractName": "Referendum"
+      },
+      {
+        "description": "contract CrossChain",
+        "contractAddress": "x7G7VYqqeVAH8aeAsb7gYuTQ12YS1zKuxur9YES3cUj72QMxJ",
+        "contractName": "CrossChain"
+      }
+    ]
+  },
+  "constants": {
+    "proposalTypes": {
+      "PARLIAMENT": "Parliament",
+      "REFERENDUM": "Referendum",
+      "ASSOCIATION": "Association"
+    },
+    "proposalStatus": {
+      "PENDING": "pending",
+      "APPROVED": "approved",
+      "RELEASED": "released"
+    },
+    "proposalActions": {
+      "APPROVE": "Approve",
+      "REJECT": "Reject",
+      "ABSTAIN": "Abstain"
+    }
+  }
+}
