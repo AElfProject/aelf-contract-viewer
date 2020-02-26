@@ -152,7 +152,8 @@ async function organizationUpdatedInsert(transaction) {
   const {
     Logs = [],
     Transaction,
-    TransactionId
+    TransactionId,
+    time
   } = transaction;
   const {
     MethodName
@@ -211,7 +212,8 @@ async function organizationUpdatedInsert(transaction) {
           Organizations.update({
             orgHash,
             releaseThreshold,
-            leftOrgInfo
+            leftOrgInfo,
+            updatedAt: time
           }, {
             where: {
               orgAddress

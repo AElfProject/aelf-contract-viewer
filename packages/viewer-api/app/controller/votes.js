@@ -6,10 +6,11 @@ const Controller = require('../core/baseController');
 
 class VotesController extends Controller {
   votedListRules = {
-    proposalType: {
-      type: 'enum',
-      values: Object.values(this.app.config.constants.proposalTypes),
-      required: true
+    search: {
+      type: 'string',
+      required: false,
+      allowEmpty: true,
+      trim: true
     },
     pre: {
       type: 'int',
@@ -23,6 +24,12 @@ class VotesController extends Controller {
       min: 10,
       required: true
     },
+    pageNum: {
+      type: 'int',
+      convertType: 'int',
+      min: 1,
+      required: true
+    },
     proposalId: {
       type: 'string',
       required: true,
@@ -32,11 +39,6 @@ class VotesController extends Controller {
   };
 
   personalVotedRules = {
-    proposalType: {
-      type: 'enum',
-      values: Object.values(this.app.config.constants.proposalTypes),
-      required: true
-    },
     proposalId: {
       type: 'string',
       required: true,
@@ -59,7 +61,6 @@ class VotesController extends Controller {
       }
       const {
         proposalId,
-        proposalType,
         address
       } = ctx.request.query;
       const {
@@ -68,10 +69,8 @@ class VotesController extends Controller {
       if (!isAudit) {
         throw new Error('need log in and sign');
       }
-      const list = await app.model.Votes.personalVoteHistory(address, proposalType, proposalId);
-      this.sendBody({
-        list
-      });
+      const list = await app.model.Votes.personalVoteHistory(address, proposalId);
+      this.sendBody(list);
     } catch (e) {
       this.error(e);
       this.sendBody();
@@ -87,17 +86,17 @@ class VotesController extends Controller {
       }
       const {
         proposalId,
-        proposalType,
-        pre,
+        pageNum,
         pageSize,
+        search = ''
       } = ctx.request.query;
-      const list = await app.model.Votes.voteHistory(
-        proposalType,
+      const result = await app.model.Votes.voteHistory(
         proposalId,
         pageSize,
-        pre
+        pageNum,
+        search
       );
-      this.sendBody({ list });
+      this.sendBody(result);
     } catch (e) {
       this.error(e);
       this.sendBody();

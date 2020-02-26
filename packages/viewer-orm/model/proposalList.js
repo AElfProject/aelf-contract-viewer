@@ -101,9 +101,9 @@ const proposalListDescription = {
   status: {
     // 无执行失败的情况，因为无法判断是否是失败
     type: ENUM(
-      proposalStatus.NOT_PASSED,
+      proposalStatus.PENDING,
       proposalStatus.APPROVED,
-      proposalStatus.MINED
+      proposalStatus.RELEASED
     ),
     allowNull: false,
     comment: 'proposal status'
@@ -208,6 +208,18 @@ class ProposalList extends Model {
     return {};
   }
 
+  static async getProposalById(proposalId) {
+    const result = await ProposalList.findOne({
+      where: {
+        proposalId
+      }
+    });
+    if (result) {
+      return result.toJSON();
+    }
+    return {};
+  }
+
   static async getPureList(
     proposalType,
     status,
@@ -227,8 +239,18 @@ class ProposalList extends Model {
             [Op.lt]: moment().utcOffset(0).format()
           },
           status: {
-            [Op.in]: [proposalStatus.NOT_PASSED, proposalStatus.APPROVED]
+            [Op.in]: [proposalStatus.PENDING, proposalStatus.APPROVED]
           }
+        };
+      } else if (status === proposalStatus.PENDING
+        || status === proposalStatus.APPROVED
+      ) {
+        whereCondition = {
+          ...whereCondition,
+          status,
+          expiredTime: {
+            [Op.gt]: moment().utcOffset(0).format()
+          },
         };
       } else {
         whereCondition = {

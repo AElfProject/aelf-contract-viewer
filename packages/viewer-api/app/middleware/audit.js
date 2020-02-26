@@ -20,7 +20,7 @@ const auditRules = {
     type: 'string',
     required: true,
     validator(value) {
-      return defaultEc.keyFromPublic(value);
+      return defaultEc.keyFromPublic(value, 'hex');
     }
   },
   timestamp: {
@@ -44,7 +44,7 @@ function verify(msg, publicKey, signature = '') {
     recoveryParam
   };
   try {
-    const result = keyPair.verify(Buffer.from(msg), signatureObj);
+    const result = keyPair.verify(msg, signatureObj);
     return result;
   } catch (e) {
     return false;
@@ -65,7 +65,7 @@ module.exports = options => {
       await next();
     } else if (address && signature) {
       try {
-        ctx.validator(auditRules, {
+        ctx.app.validator.validate(auditRules, {
           address,
           signature,
           pubKey,
@@ -78,9 +78,9 @@ module.exports = options => {
           return true;
         });
         const {
-          expired = 300 // s, 300秒
+          expired = 300 * 1000 // s, 300秒
         } = options;
-        const now = new Date().getTime() / 1000;
+        const now = new Date().getTime();
         if (+timestamp >= now - expired && +timestamp <= now + expired) {
           ctx.isAudit = verify('' + timestamp, pubKey, signature);
           await next();

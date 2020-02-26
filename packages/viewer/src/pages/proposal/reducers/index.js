@@ -6,13 +6,13 @@ import { combineReducers } from 'redux';
 import { common } from './common';
 import { getOrganization } from './organizationList';
 import { getProposalList } from './proposalList';
-import { setCurrentProposal } from './proposalDetail';
+import { setModifyOrg } from './proposalModify';
 
 const root = combineReducers({
   common,
   organizations: getOrganization,
   proposals: getProposalList,
-  currentProposal: setCurrentProposal
+  proposalModify: setModifyOrg
 });
 
 export default root;

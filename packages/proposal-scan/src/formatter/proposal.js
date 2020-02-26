@@ -215,7 +215,7 @@ async function proposalCreatedFormatter(transaction) {
       contractMethod,
       contractParams,
       expiredTime: formatTimestamp(expiredTime).utcOffset(0).format(),
-      status: toBeReleased ? proposalStatus.APPROVED : proposalStatus.NOT_PASSED
+      status: toBeReleased ? proposalStatus.APPROVED : proposalStatus.PENDING
     };
     return result;
   }))
@@ -342,7 +342,7 @@ async function proposalVotedFormatter(transaction) {
         amount,
         status: (proposalInfo && proposalInfo.toBeReleased)
           ? proposalStatus.APPROVED
-          : proposalStatus.NOT_PASSED
+          : proposalStatus.PENDING
       },
       vote: {
         txId: TransactionId,
@@ -409,7 +409,7 @@ async function proposalReleasedFormatter(transaction) {
     proposalId: item.deserializeLogResult.proposalId,
     releasedTxId: TransactionId,
     releasedTime: time,
-    status: proposalStatus.MINED
+    status: proposalStatus.RELEASED
   }));
 }
 

@@ -3,18 +3,17 @@
  * @author atom-yang
  */
 import {
-  SET_CURRENT_PROPOSALS_DETAIL
+  SET_MODIFY_ORG_DETAIL
 } from '../actions/proposalDetail';
 
 const initialState = {
-  currentProposalInfo: {}
 };
 
-export const setCurrentProposal = (state = initialState, { type, payload }) => {
+export const setModifyOrg = (state = initialState, { type, payload }) => {
   switch (type) {
-    case SET_CURRENT_PROPOSALS_DETAIL:
+    case SET_MODIFY_ORG_DETAIL:
       return {
-        currentProposalInfo: payload
+        ...payload
       };
     default:
       return state;

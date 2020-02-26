@@ -17,10 +17,11 @@ const initialState = {
     pageNum: 1,
     search: '',
     proposalType: proposalTypes.PARLIAMENT,
-    isContract: false,
+    isContract: 0,
     status: proposalStatus.ALL
   },
   total: 0,
+  bpCount: 1,
   list: [],
   isAudit: false,
   status: LOADING_STATUS.LOADING

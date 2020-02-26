@@ -8,13 +8,15 @@ const config = require('../config');
 
 const {
   constants: {
-    proposalTypes
+    proposalTypes,
+    proposalActions
   }
 } = config;
 
 const {
   Model,
   BIGINT,
+  DECIMAL,
   BOOLEAN,
   STRING,
   ENUM,
@@ -47,7 +49,7 @@ const votesDescription = {
     allowNull: false
   },
   amount: {
-    type: BIGINT,
+    type: DECIMAL,
     allowNull: false,
     defaultValue: 0,
   },
@@ -57,7 +59,11 @@ const votesDescription = {
     defaultValue: 'none'
   },
   action: {
-    type: ENUM('Approve', 'Reject', 'Abstain'),
+    type: ENUM(
+      proposalActions.APPROVE,
+      proposalActions.REJECT,
+      proposalActions.ABSTAIN
+    ),
     allowNull: false
   },
   claimed: {
@@ -96,47 +102,72 @@ const votesDescription = {
 };
 
 class Votes extends Model {
-  static personalVoteHistory(voter, proposalType, proposalId) {
+  static async personalVoteHistory(voter, proposalId) {
     return Votes.findAll({
       attributes: [
         'txId',
         'voter',
         'amount',
         'symbol',
-        'action'
+        'action',
+        'time',
+        'claimed',
+        'claimedTx',
+        'claimedTime'
       ],
       where: {
         voter,
-        proposalType,
         proposalId
-      }
+      },
+      order: [
+        ['id', 'DESC']
+      ],
     });
   }
 
-  static voteHistory(proposalType, proposalId, pageSize, pre) {
+  static async voteHistory(proposalId, pageSize, pageNum, search) {
     let whereCondition = {
-      proposalType,
       proposalId
     };
-    if (pre) {
+    if (search) {
       whereCondition = {
         ...whereCondition,
-        id: {
-          [Op.lt]: pre
-        }
+        [Op.or]: [
+          {
+            voter: {
+              [Op.substring]: search
+            }
+          },
+          {
+            txId: {
+              [Op.substring]: search
+            }
+          },
+        ]
       };
     }
-    return Votes.findAll({
+    const result = await Votes.findAndCountAll({
       attributes: [
         'txId',
         'voter',
         'amount',
         'symbol',
-        'action'
+        'action',
+        'time'
+      ],
+      order: [
+        ['id', 'DESC']
       ],
       where: whereCondition,
       limit: pageSize,
+      offset: (pageNum - 1) * pageSize
     });
+    const total = result.count;
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
   }
 
   static async hasVoted(voter, proposalType, proposalIds = []) {
@@ -147,7 +178,7 @@ class Votes extends Model {
         proposalType
       }
     });
-    result.reduce((acc, item) => {
+    return result.reduce((acc, item) => {
       const { proposalId, action } = item;
       if (proposalIds.includes(proposalId)) {
         return {

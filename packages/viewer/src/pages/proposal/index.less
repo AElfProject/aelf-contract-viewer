@@ -1,1 +1,45 @@
+body {
+  background-color: #f8f9fa;
+}
+.approve-color {
+  background-color: #1db49a;
+  border-color: #1db49a;
+  color: #ffffff;
+  &:hover, &:focus {
+    background-color: #1ECAAE;
+    border-color: #1ECAAE;
+    color: #ffffff;
+  }
+}
+.reject-color {
+  background-color: #d34a64;
+  border-color: #d34a64;
+  color: #ffffff;
+  &:hover, &:focus {
+    border-color: #d34a64;
+    color: #666666;
+  }
+}
+.abstain-color {
+  background-color: #646464;
+  border-color: #1db49a;
+  color: #ffffff;
+  &:hover, &:focus {
+    border-color: #1db49a;
+    color: #666666;
+  }
+}
 
+.proposal {
+  background-color: #f8f9fa;
+  &-container {
+    background-color: #ffffff;
+    padding: 10px 30px;
+    margin-top: 15px;
+    .card-list-desc-item {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+    }
+  }
+}

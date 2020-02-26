@@ -67,6 +67,12 @@ const organizationDescription = {
     defaultValue: NOW,
     field: 'created_at'
   },
+  updatedAt: {
+    type: DATE,
+    allowNull: false,
+    defaultValue: NOW,
+    field: 'updated_at'
+  },
   releaseThreshold: {
     type: TEXT('long'),
     allowNull: false,
@@ -159,6 +165,21 @@ class Organizations extends Model {
         }
       }
     });
+  }
+
+  static async getOrganizationByAddress(orgAddress) {
+    const result = await Organizations.findOne({
+      attributes: {
+        exclude: ['id']
+      },
+      where: {
+        orgAddress
+      }
+    });
+    if (result) {
+      return result.toJSON();
+    }
+    return {};
   }
 
   static async isExist(orgAddress) {

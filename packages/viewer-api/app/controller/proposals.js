@@ -3,6 +3,10 @@
  * @author atom-yang
  */
 const Controller = require('../core/baseController');
+const {
+  getTxResult,
+  parseJSON
+} = require('../utils');
 
 const paramRules = {
   proposalId: {
@@ -56,8 +60,9 @@ class ProposalsController extends Controller {
       required: false
     },
     isContract: {
-      type: 'bool',
-      default: false,
+      type: 'enum',
+      values: [ '0', '1' ],
+      default: '0',
       required: false
     }
   };
@@ -71,13 +76,6 @@ class ProposalsController extends Controller {
       max: 100
     },
     txId: {
-      type: 'string',
-      trim: true,
-      required: true,
-      min: 64,
-      max: 64
-    },
-    proposalId: {
       type: 'string',
       trim: true,
       required: true,
@@ -106,21 +104,104 @@ class ProposalsController extends Controller {
     },
   };
 
-  async getParam() {
+  async getProposalById() {
     const { ctx, app } = this;
+    const { config } = app;
+    const { constants: { proposalTypes } } = config;
     try {
+      const { BPList = [], parliamentProposerList = [] } = app.cache;
       const errors = app.validator.validate(paramRules, ctx.request.query);
       if (errors) {
         throw errors;
       }
+      const { isAudit } = ctx;
       const {
+        address,
         proposalId
       } = ctx.request.query;
+      let proposal = await app.model.ProposalList.getProposalById(proposalId);
+      if (Object.keys(proposal) === 0) {
+        throw new Error('not exist');
+      }
       const {
-        contractParams = ''
-      } = await app.model.ProposalList.getParams(proposalId);
+        orgAddress,
+        proposalType
+      } = proposal;
+      const organization = await app.model.Organizations.getOrganizationByAddress(orgAddress);
+      /* eslint-disable no-case-declarations */
+      if (isAudit) {
+        switch (proposalType) {
+          case proposalTypes.PARLIAMENT:
+            // 议会形式
+            const isBp = BPList.includes(address);
+            if (isBp) {
+              // 有权限进行投票
+              const ParVotedIds = await app.model.Votes.hasVoted(
+                address,
+                proposalTypes.PARLIAMENT,
+                [ proposalId ]
+              );
+              proposal = {
+                ...proposal,
+                canVote: true,
+                votedStatus: ParVotedIds[proposalId] || 'none'
+              };
+            } else {
+              // 无权限进行投票
+              proposal = {
+                ...proposal,
+                canVote: false,
+                votedStatus: 'none'
+              };
+            }
+            break;
+          case proposalTypes.REFERENDUM:
+            // 公投模型，人人均有权限进行投票
+            const referVotedIds = await app.model.Votes.hasVoted(
+              address,
+              proposalTypes.REFERENDUM,
+              [ proposalId ]
+            );
+            proposal = {
+              ...proposal,
+              canVote: true,
+              votedStatus: referVotedIds[proposalId] || 'none'
+            };
+            break;
+          case proposalTypes.ASSOCIATION:
+            // 组织模型，组织成员有权限进行投票
+            const {
+              leftOrgInfo
+            } = organization;
+            const {
+              organizationMemberList = []
+            } = leftOrgInfo;
+            const assoVotedIds = await app.model.Votes.hasVoted(
+              address,
+              proposalTypes.REFERENDUM,
+              [ proposalId ]
+            );
+            proposal = {
+              ...proposal,
+              canVote: Array.isArray(organizationMemberList) ? organizationMemberList.includes(address) : false,
+              votedStatus: assoVotedIds[proposalId] || 'none'
+            };
+            break;
+          default:
+            throw new Error('not a valid proposal type');
+        }
+      } else {
+        proposal = {
+          ...proposal,
+          canVote: false,
+          votedStatus: 'none'
+        };
+      }
       this.sendBody({
-        params: contractParams
+        proposal,
+        bpList: BPList,
+        organization,
+        parliamentProposerList
       });
     } catch (e) {
       this.error(e);
@@ -141,7 +222,7 @@ class ProposalsController extends Controller {
       const {
         address,
         search,
-        isContract = false,
+        isContract = '0',
         pageSize = 6,
         pageNum = 1,
         status,
@@ -155,7 +236,7 @@ class ProposalsController extends Controller {
         status,
         pageNum,
         pageSize,
-        isContract,
+        +isContract === 1,
         search
       );
       if (total === 0 || list.length === 0) {
@@ -178,12 +259,12 @@ class ProposalsController extends Controller {
           [org.orgAddress]: org
         };
       }, {});
+      const { BPList = [] } = app.cache;
       /* eslint-disable no-case-declarations */
       if (isAudit) {
         switch (proposalType) {
           case proposalTypes.PARLIAMENT:
             // 议会形式
-            const { BPList = [] } = app.cache;
             const isBp = BPList.includes(address);
             if (isBp) {
               // 有权限进行投票
@@ -273,9 +354,11 @@ class ProposalsController extends Controller {
       this.sendBody({
         isAudit,
         list,
+        bpCount: BPList.length,
         total
       });
     } catch (e) {
+      console.error(e);
       this.error(e);
       this.sendBody();
     }
@@ -291,7 +374,10 @@ class ProposalsController extends Controller {
       const {
         contractName,
       } = ctx.request.query;
-      const result = await app.model.ContractNames.isExist(contractName);
+      let result = await app.model.ContractNames.isExist(contractName);
+      if (!result) {
+        result = await app.model.Contracts.isExistName(contractName);
+      }
       this.sendBody({
         isExist: result
       });
@@ -308,11 +394,40 @@ class ProposalsController extends Controller {
       if (errors) {
         throw errors;
       }
-      const result = await app.model.ContractNames.addName(ctx.request.body);
-      if (result === false) {
-        throw new Error('contract name has been taken');
+      const {
+        isAudit
+      } = ctx;
+      if (!isAudit) {
+        throw new Error('need log in and sign');
       }
-      this.sendBody({});
+      const {
+        contractName,
+        txId,
+        action,
+        address,
+      } = ctx.request.body;
+      let isExist = await app.model.ContractNames.isExist(contractName);
+      if (!isExist) {
+        isExist = await app.model.Contracts.isExistName(contractName);
+      }
+      if (isExist) {
+        throw new Error('contract name has been taken');
+      } else {
+        this.sendBody({});
+      }
+      getTxResult(txId).then(res => {
+        if (res.Status === 'MINED') {
+          app.model.ContractNames.addName({
+            contractName,
+            txId,
+            action,
+            address,
+            proposalId: parseJSON(res.ReadableReturnValue)
+          });
+        }
+      }).catch(err => {
+        console.log(err);
+      });
     } catch (e) {
       this.error(e);
       this.sendBody();

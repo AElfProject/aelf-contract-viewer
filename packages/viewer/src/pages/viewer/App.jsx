@@ -11,7 +11,7 @@ import {
   GlobalContext
 } from './common/context';
 import { detectMobileBrowser } from './common/utils';
-import './index.less';
+import '../../common/index.less';
 
 const {
   Content

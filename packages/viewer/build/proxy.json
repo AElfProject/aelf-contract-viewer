@@ -7,5 +7,14 @@
     "headers": {
       "Host": "test.aelf.io"
     }
+  },
+  {
+    "target": "http://18.163.40.216:8000",
+    "context": [
+      "/api/blockChain"
+    ],
+    "headers": {},
+    "changeOrigin": true,
+    "secure": false
   }
 ]

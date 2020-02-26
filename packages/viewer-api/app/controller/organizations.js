@@ -67,16 +67,18 @@ class OrganizationsController extends Controller {
       let list;
       // 根据用户地址查询有权限使用的组织全列表
       if (proposalType === config.constants.proposalTypes.PARLIAMENT) {
-        const { BPList = [] } = app.cache;
-        const isBp = BPList.includes(address);
+        const { BPList = [], parliamentProposerList = [] } = app.cache;
         // 如果为BP节点，则所有的Parliament组织均可创建提案
+        const isBp = BPList.includes(address);
+        // 如果在白名单里，则所有的Parliament组织均可创建提案
+        const isProposer = parliamentProposerList.includes(address);
         const organizationList = await app.model.Organizations.getAuditOrganizations(proposalType, search);
         list = organizationList.filter(item => {
           const {
             leftOrgInfo
           } = item;
           const { proposerAuthorityRequired } = leftOrgInfo;
-          return isBp || !proposerAuthorityRequired;
+          return isBp || !proposerAuthorityRequired || isProposer;
         }).map(v => v.orgAddress);
       } else {
         list = await app.model.Proposers.getOrganizations(proposalType, address, search);
@@ -111,10 +113,12 @@ class OrganizationsController extends Controller {
         pageSize,
         search
       );
-      // todo: 时间+时区格式化
+      const { BPList = [], parliamentProposerList = [] } = app.cache;
       this.sendBody({
         list,
-        total
+        total,
+        bpList: BPList,
+        parliamentProposerList
       });
     } catch (e) {
       this.error(e);

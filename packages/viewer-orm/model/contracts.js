@@ -77,6 +77,19 @@ const contractsDescription = {
 };
 
 class Contracts extends Model {
+  static async getContractName(address) {
+    const result = await Contracts.findOne({
+      attributes: ['contractName'],
+      where: {
+        address
+      }
+    });
+    if (result && +result.contractName !== -1) {
+      return result.contractName;
+    }
+    return '';
+  }
+
   static async getInfoByAddress(address) {
     const result = await Contracts.findOne({
       where: {
@@ -133,6 +146,16 @@ class Contracts extends Model {
       total,
       list
     };
+  }
+
+  static async isExistName(contractName) {
+    const isExist = await Contracts.findOne({
+      attributes: ['id'],
+      where: {
+        contractName
+      }
+    });
+    return !!isExist;
   }
 }
 

@@ -12,6 +12,7 @@ import {
   Table,
   Tag
 } from 'antd';
+import useLocation from 'react-use/lib/useLocation';
 import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
 import config from '../../../../common/config';
@@ -78,6 +79,12 @@ const Total = total => (
 );
 
 const List = () => {
+  const fullPath = useLocation();
+  useEffect(() => {
+    sendMessage({
+      href: fullPath.href
+    });
+  }, [fullPath]);
   const [list, setList] = useState([]);
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [pagination, setPagination] = useState({

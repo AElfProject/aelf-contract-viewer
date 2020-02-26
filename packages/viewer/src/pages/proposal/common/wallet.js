@@ -14,6 +14,7 @@ export class Wallet {
       ...options
     };
     this.proxy = new WALLET_TYPE[options.walletType](this.options);
+    this.isExist = this.proxy.isExist;
   }
 
   login(...args) {
@@ -27,4 +28,14 @@ export class Wallet {
   sign(...args) {
     return this.proxy.sign(...args);
   }
+
+  invoke(...args) {
+    return this.proxy.invoke(...args);
+  }
 }
+
+const walletInstance = new Wallet({
+  walletType: 'EXTENSION'
+});
+
+export default walletInstance;

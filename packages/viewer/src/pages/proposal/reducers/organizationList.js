@@ -20,7 +20,9 @@ const initialState = {
   },
   total: 0,
   list: [],
-  status: LOADING_STATUS.LOADING
+  bpList: [],
+  parliamentProposerList: [],
+  loadingStatus: LOADING_STATUS.LOADING
 };
 
 export const getOrganization = (state = initialState, { type, payload }) => {
@@ -28,7 +30,7 @@ export const getOrganization = (state = initialState, { type, payload }) => {
     case GET_ORGANIZATIONS_LIST.GET_ORGANIZATIONS_LIST_START:
       return {
         ...state,
-        status: LOADING_STATUS.LOADING,
+        loadingStatus: LOADING_STATUS.LOADING,
         params: {
           ...state.params,
           ...payload
@@ -38,12 +40,12 @@ export const getOrganization = (state = initialState, { type, payload }) => {
       return {
         ...state,
         ...payload,
-        status: LOADING_STATUS.SUCCESS
+        loadingStatus: LOADING_STATUS.SUCCESS
       };
     case GET_ORGANIZATIONS_LIST.GET_ORGANIZATIONS_LIST_FAIL:
       return {
         ...state,
-        status: LOADING_STATUS.FAILED
+        loadingStatus: LOADING_STATUS.FAILED
       };
     default:
       return state;

@@ -26,6 +26,9 @@ export async function innerHeight(time = 0, timeout = 500, maxTime = 10) {
 
 export function sendMessage(message = {}, origin = '*') {
   if (window.parent) {
-    window.parent.postMessage(message, origin);
+    window.parent.postMessage({
+      type: 'viewer',
+      message
+    }, origin);
   }
 }

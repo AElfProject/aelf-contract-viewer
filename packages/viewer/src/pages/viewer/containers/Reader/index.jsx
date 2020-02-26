@@ -26,6 +26,7 @@ import {
   Icon,
   Alert
 } from 'antd';
+import useLocation from 'react-use/lib/useLocation';
 import {
   innerHeight,
   sendMessage
@@ -189,6 +190,12 @@ const fetchingStatusMap = {
 };
 
 const Reader = () => {
+  const fullPath = useLocation();
+  useEffect(() => {
+    sendMessage({
+      href: fullPath.href
+    });
+  }, [fullPath]);
   const global = useContext(GlobalContext);
   const {
     isMobile = false

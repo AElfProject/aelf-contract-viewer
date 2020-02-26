@@ -1,0 +1,47 @@
+.ant-card-head {
+  background-color: #ededed;
+}
+.proposal-list-item {
+  .ant-divider-horizontal {
+    margin: 12px 0;
+  }
+  &-id {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    > div {
+      max-width: 80%;
+    }
+    &-status {
+      text-align: right;
+    }
+  }
+  &-info {
+    &-item {
+      display: flex;
+      flex-flow: row nowrap;
+    }
+  }
+  &-vote {
+    &-chart {
+      .ant-col {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;;
+      }
+    }
+  }
+  &-actions {
+    position: relative;
+  }
+  &-buttons {
+    display: inline-block;
+    transform: translate(-50%);
+    position: absolute;
+    left: 50%;
+  }
+  &-abstain {
+    float: right;
+  }
+}

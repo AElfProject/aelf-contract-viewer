@@ -2,12 +2,39 @@
  * @file common actions
  * @author atom-yang
  */
-
-/**
- * @file List actions
- * @author yangmutong
- */
+import {
+  message
+} from 'antd';
 import { arrayToMap } from '../common/utils';
+import walletInstance from '../common/wallet';
+
+// check is exist
+export const CHECK_WALLET_EXIST = arrayToMap([
+  'CHECK_WALLET_EXIST_START',
+  'CHECK_WALLET_EXIST_SUCCESS',
+  'CHECK_WALLET_EXIST_FAILED'
+]);
+
+export const checkWalletIsExist = () => async dispatch => {
+  dispatch({
+    type: CHECK_WALLET_EXIST.LOG_IN_START,
+    payload: {}
+  });
+  try {
+    const detail = await walletInstance.isExist;
+    dispatch({
+      type: CHECK_WALLET_EXIST.LOG_IN_SUCCESS,
+      payload: {
+        ...detail
+      }
+    });
+  } catch (e) {
+    dispatch({
+      type: CHECK_WALLET_EXIST.LOG_IN_FAILED,
+      payload: {}
+    });
+  }
+};
 
 // 登录
 export const LOG_IN_ACTIONS = arrayToMap([
@@ -16,18 +43,21 @@ export const LOG_IN_ACTIONS = arrayToMap([
   'LOG_IN_FAILED'
 ]);
 
-export const logIn = params => async dispatch => {
+export const logIn = () => async dispatch => {
   dispatch({
     type: LOG_IN_ACTIONS.LOG_IN_START,
-    payload: params
+    payload: {}
   });
   try {
-    // todo: 登录逻辑
+    const detail = await walletInstance.login();
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_SUCCESS,
-      payload: {}
+      payload: {
+        ...detail
+      }
     });
   } catch (e) {
+    message.warn((e.errorMessage || {}).message || 'night ELF is locked!');
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_FAILED,
       payload: {}
@@ -42,13 +72,13 @@ export const LOG_OUT_ACTIONS = arrayToMap([
   'LOG_OUT_FAILED'
 ]);
 
-export const logOut = params => async dispatch => {
+export const logOut = address => async dispatch => {
   dispatch({
     type: LOG_OUT_ACTIONS.LOG_OUT_START,
-    payload: params
+    payload: {}
   });
   try {
-    // todo: 登出逻辑
+    await walletInstance.logout(address);
     dispatch({
       type: LOG_OUT_ACTIONS.LOG_OUT_SUCCESS,
       payload: {}

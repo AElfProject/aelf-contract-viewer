@@ -1,0 +1,62 @@
+.organization-list-item {
+  .ant-divider-horizontal {
+    margin: 12px 0;
+  }
+  .ant-card-head {
+    background-color: #ededed;
+  }
+  &-title {
+    &-countdown {
+      float: right;
+      font-size: 14px;
+      font-weight: bold;
+      color: #d34a64;
+    }
+  }
+  &-id {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    // min-height: 50px;
+    > i {
+      color: #5c28a9;
+    }
+    > div {
+      max-width: 80%;
+    }
+    &-status {
+      text-align: right;
+    }
+  }
+  &-info {
+    &-item {
+      display: flex;
+      flex-flow: row nowrap;
+    }
+  }
+  &-vote {
+    &-chart {
+      .ant-col {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;;
+      }
+      &-circle {
+        // width: 70%;
+      }
+    }
+  }
+  .card-list-desc-item {
+    .sub-title {
+      margin-right: 5px;
+    }
+    span:nth-child(2) {
+      flex: 2;
+      overflow: hidden;
+      .ant-select {
+        width: 100%;
+      }
+    }
+  }
+}
