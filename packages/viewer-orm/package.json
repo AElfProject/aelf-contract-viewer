@@ -11,9 +11,9 @@
     "create-db:dev": "cross-env NODE_ENV=development sequelize db:create",
     "generate": "cross-env NODE_ENV=production sequelize migration:generate",
     "generate:dev": "cross-env NODE_ENV=development sequelize migration:generate",
-    "migrate": "sequelize db:migrate",
+    "migrate": "cross-env NODE_ENV=production sequelize db:migrate",
     "migrate:dev": "cross-env NODE_ENV=development sequelize db:migrate",
-    "undo-all": "sequelize db:migrate:undo:all",
+    "undo-all": "cross-env NODE_ENV=production sequelize db:migrate:undo:all",
     "undo-all:dev": "cross-env NODE_ENV=development sequelize db:migrate:undo:all"
   },
   "dependencies": {
