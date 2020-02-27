@@ -7,9 +7,9 @@
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
-    "predev": "cross-env NODE_ENV=development && node ../../scripts/queryConfig.js",
-    "dev": "npm run clean && cross-env NODE_ENV=development && webpack-dev-server --progress --colors --display-chunks --watch --config ./build/webpack.dev.js",
-    "prebuild": "cross-env NODE_ENV=production && node ../../scripts/queryConfig.js",
+    "predev": "cross-env NODE_ENV=development node ../../scripts/queryConfig.js",
+    "dev": "npm run clean && cross-env NODE_ENV=development webpack-dev-server --progress --colors --display-chunks --watch --config ./build/webpack.dev.js",
+    "prebuild": "cross-env NODE_ENV=production node ../../scripts/queryConfig.js",
     "build": "npm run clean && cross-env NODE_ENV=production webpack --progress --colors --display-chunks --config ./build/webpack.prod.js",
     "analyze": "npm run clean && cross-env NODE_ENV=production webpack --config ./build/webpack.analyze.js",
     "clean": "rimraf dist/*"
