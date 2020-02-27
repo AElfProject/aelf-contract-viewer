@@ -119,7 +119,7 @@ const App = () => {
                 Proposal Rules
               </span>
             </Popover>
-            <LogButton isExist={isExist} />
+            <LogButton isExist={!!isExist} />
           </>
         )}
       >

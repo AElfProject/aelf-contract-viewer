@@ -30,19 +30,19 @@ export default class Extension {
     this.contracts = {};
     this.elfInstance = null;
     this.isExist = new Promise(resolve => {
-      if (window.NightElf) {
+      if (window.NightElf || window.parent.NightElf) {
         resolve(true);
       } else {
         document.addEventListener('NightElf', () => {
           resolve(true);
         });
         setTimeout(() => {
-          resolve(window.NightElf);
+          resolve(!!(window.NightElf || window.parent.NightElf));
         }, 5000);
       }
     }).then(result => {
       if (result) {
-        this.elfInstance = new window.NightElf.AElf({
+        this.elfInstance = new (window.NightElf || window.parent.NightElf).AElf({
           httpProvider: [
             DEFAUT_RPCSERVER
           ],

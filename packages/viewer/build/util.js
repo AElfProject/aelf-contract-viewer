@@ -15,7 +15,7 @@ const isProdMode = process.env.NODE_ENV === 'production';
 
 const ROOT = path.resolve(__dirname, '..');
 
-const PUBLIC_PATH = isProdMode ? config.outputPath : '/';
+const PUBLIC_PATH = isProdMode ? config.outputPath : config.outputPath;
 
 const OUTPUT_PATH = path.resolve(__dirname, '..', 'dist/viewer');
 
