@@ -36,7 +36,6 @@ const {
   proposalStatus
 } = constants;
 
-// todo: 错误处理，空列表
 const ProposalList = () => {
   const common = useSelector(state => state.common, shallowEqual);
   const proposalList = useSelector(state => state.proposals, shallowEqual);
