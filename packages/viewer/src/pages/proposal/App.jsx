@@ -74,7 +74,7 @@ const App = () => {
     sendMessage({
       href: fullPath.href
     });
-    innerHeight().then(height => {
+    innerHeight(500).then(height => {
       sendMessage({ height });
     }).catch(err => {
       console.error(err);
