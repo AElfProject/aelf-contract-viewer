@@ -210,7 +210,7 @@ const Reader = () => {
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [viewerConfig, setViewerConfig] = useState({});
   useEffect(() => {
-    innerHeight().then(height => {
+    innerHeight(500).then(height => {
       sendMessage({ height });
     }).catch(err => {
       console.error(err);

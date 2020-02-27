@@ -20,7 +20,7 @@ export async function innerHeight(minHeight = 400, time = 0, timeout = 500, maxT
         resolve();
       }, timeout);
     });
-    return innerHeight(currentTime);
+    return innerHeight(minHeight, currentTime);
   }
 }
 
