@@ -39,14 +39,15 @@ export const ACTIONS_ICON_MAP = {
 
 const Title = props => {
   const {
+    status,
     proposalType,
     votedStatus,
     expiredTime
   } = props;
   const momentExpired = moment(expiredTime);
   const now = moment();
-  const showExpired = momentExpired.isBefore(now)
-    && momentExpired.isAfter(now.subtract(3, 'days'));
+  const showExpired = status !== proposalStatus.RELEASED && momentExpired.isAfter(now)
+    && momentExpired.isBefore(now.add(3, 'days'));
   return (
     <div className="proposal-list-item-title">
       <span className="gap-right-small">{proposalType}</span>
@@ -62,6 +63,7 @@ const Title = props => {
   );
 };
 Title.propTypes = {
+  status: PropTypes.oneOf(Object.values(proposalStatus)).isRequired,
   proposalType: PropTypes.oneOf(Object.values(proposalTypes)).isRequired,
   votedStatus: PropTypes.oneOf([
     'none',
@@ -108,6 +110,7 @@ const Proposal = props => {
       <Card
         title={(
           <Title
+            status={status}
             expiredTime={expiredTime}
             proposalType={proposalType}
             votedStatus={votedStatus}

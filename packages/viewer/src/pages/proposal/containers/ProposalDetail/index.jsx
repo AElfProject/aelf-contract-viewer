@@ -67,21 +67,23 @@ function getData(proposalId) {
 
 function CountDown(props) {
   const {
-    time
+    time,
+    status
   } = props;
   if (!time) {
     return null;
   }
   const now = moment();
   const expired = moment(time);
-  const show = expired.isBefore(now)
-  && expired.isAfter(now.subtract(3, 'days'));
+  const show = status !== proposalStatus.RELEASED && expired.isAfter(now)
+  && expired.isBefore(now.add(3, 'days'));
   return show
     ? (<span className="warning-text">{`Expire ${now.to(expired)}`}</span>) : null;
 }
 
 CountDown.propTypes = {
-  time: PropTypes.string
+  time: PropTypes.string,
+  status: PropTypes.oneOf(Object.values(proposalStatus)).isRequired
 };
 
 CountDown.defaultProps = {
@@ -234,7 +236,7 @@ const ProposalDetail = () => {
               <PageHeader
                 onBack={history.length > 1 ? goBack : null}
                 title="Proposal Detail"
-                subTitle={<CountDown time={expiredTime} />}
+                subTitle={<CountDown time={expiredTime} status={status} />}
                 tags={votedStatus && votedStatus !== 'none'
                   ? (
                     <Tag color={ACTIONS_COLOR_MAP[votedStatus]}>
