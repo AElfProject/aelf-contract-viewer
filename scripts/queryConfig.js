@@ -47,13 +47,22 @@ async function getContractAddress() {
   const zeroContract = await aelf.chain.contractAt(GenesisContractAddress, wallet);
   const list = await Promise.all(contractNames.map(async item => {
     const { contractName, name, ...left } = item;
-    const address = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(contractName));
-    return {
-      ...left,
-      contractAddress: address,
-      contractName: name
-    };
+    try {
+      const address = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(contractName));
+      return {
+        ...left,
+        contractAddress: address,
+        contractName: name
+      };
+    } catch (e) {
+      return {
+        ...left,
+        contractAddress: '',
+        contractName: name
+      };
+    }
   })).then(results => results.filter(item => item.contractAddress));
+  console.log(list);
   result = {
     ...result,
     contractAddress: [
@@ -76,4 +85,6 @@ async function getContractAddress() {
   fs.writeFileSync(path.resolve(__dirname, '../config.json'), `${JSON.stringify(result, null, 2)}\n`);
 }
 
-getContractAddress().catch(console.error);
+(async () => {
+  await getContractAddress();
+})();
