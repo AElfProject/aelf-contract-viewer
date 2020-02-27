@@ -105,6 +105,28 @@ export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpC
   return result;
 }
 
+function isProposer(logStatus, user, proposalType, leftOrgInfo, bpList, parliamentProposerList) {
+  if (logStatus !== LOG_STATUS.LOGGED) {
+    return false;
+  }
+  const {
+    proposerAuthorityRequired,
+    proposerWhiteList = {}
+  } = leftOrgInfo;
+  let {
+    proposers = []
+  } = proposerWhiteList;
+  if (proposalType === proposalTypes.PARLIAMENT) {
+    if (proposerAuthorityRequired === true) {
+      proposers = [...bpList, ...parliamentProposerList];
+      proposers = [...new Set(proposers)];
+      return proposers.indexOf(user) > -1;
+    }
+    return true;
+  }
+  return proposers.indexOf(user) > -1;
+}
+
 export function getOrganizationLeftInfo(proposalType, leftOrgInfo, bpList, parliamentProposerList) {
   const {
     tokenSymbol,
@@ -190,7 +212,8 @@ const Organization = props => {
     logStatus,
     bpList,
     editOrganization,
-    parliamentProposerList
+    parliamentProposerList,
+    currentWallet
   } = props;
   const votesData = useMemo(() => getCircleValues(proposalType, releaseThreshold, leftOrgInfo), [
     proposalType,
@@ -201,6 +224,11 @@ const Organization = props => {
     leftOrgInfo,
     bpList,
     parliamentProposerList
+  ]);
+  // eslint-disable-next-line max-len
+  const canEdit = useMemo(() => isProposer(logStatus, currentWallet.address, proposalType, leftOrgInfo, bpList, parliamentProposerList), [
+    logStatus,
+    currentWallet
   ]);
   const handleEdit = () => {
     editOrganization(orgAddress);
@@ -219,7 +247,7 @@ const Organization = props => {
           <div className="gap-right-large text-ellipsis">
             {orgAddress}
           </div>
-          {logStatus === LOG_STATUS.LOGGED
+          {canEdit
             ? (<Icon type="edit" color="purple" onClick={handleEdit} />) : null}
         </div>
         <Divider />
@@ -330,7 +358,11 @@ Organization.propTypes = {
   logStatus: PropTypes.oneOf(Object.values(LOG_STATUS)).isRequired,
   bpList: PropTypes.arrayOf(PropTypes.string).isRequired,
   editOrganization: PropTypes.func.isRequired,
-  parliamentProposerList: PropTypes.arrayOf(PropTypes.string).isRequired
+  parliamentProposerList: PropTypes.arrayOf(PropTypes.string).isRequired,
+  currentWallet: PropTypes.shape({
+    address: PropTypes.string,
+    publicKey: PropTypes.string
+  }).isRequired
 };
 
 export default Organization;

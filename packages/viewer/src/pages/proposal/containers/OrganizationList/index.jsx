@@ -55,7 +55,8 @@ const OrganizationList = () => {
   } = organizationList;
   const {
     logStatus,
-    isALLSettle
+    isALLSettle,
+    currentWallet
   } = common;
   const dispatch = useDispatch();
   const [searchValue, setSearchValue] = useState(params.search);
@@ -163,6 +164,7 @@ const OrganizationList = () => {
                       logStatus={logStatus}
                       editOrganization={editOrganization}
                       parliamentProposerList={parliamentProposerList}
+                      currentWallet={currentWallet}
                     />
                   </Col>
                 ))}
