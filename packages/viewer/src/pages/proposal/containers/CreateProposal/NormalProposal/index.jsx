@@ -16,6 +16,7 @@ import {
   Button,
   Tooltip,
   Icon,
+  // eslint-disable-next-line no-unused-vars
   Radio,
   message,
   Spin
@@ -241,6 +242,7 @@ function parsedParams(inputType, originalParams) {
   return result;
 }
 
+// eslint-disable-next-line no-unused-vars
 function parsedParamsWithoutSpecial(inputType, originalParams) {
   const fieldsLength = Object.keys(inputType.toJSON().fields || {}).length;
   let result = {};
@@ -306,6 +308,7 @@ const NormalProposal = props => {
     isSingleString: false,
     isEmpty: false
   });
+  // eslint-disable-next-line no-unused-vars
   const [paramsInputMethod, setParamsInputMethod] = useState('plain');
   const [organizationList, setOrganizationList] = useState([]);
   const [contractList, setContractList] = useState([]);
@@ -405,9 +408,10 @@ const NormalProposal = props => {
     });
   };
 
-  function handleInputMethod(e) {
-    setParamsInputMethod(e.target.value);
-  }
+  // eslint-disable-next-line no-unused-vars
+  // function handleInputMethod(e) {
+  //   setParamsInputMethod(e.target.value);
+  // }
 
   const handleSubmit = async () => {
     let result;
@@ -426,10 +430,11 @@ const NormalProposal = props => {
       let parsed;
       if (paramsInputMethod === 'format') {
         parsed = parsedParams(inputType, leftParams);
-        const error = inputType.verify(parsedParamsWithoutSpecial(inputType, leftParams));
-        if (error) {
-          throw new Error(`Contract params ${error}`);
-        }
+        // todo: 校验不好使，对于integer string类型不好操作
+        // const error = inputType.verify(parsedParamsWithoutSpecial(inputType, leftParams));
+        // if (error) {
+        //   throw new Error(`Contract params ${error}`);
+        // }
       } else {
         console.log(leftParams.realSpecialPlain);
         parsed = parseJSON(leftParams.realSpecialPlain);
@@ -575,10 +580,6 @@ const NormalProposal = props => {
           className={methods && methods.methodName && !methods.isEmpty ? 'normal-proposal-params' : ''}
           required
         >
-          <Radio.Group onChange={handleInputMethod} value={paramsInputMethod}>
-            <Radio.Button value="plain">Input in plain text</Radio.Button>
-            <Radio.Button value="format">Input in formatted</Radio.Button>
-          </Radio.Group>
           {
             paramsInputMethod === 'format' && methods && methods.methodName ? (
               <ContractParams

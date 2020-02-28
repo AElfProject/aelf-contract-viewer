@@ -47,6 +47,10 @@ export const getProposalList = (state = initialState, { type, payload }) => {
     case GET_PROPOSALS_LIST.GET_PROPOSALS_LIST_FAIL:
       return {
         ...state,
+        total: 0,
+        bpCount: 1,
+        list: [],
+        isAudit: false,
         status: LOADING_STATUS.FAILED
       };
     default:

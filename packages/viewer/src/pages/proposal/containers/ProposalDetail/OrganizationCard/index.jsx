@@ -77,7 +77,7 @@ const OrganizationCard = props => {
             </div>
             <div className="gap-bottom-small">
               <span className="sub-title gap-right-small">
-                Maximal Rejection Threshold:
+                Maximal Abstention Threshold:
               </span>
               <span>
                 {thresholdValue[proposalActions.ABSTAIN].num}

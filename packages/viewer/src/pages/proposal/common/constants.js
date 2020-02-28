@@ -101,6 +101,13 @@ export const CONTRACT_TEXT_MAP = {
   UpdateSmartContract: 'Update Contract'
 };
 
+export const PROPOSAL_STATUS_CAPITAL = {
+  [proposalStatus.PENDING]: 'Pending',
+  [proposalStatus.APPROVED]: 'Approved',
+  expired: 'Expired',
+  [proposalStatus.RELEASED]: 'Released',
+};
+
 export default {
   ...constants,
   proposalStatus: {

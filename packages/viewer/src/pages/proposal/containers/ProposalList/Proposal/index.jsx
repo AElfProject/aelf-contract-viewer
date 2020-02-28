@@ -20,7 +20,8 @@ import constants, {
   ACTIONS_COLOR_MAP,
   organizationInfoPropTypes,
   STATUS_COLOR_MAP,
-  CONTRACT_TEXT_MAP
+  CONTRACT_TEXT_MAP,
+  PROPOSAL_STATUS_CAPITAL
 } from '../../../common/constants';
 import './index.less';
 import VoteChart from '../../../components/VoteChart';
@@ -129,7 +130,9 @@ const Proposal = props => {
               ? (<Tag color="purple">{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
           </div>
           <div className="proposal-list-item-id-status">
-            <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>{realProposalStatus}</Tag>
+            <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>
+              {PROPOSAL_STATUS_CAPITAL[realProposalStatus]}
+            </Tag>
             {realProposalStatus === proposalStatus.APPROVED && canRelease
               // eslint-disable-next-line max-len
               ? (<Button proposal-id={proposalId} type="link" size="small" onClick={handleRelease}>Release&gt;</Button>) : null}

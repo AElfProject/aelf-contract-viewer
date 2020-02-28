@@ -37,13 +37,22 @@ div#app {
   background-color: #f8f9fa;
   &-container {
     background-color: #ffffff;
-    padding: 10px 30px;
     margin-top: 15px;
-    margin-bottom: 60px;
+    padding: 10px 30px 72px;
     .card-list-desc-item {
       display: flex;
       flex-flow: row nowrap;
       justify-content: space-between;
+      .sub-title {
+        margin-right: 5px;
+      }
+      span:nth-child(2) {
+        flex: 2;
+        overflow: hidden;
+        .ant-select {
+          width: 100%;
+        }
+      }
     }
   }
 }

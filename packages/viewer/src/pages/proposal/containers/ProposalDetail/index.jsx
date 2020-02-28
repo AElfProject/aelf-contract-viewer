@@ -34,7 +34,8 @@ import constants, {
   CONTRACT_TEXT_MAP,
   LOADING_STATUS,
   LOG_STATUS,
-  STATUS_COLOR_MAP
+  STATUS_COLOR_MAP,
+  PROPOSAL_STATUS_CAPITAL
 } from '../../common/constants';
 import { request } from '../../../../common/request';
 import VoteData from './VoteData';
@@ -106,7 +107,7 @@ function Extra(props) {
   const canRelease = logStatus === LOG_STATUS.LOGGED && currentWallet && proposer === currentWallet.address;
   return (
     <div className="proposal-list-item-id-status">
-      <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>{realProposalStatus}</Tag>
+      <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>{PROPOSAL_STATUS_CAPITAL[realProposalStatus]}</Tag>
       {realProposalStatus === proposalStatus.APPROVED && canRelease
         // eslint-disable-next-line max-len
         ? (<Button type="link" size="small" onClick={handleRelease}>Release&gt;</Button>) : null}
@@ -254,7 +255,7 @@ const ProposalDetail = () => {
               )}
               />
               <Divider className="proposal-detail-header-divider" />
-              <Title level={3}>Proposal ID: {proposalId}</Title>
+              <Title level={3} ellipsis>Proposal ID: {proposalId}</Title>
               <div className="proposal-detail-tag gap-bottom">
                 <Tag color="purple" className="gap-right">{proposalType}</Tag>
                 {CONTRACT_TEXT_MAP[contractMethod]

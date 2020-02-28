@@ -118,7 +118,7 @@ export default class Extension {
       if (result && +result.error === 0) {
         return result.signature;
       }
-      throw new Error('sign failed');
+      throw result;
     });
   }
 

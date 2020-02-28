@@ -8,7 +8,8 @@ import {
   Switch,
   Redirect,
   Route,
-  useLocation
+  useLocation,
+  Link
 } from 'react-router-dom';
 import useUseLocation from 'react-use/lib/useLocation';
 import {
@@ -64,7 +65,6 @@ const App = () => {
   const logStatus = useSelector(state => state.common.logStatus);
   const [isExist, setIsExist] = useState(true);
   const location = useLocation();
-  console.log(location);
   const {
     pathname
   } = location;
@@ -79,6 +79,7 @@ const App = () => {
     }).catch(err => {
       console.error(err);
     });
+    console.log(fullPath);
   }, [fullPath]);
 
   useEffect(() => {
@@ -123,10 +124,10 @@ const App = () => {
           </>
         )}
       >
-        <TabPane tab="Proposals" key="proposals" />
+        <TabPane tab={(<Link to="/proposals">Proposals</Link>)} key="proposals" />
         {logStatus === LOG_STATUS.LOGGED
           ? <TabPane tab="Apply" key="apply" /> : null}
-        <TabPane tab="Organizations" key="organizations" />
+        <TabPane tab={(<Link to="/organizations">Organizations</Link>)} key="organizations" />
       </Tabs>
       <div className="proposal-container">
         <Switch>

@@ -118,7 +118,7 @@ const CreateProposal = () => {
       }
     } catch (e) {
       console.error(e);
-      message.error(e.message || 'Error happened');
+      message.error((e.errorMessage || {}).message || e.message || 'Error happened');
     } finally {
       setContractResult({
         ...contract,
@@ -170,7 +170,7 @@ const CreateProposal = () => {
       showTransactionResult(result);
     } catch (e) {
       console.error(e);
-      message.error(e.message || 'Error happened');
+      message.error((e.errorMessage || {}).message || e.message || 'Error happened');
     } finally {
       setNormalResult({
         ...normalResult,

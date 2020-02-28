@@ -17,8 +17,7 @@ import {
   Row,
   Col,
   Empty,
-  Result,
-  message
+  Result
 } from 'antd';
 import Total from '../../components/Total';
 import constants, { LOADING_STATUS, LOG_STATUS } from '../../common/constants';
@@ -26,7 +25,13 @@ import Proposal from './Proposal';
 import { getProposals } from '../../actions/proposalList';
 import ApproveTokenModal from './ApproveTokenModal';
 import './index.less';
-import { getContractAddress, sendTransaction } from '../../common/utils';
+import {
+  getContractAddress,
+  sendTransaction,
+  getSignParams
+} from '../../common/utils';
+import { innerHeight, sendMessage } from '../../../../common/utils';
+import { LOG_IN_ACTIONS } from '../../actions/common';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -63,29 +68,28 @@ const ProposalList = () => {
   const [searchValue, setSearchValue] = useState(params.search);
   // const { proposalType } = useParams();
 
+  useEffect(() => {
+    innerHeight(500).then(height => {
+      sendMessage({ height });
+    }).catch(err => {
+      console.error(err);
+    });
+  }, [list]);
+
   const fetchList = async param => {
-    let signParams = { ...param };
+    let signedParams = {};
     if (logStatus === LOG_STATUS.LOGGED) {
-      try {
-        const timestamp = `${new Date().getTime()}`;
-        const signature = await wallet.sign(timestamp);
-        signParams = {
-          ...signParams,
-          address: currentWallet.address,
-          signature,
-          pubKey: currentWallet.publicKey,
-          timestamp
-        };
-      } catch (e) {
-        message.warn((e.errorMessage || {}).message || 'night ELF is locked');
+      signedParams = await getSignParams(wallet, currentWallet);
+      if (Object.keys(signedParams).length === 0) {
+        dispatch({
+          type: LOG_IN_ACTIONS.LOG_IN_FAILED
+        });
       }
-    } else {
-      delete signParams.address;
-      delete signParams.signature;
-      delete signParams.timestamp;
-      delete signParams.pubKey;
     }
-    dispatch(getProposals(signParams));
+    dispatch(getProposals({
+      ...param,
+      ...signedParams
+    }));
   };
   useEffect(() => {
     if (isALLSettle === true) {
@@ -94,7 +98,6 @@ const ProposalList = () => {
   }, [isALLSettle, logStatus]);
 
   useEffect(() => {
-    console.log('in changed');
     setSearchValue(params.search);
   }, [params.search]);
 
@@ -217,11 +220,11 @@ const ProposalList = () => {
               value={params.status}
               onChange={handleStatusChange}
             >
-              <Option value={proposalStatus.ALL}>{proposalStatus.ALL}</Option>
-              <Option value={proposalStatus.PENDING}>{proposalStatus.PENDING}</Option>
-              <Option value={proposalStatus.APPROVED}>{proposalStatus.APPROVED}</Option>
-              <Option value={proposalStatus.RELEASED}>{proposalStatus.RELEASED}</Option>
-              <Option value={proposalStatus.EXPIRED}>{proposalStatus.EXPIRED}</Option>
+              <Option value={proposalStatus.ALL}>All</Option>
+              <Option value={proposalStatus.PENDING}>Pending</Option>
+              <Option value={proposalStatus.APPROVED}>Approved</Option>
+              <Option value={proposalStatus.RELEASED}>Released</Option>
+              <Option value={proposalStatus.EXPIRED}>Expired</Option>
             </Select>
           </div>
           <Search
