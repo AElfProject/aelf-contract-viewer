@@ -8,7 +8,7 @@ module.exports = app => {
     router,
     controller
   } = app;
-  const audit = app.middleware.audit({ expired: 300 });
+  const audit = app.middleware.audit({ expired: 300 * 1000 });
 
   router.get('/api/viewer/initCsrfToken', controller.initCsrfToken.initToken);
   router.get('/api/viewer/list', controller.list.getList);

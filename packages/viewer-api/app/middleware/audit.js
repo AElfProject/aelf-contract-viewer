@@ -79,7 +79,7 @@ module.exports = options => {
         } = options;
         const now = new Date().getTime();
         if (+timestamp >= now - expired && +timestamp <= now + expired) {
-          ctx.isAudit = verify('' + timestamp, pubKey, signature);
+          ctx.isAudit = verify(+timestamp, pubKey, signature);
           await next();
         } else {
           ctx.isAudit = false;
