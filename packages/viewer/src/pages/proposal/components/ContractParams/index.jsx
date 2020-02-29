@@ -141,7 +141,6 @@ const ContractParams = props => {
   } = props;
   const formDescriptor = useMemo(() => getParams(inputType), [inputType]);
   const flattedFormDescriptor = useMemo(() => flatMapForm(formDescriptor), [formDescriptor]);
-  console.log(flattedFormDescriptor);
   return (
     <div className="proposal-contract-params gap-bottom-large">
       {Object.keys(flattedFormDescriptor).map(key => {

@@ -59,7 +59,7 @@ const Title = props => {
           </Tag>
         ) : null}
       {showExpired
-        ? (<span className="warning-text">{`Expire ${now.to(momentExpired)}`}</span>) : null}
+        ? (<span className="warning-text">{`Expire ${momentExpired.to(now)}`}</span>) : null}
     </div>
   );
 };
