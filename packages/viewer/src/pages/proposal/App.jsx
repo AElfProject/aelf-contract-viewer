@@ -124,10 +124,10 @@ const App = () => {
           </>
         )}
       >
-        <TabPane tab={(<Link to="/proposals">Proposals</Link>)} key="proposals" />
+        <TabPane tab={(<Link className="tab-link" to="/proposals">Proposals</Link>)} key="proposals" />
         {logStatus === LOG_STATUS.LOGGED
           ? <TabPane tab="Apply" key="apply" /> : null}
-        <TabPane tab={(<Link to="/organizations">Organizations</Link>)} key="organizations" />
+        <TabPane tab={(<Link className="tab-link" to="/organizations">Organizations</Link>)} key="organizations" />
       </Tabs>
       <div className="proposal-container">
         <Switch>
