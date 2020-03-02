@@ -22,7 +22,8 @@ import {
   Tabs
 } from 'antd';
 import {
-  useSelector
+  useSelector,
+  useDispatch
 } from 'react-redux';
 import Title from 'antd/lib/typography/Title';
 import {
@@ -44,8 +45,13 @@ import OrganizationCard from './OrganizationCard';
 import ContractDetail from './ContractDetail';
 import config from '../../../../common/config';
 import './index.less';
-import { getContractAddress, sendTransaction } from '../../common/utils';
+import {
+  getContractAddress,
+  sendTransaction,
+  getSignParams
+} from '../../common/utils';
 import ApproveTokenModal from '../ProposalList/ApproveTokenModal';
+import { LOG_IN_ACTIONS } from '../../actions/common';
 
 const {
   viewer
@@ -60,8 +66,18 @@ const {
   proposalStatus
 } = constants;
 
-function getData(proposalId) {
+async function getData(proposalId, wallet, currentWallet, logStatus, dispatch) {
+  let signedParams = {};
+  if (logStatus === LOG_STATUS.LOGGED) {
+    signedParams = await getSignParams(wallet, currentWallet);
+    if (Object.keys(signedParams).length === 0) {
+      dispatch({
+        type: LOG_IN_ACTIONS.LOG_IN_FAILED
+      });
+    }
+  }
   return request(API_PATH.GET_PROPOSAL_INFO, {
+    ...signedParams,
     proposalId
   }, { method: 'GET' });
 }
@@ -132,8 +148,9 @@ const ProposalDetail = () => {
     proposalId = ''
   } = useParams();
   const history = useHistory();
+  const dispatch = useDispatch();
   const common = useSelector(state => state.common);
-  const [visible, setVisble] = useState(false);
+  const [visible, setVisible] = useState(false);
   const {
     logStatus,
     aelf,
@@ -152,7 +169,7 @@ const ProposalDetail = () => {
     return <Redirect to="/proposals" />;
   }
   useEffect(() => {
-    getData(proposalId).then(result => {
+    getData(proposalId, wallet, currentWallet, logStatus, dispatch).then(result => {
       setInfo({
         ...info,
         bpList: result.bpList,
@@ -169,10 +186,6 @@ const ProposalDetail = () => {
       });
     });
   }, [proposalId]);
-
-  function handleRelease() {
-
-  }
 
   const {
     createAt,
@@ -194,7 +207,7 @@ const ProposalDetail = () => {
 
   const send = async action => {
     if (proposalType === proposalTypes.REFERENDUM) {
-      setVisble(true);
+      setVisible(true);
     } else {
       await sendTransaction(wallet, getContractAddress(proposalType), action, proposalId);
     }
@@ -216,11 +229,15 @@ const ProposalDetail = () => {
     await send('Abstain');
   }
 
+  async function handleRelease() {
+    await send('Release');
+  }
+
   async function handleConfirm(action) {
     if (action) {
       await sendTransaction(wallet, getContractAddress(proposalType), action, proposalId);
     }
-    setVisble(false);
+    setVisible(false);
   }
 
   return (
