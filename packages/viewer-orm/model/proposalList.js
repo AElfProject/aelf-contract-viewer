@@ -73,7 +73,7 @@ const proposalListDescription = {
   },
   contractParams: {
     type: TEXT('long'),
-    allowNull: false,
+    allowNull: true,
     field: 'contract_params'
   },
   expiredTime: {

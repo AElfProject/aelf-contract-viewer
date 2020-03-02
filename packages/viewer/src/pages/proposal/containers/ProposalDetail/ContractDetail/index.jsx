@@ -56,13 +56,15 @@ const ContractDetail = props => {
     });
     if (createdBy === 'SYSTEM_CONTRACT') {
       setParams(JSON.stringify(JSON.parse(contractParams), null, 2));
-    } else {
+    } else if (contractParams) {
       getContract(aelf, contractAddress).then(contract => {
         const decoded = contract[contractMethod].unpackPackedInput(base64ToHex(contractParams));
         setParams(JSON.stringify(decoded, null, 2));
       }).catch(e => {
         message.error(e.message || 'Chain server is not reachable');
       });
+    } else {
+      setParams(JSON.stringify(null, null, 2));
     }
   }, [contractAddress]);
 
