@@ -91,9 +91,10 @@ function CountDown(props) {
     return null;
   }
   const now = moment();
+  const threshold = moment().add(3, 'days');
   const expired = moment(time);
   const show = status !== proposalStatus.RELEASED && expired.isAfter(now)
-  && expired.isBefore(now.add(3, 'days'));
+  && expired.isBefore(threshold);
   return show
     ? (<span className="warning-text">{`Expire ${expired.to(now)}`}</span>) : null;
 }
