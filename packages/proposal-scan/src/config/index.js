@@ -61,6 +61,9 @@ function getContractAddress(contracts) {
   const sideChainController = contractAddress.crossChain.contract.GetSideChainLifetimeController.call({
     sync: true
   });
+  const feeController = contractAddress.token.contract.GetMethodFeeController.call({
+    sync: true
+  });
   return {
     aelf,
     wallet,
@@ -70,7 +73,8 @@ function getContractAddress(contracts) {
       ProposeNewContract: deployController,
       ProposeUpdateContract: deployController,
       ProposeContractCodeCheck: codeController,
-      RequestSideChainCreation: sideChainController
+      RequestSideChainCreation: sideChainController,
+      MethodFee: feeController
     }
   };
 }

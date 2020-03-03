@@ -6,7 +6,8 @@
     "parliament": "AElf.ContractNames.Parliament",
     "referendum": "AElf.ContractNames.Referendum",
     "association": "AElf.ContractNames.Association",
-    "crossChain": "AElf.ContractNames.CrossChain"
+    "crossChain": "AElf.ContractNames.CrossChain",
+    "token": "AElf.ContractNames.Token"
   },
   "contractNames": [
     "AElf.ContractNames.Election",
@@ -29,36 +30,36 @@
     "addressUrl": "/address",
     "txUrl": "/tx",
     "blockUrl": "/block",
-    "chainId": "tDVX",
+    "chainId": "AELF",
     "contractAddress": [
       {
         "contractName": "Genesis",
         "description": "contract Genesis",
-        "contractAddress": "2eQHeJ3HUcCCFw3VvpbghbUmxfnYjXoHNgRrcyKBTp5q9ZuhxK"
+        "contractAddress": "2gaQh4uxg6tzyH1ADLoDxvHA14FMpzEiMqsQ6sDG5iHT8cmjp8"
       },
       {
         "description": "contract Token",
-        "contractAddress": "2ELTSBpU7fjidMAQdSyqimDL6hx3kNVR8k8x2ytXs3oLuDZQfU",
+        "contractAddress": "25CecrU94dmMdbhC3LWMKxtoaL4Wv8PChGvVJM6PxkHAyvXEhB",
         "contractName": "Token"
       },
       {
         "description": "contract Parliament",
-        "contractAddress": "2XDGCFE8nNSqzXFhqoGVADAgqdzTDHyfeLXchzPd3bLKdsRGwG",
+        "contractAddress": "R8nWLhsyLsY9Di4ULKQ41ddV8j1HbLikT3RjbLBDPGxnJFCv3",
         "contractName": "Parliament"
       },
       {
         "description": "contract Association",
-        "contractAddress": "3S4pDFxPZtDRea9vKpyPrzJ41yN6P1gGdh6XqgMwxqGnNfFAK",
+        "contractAddress": "29RDBXTqwnpWPSPHGatYsQXW2E17YrQUCj7QhcEZDnhPb6ThHW",
         "contractName": "Association"
       },
       {
         "description": "contract Referendum",
-        "contractAddress": "uCCEpxg14EofdYBfe384NtzPuLJthMYkrL8cfyXxuA5rZ1rZ8",
+        "contractAddress": "2F5C128Srw5rHCXoSY2C7uT5sAku48mkgiaTTp1Hiprhbb7ED9",
         "contractName": "Referendum"
       },
       {
         "description": "contract CrossChain",
-        "contractAddress": "x1GW1NAc3t3igHhk2CgXAC2KohPjAj2sap9n6AdRNGYh5x1CV",
+        "contractAddress": "x7G7VYqqeVAH8aeAsb7gYuTQ12YS1zKuxur9YES3cUj72QMxJ",
         "contractName": "CrossChain"
       }
     ]

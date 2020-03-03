@@ -266,7 +266,7 @@ const VoteDetail = props => {
       <Title level={4} className="gap-top-large">All Votes</Title>
       <Search
         className="vote-detail-search"
-        placeholder="Input contract address"
+        placeholder="Input voter address/transaction id"
         onSearch={onSearch}
       />
       <div className="vote-detail-content gap-top-large">

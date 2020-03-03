@@ -196,7 +196,16 @@ async function proposalCreatedFormatter(transaction) {
         };
         break;
       default:
-        return {};
+        // eslint-disable-next-line no-case-declarations,max-len
+        const proposalInfoFromChain = await config.contracts[proposalType.toLowerCase()].contract.GetProposal.call(proposalId);
+        if (!proposalInfoFromChain) {
+          return {};
+        }
+        proposalInfo = {
+          ...proposalInfo,
+          ...proposalInfoFromChain,
+          expiredTime: formatTimestamp(proposalInfoFromChain.expiredTime)
+        };
     }
     const {
       contractMethodName: contractMethod,
