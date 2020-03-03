@@ -130,7 +130,7 @@ class Scanner {
         ownerAddress: config.contracts.parliament.defaultOrganizationAddress
       },
       ...Object.values(controller)
-    ].reduce((acc, v) => ({
+    ].filter(v => v.contractAddress && v.ownerAddress).reduce((acc, v) => ({
       ...acc,
       [v.ownerAddress]: v
     }), {}));

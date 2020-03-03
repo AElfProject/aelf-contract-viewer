@@ -64,6 +64,9 @@ function getContractAddress(contracts) {
   const feeController = contractAddress.token.contract.GetMethodFeeController.call({
     sync: true
   });
+  const userFeeController = contractAddress.token.contract.GetUserFeeController.call({
+    sync: true
+  });
   return {
     aelf,
     wallet,
@@ -74,7 +77,19 @@ function getContractAddress(contracts) {
       ProposeUpdateContract: deployController,
       ProposeContractCodeCheck: codeController,
       RequestSideChainCreation: sideChainController,
-      MethodFee: feeController
+      MethodFee: feeController,
+      ParliamentUserFee: {
+        contractAddress: contractAddress.parliament.address,
+        ownerAddress: userFeeController.parliamentController
+      },
+      AssociationUserFee: {
+        contractAddress: contractAddress.association.address,
+        ownerAddress: userFeeController.rootController
+      },
+      ReferendumUserFee: {
+        contractAddress: contractAddress.referendum.address,
+        ownerAddress: userFeeController.referendumController
+      }
     }
   };
 }

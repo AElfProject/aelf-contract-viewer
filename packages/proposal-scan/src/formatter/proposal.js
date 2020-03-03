@@ -15,8 +15,14 @@ const {
   Tokens
 } = require('viewer-orm/model/tokens');
 const {
+  Organizations
+} = require('viewer-orm/model/organizations');
+const {
   ProposalList
 } = require('viewer-orm/model/proposalList');
+const {
+  organizationCreatedInserter
+} = require('./organization');
 const {
   parseParams,
   deserializeLogs,
@@ -105,6 +111,30 @@ const SYSTEM_PROPOSAL_METHODS_MAP = {
   ProposeUpdateContract: 'ProposeContractCodeCheck',
   RequestSideChainCreation: 'CreateSideChain'
 };
+
+async function organizationNotFound(orgAddress, proposalType) {
+  const time = config.chainInitTime;
+  const txId = 'inner';
+  const orgInfo = config.contracts[proposalType.toLowerCase()].contract.GetOrganization.call(orgAddress);
+  const {
+    organizationAddress,
+    organizationHash: orgHash,
+    proposalReleaseThreshold: releaseThreshold,
+    ...leftOrgInfo
+  } = orgInfo;
+  await organizationCreatedInserter([
+    {
+      orgAddress,
+      orgHash,
+      releaseThreshold,
+      leftOrgInfo,
+      createdAt: time,
+      proposalType,
+      creator: config.contracts.zero.address,
+      txId
+    }
+  ]);
+}
 
 async function proposalCreatedFormatter(transaction) {
   const {
@@ -216,6 +246,10 @@ async function proposalCreatedFormatter(transaction) {
       proposer,
       toBeReleased
     } = proposalInfo;
+    const isExistOrg = await Organizations.isExist(organizationAddress);
+    if (!isExistOrg) {
+      await organizationNotFound(organizationAddress, proposalType);
+    }
     result = {
       ...result,
       orgAddress: organizationAddress,
