@@ -54,19 +54,19 @@ function getContractAddress(contracts) {
   });
   const deployController = genContract.GetContractDeploymentController.call({
     sync: true
-  });
+  }) || {};
   const codeController = genContract.GetCodeCheckController.call({
     sync: true
-  });
+  }) || {};
   const sideChainController = contractAddress.crossChain.contract.GetSideChainLifetimeController.call({
     sync: true
-  });
+  }) || {};
   const feeController = contractAddress.token.contract.GetMethodFeeController.call({
     sync: true
-  });
+  }) || {};
   const userFeeController = contractAddress.token.contract.GetUserFeeController.call({
     sync: true
-  });
+  }) || {};
   return {
     aelf,
     wallet,
