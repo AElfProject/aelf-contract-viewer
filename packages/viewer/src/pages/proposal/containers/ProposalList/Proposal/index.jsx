@@ -47,8 +47,9 @@ const Title = props => {
   } = props;
   const momentExpired = moment(expiredTime);
   const now = moment();
+  const threshold = moment().add(3, 'days');
   const showExpired = status !== proposalStatus.RELEASED && momentExpired.isAfter(now)
-    && momentExpired.isBefore(now.add(3, 'days'));
+    && momentExpired.isBefore(threshold);
   return (
     <div className="proposal-list-item-title">
       <span className="gap-right-small">{proposalType}</span>
@@ -59,7 +60,7 @@ const Title = props => {
           </Tag>
         ) : null}
       {showExpired
-        ? (<span className="warning-text">{`Expire ${momentExpired.to(now)}`}</span>) : null}
+        ? (<span className="warning-text">{`Expire ${now.to(expiredTime)}`}</span>) : null}
     </div>
   );
 };

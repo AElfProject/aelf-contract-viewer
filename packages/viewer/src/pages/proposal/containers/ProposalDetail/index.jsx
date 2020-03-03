@@ -96,7 +96,7 @@ function CountDown(props) {
   const show = status !== proposalStatus.RELEASED && expired.isAfter(now)
   && expired.isBefore(threshold);
   return show
-    ? (<span className="warning-text">{`Expire ${expired.to(now)}`}</span>) : null;
+    ? (<span className="warning-text">{`Expire ${now.to(expired)}`}</span>) : null;
 }
 
 CountDown.propTypes = {
