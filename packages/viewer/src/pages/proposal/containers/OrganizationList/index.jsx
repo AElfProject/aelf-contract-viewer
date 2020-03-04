@@ -33,6 +33,7 @@ import {
 } from '../../actions/proposalDetail';
 import { getOrganizations } from '../../actions/organizationList';
 import './index.less';
+import { innerHeight, sendMessage } from '../../../../common/utils';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -40,7 +41,6 @@ const {
   proposalTypes
 } = constants;
 
-// todo: 错误处理，空列表
 const OrganizationList = () => {
   const history = useHistory();
   const common = useSelector(state => state.common, shallowEqual);
@@ -75,6 +75,14 @@ const OrganizationList = () => {
   useEffect(() => {
     setSearchValue(params.search);
   }, [params.search]);
+
+  useEffect(() => {
+    innerHeight(500).then(height => {
+      sendMessage({ height });
+    }).catch(err => {
+      console.error(err);
+    });
+  }, [list]);
 
   const onPageNumChange = pageNum => fetchList({
     ...params,
