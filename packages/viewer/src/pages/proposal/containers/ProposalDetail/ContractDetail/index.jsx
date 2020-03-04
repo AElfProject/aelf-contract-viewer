@@ -12,8 +12,7 @@ import {
   Tooltip,
   Row,
   Col,
-  Tag,
-  message
+  Tag
 } from 'antd';
 import {
   API_PATH
@@ -61,7 +60,8 @@ const ContractDetail = props => {
         const decoded = contract[contractMethod].unpackPackedInput(base64ToHex(contractParams));
         setParams(JSON.stringify(decoded, null, 2));
       }).catch(e => {
-        message.error(e.message || 'Chain server is not reachable');
+        console.log(e);
+        // message.error(e.message || 'Chain server is not reachable');
       });
     } else {
       setParams(JSON.stringify(null, null, 2));

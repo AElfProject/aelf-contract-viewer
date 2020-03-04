@@ -118,6 +118,7 @@ export default {
   viewer,
   DEFAUT_RPCSERVER:
     process.env.NODE_ENV === 'production'
-      ? `${window.location.protocol}//${window.location.host}/chain` : 'http://18.163.40.216:8000',
+      ? `${window.location.protocol}//${window.location.host}/chain`
+      : `${window.location.protocol}//${window.location.host}`,
   APP_NAME: 'explorer.aelf.io'
 };

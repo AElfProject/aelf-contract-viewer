@@ -1,5 +1,14 @@
 [
   {
+    "target": "http://3.112.150.128:8000",
+    "context": [
+      "/api/blockChain"
+    ],
+    "headers": {},
+    "changeOrigin": true,
+    "secure": false
+  },
+  {
     "target": "http://127.0.0.1:7740",
     "context": [
       "/api"
@@ -7,14 +16,5 @@
     "headers": {
       "Host": "test.aelf.io"
     }
-  },
-  {
-    "target": "http://18.163.40.216:8000",
-    "context": [
-      "/api/blockChain"
-    ],
-    "headers": {},
-    "changeOrigin": true,
-    "secure": false
   }
 ]
