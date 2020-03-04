@@ -49,7 +49,7 @@ const votesDescription = {
     allowNull: false
   },
   amount: {
-    type: DECIMAL(10, 8),
+    type: DECIMAL(64, 8),
     allowNull: false,
     defaultValue: 0,
   },

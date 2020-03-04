@@ -99,11 +99,11 @@ function getContractAddress(contracts) {
       },
       AssociationDeveloperFee: {
         contractAddress: contractAddress.association.address,
-        ownerAddress: userFeeController.rootController
+        ownerAddress: developerFeeController.rootController
       },
       AssociationDeveloperDevFee: {
         contractAddress: contractAddress.association.address,
-        ownerAddress: userFeeController.developerController
+        ownerAddress: developerFeeController.developerController
       }
     }
   };
