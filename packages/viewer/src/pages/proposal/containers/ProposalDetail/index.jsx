@@ -231,7 +231,7 @@ const ProposalDetail = () => {
   }
 
   async function handleRelease() {
-    await send('Release');
+    await sendTransaction(wallet, getContractAddress(proposalType), 'Release', proposalId);
   }
 
   async function handleConfirm(action) {
