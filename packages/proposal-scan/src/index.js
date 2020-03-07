@@ -2,11 +2,19 @@
  * @file index
  * @author atom-yang
  */
+const AElf = require('aelf-sdk');
 const {
   ScanCursor
 } = require('viewer-orm/model/scanCursor');
+const {
+  Scanner
+} = require('aelf-block-scan');
 const config = require('./config');
-const Scanner = require('./scan');
+const DBScanner = require('./dbScanner');
+const DBOperation = require('./dbOperation');
+const {
+  listeners
+} = require('./config/constants');
 
 function cleanup() {
   console.log('cleanup');
@@ -19,17 +27,35 @@ process.on('unhandledRejection', err => {
   cleanup();
 });
 
+
 async function init() {
   const lastId = await ScanCursor.getLastId(config.scannerName);
   if (lastId === false) {
     await ScanCursor.insertIncId(0, config.scannerName);
   }
-  const scanner = new Scanner({
+  const lastDBId = await ScanCursor.getLastId(config.dbScannerName);
+  if (lastDBId === false) {
+    await ScanCursor.insertIncId(0, config.dbScannerName);
+  }
+  const aelf = new AElf(new AElf.providers.HttpProvider(config.scan.host));
+  const scanner = new Scanner(new DBOperation({}), {
     ...config.scan,
-    aelf: config.aelf
+    aelfInstance: aelf,
+    interval: config.scan.proposalInterval,
+    startHeight: lastId + 1,
+    missingHeightList: [],
+    listeners,
+    scanMode: 'listener'
+  });
+  const dbScanner = new DBScanner({
+    aelf,
+    concurrentQueryLimit: config.scan.concurrentQueryLimit,
+    interval: config.scan.proposalInterval
   });
   try {
-    await scanner.init();
+    await scanner.start();
+    console.log('start loop');
+    await dbScanner.init();
   } catch (err) {
     console.error(`root catch ${err.toString()}`);
     cleanup();

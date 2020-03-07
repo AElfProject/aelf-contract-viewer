@@ -98,6 +98,22 @@ const proposalListDescription = {
     allowNull: false,
     defaultValue: 0
   },
+  leftInfo: {
+    type: TEXT('long'),
+    allowNull: true,
+    field: 'left_info',
+    get() {
+      const data = this.getDataValue('leftInfo');
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        return data || {};
+      }
+    },
+    set(value) {
+      this.setDataValue('leftInfo', JSON.stringify(value));
+    }
+  },
   status: {
     // 无执行失败的情况，因为无法判断是否是失败
     type: ENUM(

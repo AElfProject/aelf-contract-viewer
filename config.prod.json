@@ -25,7 +25,8 @@
     "proposalInterval": 4000,
     "concurrentQueryLimit": 5,
     "host": "http://192.168.197.51:8000",
-    "buffer": 100
+    "buffer": 100,
+    "maxInsert": 20
   },
   "decompiler": {
     "interval": 300000,

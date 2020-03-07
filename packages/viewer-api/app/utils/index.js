@@ -50,9 +50,19 @@ function parseJSON(str = '') {
   return result;
 }
 
+async function deserializeLog(log) {
+  const {
+    Address,
+    Name
+  } = log;
+  const contract = await aelf.chain.contractAt(Address, wallet);
+  return contract.deserializeLog([ log ], Name);
+}
+
 
 module.exports = {
   getContract,
   getTxResult,
-  parseJSON
+  parseJSON,
+  deserializeLog
 };
