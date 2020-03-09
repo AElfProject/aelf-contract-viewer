@@ -3,6 +3,9 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
+const {
+  formatTimeWithZone
+} = require('../common/utils');
 const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
@@ -65,13 +68,29 @@ const organizationDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'created_at'
+    field: 'created_at',
+    get() {
+      const time = this.getDataValue('createdAt');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   updatedAt: {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'updated_at'
+    field: 'updated_at',
+    get() {
+      const time = this.getDataValue('updatedAt');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   releaseThreshold: {
     type: TEXT('long'),

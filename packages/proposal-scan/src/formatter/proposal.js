@@ -96,6 +96,8 @@ async function organizationNotFound(orgAddress, proposalType) {
   ]);
 }
 
+const PROPOSAL_CREATED_INPUT = Object.keys(config.contracts.parliament.contract.CreateProposal.inputTypeInfo.fields);
+
 async function proposalCreatedFormatter(transaction) {
   const {
     Logs = [],
@@ -124,7 +126,7 @@ async function proposalCreatedFormatter(transaction) {
       createTxId: TransactionId,
       createAt: time,
       proposalId,
-      createdBy: USER_CREATED_METHODS.includes(MethodName) ? 'SYSTEM_CONTRACT' : 'USER',
+      createdBy: USER_CREATED_METHODS.includes(MethodName) ? 'USER' : 'SYSTEM_CONTRACT',
       isContractDeployed: contractRelatedMethods.includes(MethodName),
       proposalType
     };
@@ -210,6 +212,15 @@ async function proposalCreatedFormatter(transaction) {
       toBeReleased,
       ...leftInfo
     } = proposalInfo;
+    const filteredLeft = Object.keys(leftInfo).reduce((acc, key) => {
+      if (PROPOSAL_CREATED_INPUT.includes(key)) {
+        return {
+          ...acc,
+          [key]: leftInfo[key]
+        };
+      }
+      return acc;
+    }, {});
     result = {
       ...result,
       orgAddress: organizationAddress,
@@ -217,7 +228,7 @@ async function proposalCreatedFormatter(transaction) {
       contractAddress: toAddress,
       contractMethod,
       contractParams,
-      leftInfo,
+      leftInfo: filteredLeft,
       expiredTime: formatTimestamp(expiredTime).utcOffset(0).format(),
       status: toBeReleased ? proposalStatus.APPROVED : proposalStatus.PENDING
     };
@@ -228,7 +239,12 @@ async function proposalCreatedFormatter(transaction) {
 
 async function proposalCreatedInsert(transaction) {
   const formattedData = await proposalCreatedFormatter(transaction);
-  return ProposalList.bulkCreate(formattedData);
+  return Promise.all(formattedData.map(item => ProposalList.findOrCreate({
+    where: {
+      proposalId: item.proposalId
+    },
+    defaults: item
+  })));
 }
 
 async function proposalVotedReducer(transactionList) {
@@ -275,6 +291,9 @@ async function proposalVotedReducer(transactionList) {
   }, {});
   const proposalIds = Object.keys(proposalIdsMap);
   console.log('proposalIds', proposalIds);
+  if (proposalIds.length === 0) {
+    return [];
+  }
   const existIds = await ProposalList.getExistProposalIds(proposalIds);
   const txIndexes = lodash.uniq(existIds.reduce((acc, key) => [...acc, ...proposalIdsMap[key]], []));
   txIndexes.sort((pre, next) => pre - next);
@@ -339,7 +358,7 @@ async function proposalVotedFormatter(transaction) {
         symbol,
         action: receiptType,
         proposalType,
-        time
+        time: formatTimestamp(time)
       }
     };
     return result;
@@ -363,7 +382,14 @@ async function proposalVotedInsert(transaction) {
       status
     } = update;
     return Promise.all([
-      Votes.create(vote, { transaction: t }),
+      Votes.findOrCreate({
+        where: {
+          voter: vote.voter,
+          proposalId: vote.proposalId
+        },
+        defaults: vote,
+        transaction: t
+      }),
       ProposalList.update({
         status,
         // watch out increment

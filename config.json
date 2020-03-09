@@ -26,7 +26,7 @@
     "AElf.ContractNames.Economic"
   ],
   "viewer": {
-    "viewerUrl": "./viewer.html",
+    "viewerUrl": "/viewer/viewer.html",
     "addressUrl": "/address",
     "txUrl": "/tx",
     "blockUrl": "/block",

@@ -296,6 +296,7 @@ const Reader = () => {
               address={contractInfo.address || ''}
               author={contractInfo.author || ''}
               isSystemContract={contractInfo.isSystemContract || false}
+              contractName={contractInfo.contractName || ''}
             />
             <If condition={isMobile}>
               <Then>

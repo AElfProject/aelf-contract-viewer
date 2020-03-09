@@ -18,6 +18,7 @@ import {
   Icon,
   // eslint-disable-next-line no-unused-vars
   Radio,
+  Input,
   message,
   Spin
 } from 'antd';
@@ -39,6 +40,7 @@ import { request } from '../../../../../common/request';
 import ContractParams from '../../../components/ContractParams';
 // import JSONEditor from '../../../components/JSONEditor';
 import './index.less';
+import { validateURL } from '../../../../../common/utils';
 
 const JSONEditor = lazy(() => import(/* webpackChunkName: "jsonEditor" */ '../../../components/JSONEditor'));
 
@@ -150,7 +152,34 @@ const FIELDS_MAP = {
         }
       ]
     }
-  }
+  },
+  formDescriptionURL: {
+    label: (
+      <span>
+        URL&nbsp;
+        <Tooltip
+          title="Please provide a URL describing the proposal"
+        >
+          <Icon className="main-color" type="question-circle-o" />
+        </Tooltip>
+      </span>
+    ),
+    placeholder: 'Please input the description URL of proposal',
+    form: {
+      validateTrigger: 'onBlur',
+      rules: [
+        {
+          validator(rule, value) {
+            if (value && value.length > 0) {
+              return validateURL(`https://${value}`);
+            }
+            return true;
+          },
+          message: 'Please check your URL format'
+        }
+      ]
+    }
+  },
 };
 
 const contractFilter = (input, _, list) => list
@@ -284,6 +313,26 @@ function parsedParamsWithoutSpecial(inputType, originalParams) {
   });
   return result;
 }
+
+const URLPrefix = props => {
+  const {
+    getFieldDecorator,
+    formField
+  } = props;
+  return getFieldDecorator(formField, {
+    initialValue: 'https://',
+  })(
+    <Select>
+      <Select.Option value="https://">https://</Select.Option>
+      <Select.Option value="http://">http://</Select.Option>
+    </Select>,
+  );
+};
+
+URLPrefix.propTypes = {
+  getFieldDecorator: PropTypes.func.isRequired,
+  formField: PropTypes.string.isRequired
+};
 
 const NormalProposal = props => {
   const {
@@ -423,6 +472,8 @@ const NormalProposal = props => {
         formContractAddress,
         formContractMethod,
         formExpiredTime,
+        formDescriptionURL,
+        formPrefix,
         ...leftParams
       } = result;
       const method = CONTRACT_INSTANCE_MAP[methods.contractAddress][methods.methodName];
@@ -452,13 +503,14 @@ const NormalProposal = props => {
       } else {
         decoded = method.packInput(parsed);
       }
-      console.log(result, parsed);
       submit({
         expiredTime: formExpiredTime,
         contractMethodName: formContractMethod,
         toAddress: formContractAddress,
         proposalType: formProposalType,
         organizationAddress: formOrgAddress,
+        proposalDescriptionUrl: (formDescriptionURL && formDescriptionURL.length > 0)
+          ? `${formPrefix}${formDescriptionURL}` : '',
         params: {
           origin: parsed,
           decoded
@@ -470,7 +522,6 @@ const NormalProposal = props => {
     }
   };
 
-  // todo: sdk对数组类型的object，Map类型未做处理
   return (
     <div className="normal-proposal">
       <Form
@@ -609,6 +660,23 @@ const NormalProposal = props => {
               )
             ) : null
           }
+        </FormItem>
+        <FormItem
+          label={FIELDS_MAP.formDescriptionURL.label}
+        >
+          {getFieldDecorator('formDescriptionURL', {
+            ...FIELDS_MAP.formDescriptionURL.form
+          })(
+            <Input
+              addonBefore={(
+                <URLPrefix
+                  getFieldDecorator={getFieldDecorator}
+                  formField="formPrefix"
+                />
+              )}
+              placeholder={FIELDS_MAP.formDescriptionURL.placeholder}
+            />
+          )}
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formExpiredTime.label}

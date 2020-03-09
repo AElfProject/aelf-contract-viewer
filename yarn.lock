@@ -2527,10 +2527,10 @@ address@>=0.0.1, address@^1.0.1:
   resolved "https://registry.yarnpkg.com/address/-/address-1.1.2.tgz#bf1116c9c758c51b7a933d296b72c221ed9428b6"
   integrity sha512-aT6camzM4xEA54YVJYSqxz1kv4IHnQZRtThJJHhUMRExaU5spC7jX5ugSwTaTgJliIgs4VhZOk7htClvQ/LmRA==
 
-aelf-block-scan@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/aelf-block-scan/-/aelf-block-scan-0.4.0.tgz#c2beb4ef73bc71c403cc23f6399c796e80bf5c1b"
-  integrity sha512-ZfgjaeqKfPBCs4UOpoJlYqQagHaj6Ob0wCf6RS2mz+kvtmzqTVkJx/eQ4HSoY6/bIEVkcGAJg7bM4A/OvGrcEg==
+aelf-block-scan@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/aelf-block-scan/-/aelf-block-scan-0.4.1.tgz#c229e3cbd7a8cdae071dccca30645a6f23f0ddae"
+  integrity sha512-seHCI0gNzMzVHX3o1xdz0wrzg8cVd+z0MipQ6aywXO3wmIqsLoXFKI4HDMHm2CVlYGXP06SNAG6f/EZmDnvS+w==
   dependencies:
     aelf-sdk "^3.2.29"
     cross-env "^5.2.0"

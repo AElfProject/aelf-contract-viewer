@@ -36,6 +36,11 @@ function getContractName(address) {
   }, { method: 'GET' });
 }
 
+function getContractURL(address) {
+  const innerURL = `${window.location.protocol}//${window.location.host}${viewer.viewerUrl}?address=${address}`;
+  return `${window.location.protocol}//${window.location.host}/contract?#${encodeURIComponent(innerURL)}`;
+}
+
 const ContractDetail = props => {
   const {
     aelf,
@@ -106,7 +111,7 @@ const ContractDetail = props => {
           </Col>
           <Col span={20}>
             <a
-              href={`${viewer.addressUrl}/${contractAddress}`}
+              href={getContractURL(contractAddress)}
               target="_blank"
               rel="noopener noreferrer"
             >

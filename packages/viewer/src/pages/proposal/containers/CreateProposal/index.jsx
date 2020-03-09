@@ -152,6 +152,7 @@ const CreateProposal = () => {
         toAddress,
         proposalType,
         organizationAddress,
+        proposalDescriptionUrl,
         params: {
           decoded
         }
@@ -163,7 +164,8 @@ const CreateProposal = () => {
           toAddress,
           params: uint8ToBase64(decoded || []),
           expiredTime: formatTimeToNano(expiredTime),
-          organizationAddress
+          organizationAddress,
+          proposalDescriptionUrl
         },
         contractMethod: 'CreateProposal'
       });
@@ -242,6 +244,17 @@ const CreateProposal = () => {
                 JSON.stringify((normalResult.params || {}).origin, null, 2)
               }
             </pre>
+          </div>
+          <div className="proposal-result-list-item gap-bottom">
+            <span className="sub-title gap-right">Description URL:</span>
+            <a
+              href={normalResult.proposalDescriptionUrl}
+              className="proposal-result-list-item-value text-ellipsis"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {normalResult.proposalDescriptionUrl}
+            </a>
           </div>
           <div className="proposal-result-list-item gap-bottom">
             <span className="sub-title gap-right">Expiration Time:</span>

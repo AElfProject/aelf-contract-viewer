@@ -80,8 +80,10 @@ class Operation extends DBBaseOperation {
     const {
       type,
       bestHeight,
-      LIBHeight
+      LIBHeight,
+      largestHeight
     } = data;
+    console.log(`largest height ${largestHeight}`);
     switch (type) {
       case QUERY_TYPE.INIT:
         console.log('INIT');
@@ -129,7 +131,8 @@ class Operation extends DBBaseOperation {
       results,
       // bestHeight,
       largestHeight,
-      LIBHeight
+      LIBHeight,
+      type
     } = data;
     // eslint-disable-next-line no-restricted-syntax
     for (const processor of INSERT_PHASE) {
@@ -168,7 +171,9 @@ class Operation extends DBBaseOperation {
         await insert(item);
       }
     }
-    await ScanCursor.updateLastIncId(Math.min(+LIBHeight, +largestHeight) || 0, config.scannerName);
+    if (type !== QUERY_TYPE.MISSING) {
+      await ScanCursor.updateLastIncId(Math.min(+LIBHeight, +largestHeight) || 0, config.scannerName);
+    }
   }
 
   destroy() {}

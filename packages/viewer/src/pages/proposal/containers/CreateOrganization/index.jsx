@@ -376,7 +376,7 @@ const CreateOrganization = props => {
       showTransactionResult(result);
     } catch (e) {
       console.log(e);
-      message.error(e.message || 'Please input the required form field');
+      message.error((e.errorMessage || {}).message || e.message || 'Please input the required form field');
     } finally {
       setIsLoading(false);
     }

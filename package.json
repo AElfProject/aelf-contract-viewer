@@ -10,7 +10,7 @@
     "commit": "git-cz"
   },
   "dependencies": {
-    "aelf-block-scan": "^0.4.0",
+    "aelf-block-scan": "^0.4.1",
     "aelf-sdk": "^3.2.29",
     "decimal.js": "^10.2.0",
     "lodash": "^4.17.15",

@@ -45,7 +45,7 @@ const Title = props => {
     votedStatus,
     expiredTime
   } = props;
-  const momentExpired = moment(expiredTime);
+  const momentExpired = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ');
   const now = moment();
   const threshold = moment().add(3, 'days');
   const showExpired = status !== proposalStatus.RELEASED && momentExpired.isAfter(now)
@@ -60,7 +60,7 @@ const Title = props => {
           </Tag>
         ) : null}
       {showExpired
-        ? (<span className="warning-text">{`Expire ${now.to(expiredTime)}`}</span>) : null}
+        ? (<span className="warning-text">{`Expire ${now.to(momentExpired)}`}</span>) : null}
     </div>
   );
 };
@@ -101,7 +101,8 @@ const Proposal = props => {
   } = props;
   let realProposalStatus = status;
   if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-    realProposalStatus = moment(expiredTime).isBefore(moment()) ? proposalStatus.EXPIRED : status;
+    // eslint-disable-next-line max-len
+    realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
   }
 
   const canThisUserVote = realProposalStatus === proposalStatus.PENDING && votedStatus === 'none' && canVote;
