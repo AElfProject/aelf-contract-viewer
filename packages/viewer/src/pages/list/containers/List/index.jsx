@@ -48,7 +48,7 @@ const ListColumn = [
     dataIndex: 'address',
     key: 'address',
     ellipsis: true,
-    width: 400,
+    width: 360,
     render: address => (
       <a href={`${config.viewer.viewerUrl}?address=${address}`}>
         {`ELF_${address}_${config.viewer.chainId}`}
@@ -73,7 +73,7 @@ const ListColumn = [
     dataIndex: 'author',
     key: 'author',
     ellipsis: true,
-    width: 400,
+    width: 360,
     render: address => (
       <a
         href={`${config.viewer.addressUrl}/${address}`}
