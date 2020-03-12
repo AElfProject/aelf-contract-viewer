@@ -15,9 +15,6 @@ const {
   Tokens
 } = require('viewer-orm/model/tokens');
 const {
-  Organizations
-} = require('viewer-orm/model/organizations');
-const {
   ProposalList
 } = require('viewer-orm/model/proposalList');
 const {
@@ -49,59 +46,21 @@ const contractRelatedMethods = [
   'ReleaseCodeCheckedContract'
 ];
 
-const crossChainRelatedMethods = [
-  'RequestSideChainCreation',
-  'ReleaseSideChainCreation'
-];
-
-const systemProposalMethods = [
-  ...contractRelatedMethods,
-  ...crossChainRelatedMethods
-];
-
-const proposalCreatedMethods = [
+const USER_CREATED_METHODS = [
   'CreateProposal',
-  'RequestSideChainCreation',
-  'ReleaseApprovedContract',
-  'ProposeContractCodeCheck',
-  'ProposeNewContract',
-  'ProposeUpdateContract'
+  'Release'
 ];
 
-const proposalVotedMethods = [
-  'Approve',
-  'Reject',
-  'Abstain',
-  'ApproveMultiProposals',
-];
-
-const proposalReleaseMethods = [
-  'Release',
-  'ReleaseApprovedContract',
-  'ReleaseCodeCheckedContract',
-  'ReleaseSideChainCreation'
-];
-
-// methods would be called after releasing
-const proposalPostReleaseMethods = [
-  'ReclaimVoteToken',
-  // 'ClearProposal'
-];
-
-function isProposalRelated(methodName) {
-  return [
-    ...proposalCreatedMethods,
-    ...proposalVotedMethods,
-    ...proposalReleaseMethods,
-    ...proposalPostReleaseMethods
-  ].includes(methodName);
-}
 
 function isProposalCreated(transaction) {
   const {
-    Logs = []
+    Transaction,
   } = transaction;
-  return (Logs || []).filter(({ Name }) => Name === 'ProposalCreated').length > 0;
+  const {
+    To,
+    MethodName
+  } = Transaction;
+  return !(To === config.contracts.crossChain.address && MethodName === 'ProposeCrossChainIndexing');
 }
 
 const SYSTEM_PROPOSAL_EXPIRATION_TIME = 60 * 60 * 24; // seconds
@@ -112,6 +71,7 @@ const SYSTEM_PROPOSAL_METHODS_MAP = {
   RequestSideChainCreation: 'CreateSideChain'
 };
 
+// eslint-disable-next-line no-unused-vars
 async function organizationNotFound(orgAddress, proposalType) {
   const time = config.chainInitTime;
   const txId = 'inner';
@@ -136,6 +96,8 @@ async function organizationNotFound(orgAddress, proposalType) {
   ]);
 }
 
+const PROPOSAL_CREATED_INPUT = Object.keys(config.contracts.parliament.contract.CreateProposal.inputTypeInfo.fields);
+
 async function proposalCreatedFormatter(transaction) {
   const {
     Logs = [],
@@ -158,13 +120,13 @@ async function proposalCreatedFormatter(transaction) {
     const {
       proposalId
     } = deserializeLogResult;
-    const proposalType = config.constants.addressProposalTypesMap[contractAddress];
-    // todo: proposal已经被释放的情况下，无法查询到提案的相关信息
+    const proposalType = addressProposalTypesMap[contractAddress];
+    // proposal已经被释放的情况下，无法查询到提案的相关信息
     let result = {
       createTxId: TransactionId,
       createAt: time,
       proposalId,
-      createdBy: systemProposalMethods.includes(MethodName) ? 'SYSTEM_CONTRACT' : 'USER',
+      createdBy: USER_CREATED_METHODS.includes(MethodName) ? 'USER' : 'SYSTEM_CONTRACT',
       isContractDeployed: contractRelatedMethods.includes(MethodName),
       proposalType
     };
@@ -174,6 +136,15 @@ async function proposalCreatedFormatter(transaction) {
       toBeReleased: false,
       proposer: From
     };
+    // eslint-disable-next-line max-len
+    const proposalInfoFromChain = await config.contracts[proposalType.toLowerCase()].contract.GetProposal.call(proposalId);
+    if (proposalInfoFromChain) {
+      proposalInfo = {
+        ...proposalInfo,
+        ...proposalInfoFromChain,
+        expiredTime: formatTimestamp(proposalInfoFromChain.expiredTime)
+      };
+    }
     switch (MethodName) {
       case 'CreateProposal':
         proposalInfo = {
@@ -202,7 +173,7 @@ async function proposalCreatedFormatter(transaction) {
           params,
           organizationAddress: config.controller[MethodName].ownerAddress,
           toAddress: To,
-          expiredTime: moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
+          expiredTime: proposalInfo.expiredTime || moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
         };
         break;
       case 'ReleaseApprovedContract':
@@ -222,20 +193,14 @@ async function proposalCreatedFormatter(transaction) {
           params: contractParams,
           organizationAddress: config.controller.ProposeContractCodeCheck.ownerAddress,
           toAddress: config.contracts.zero.address,
-          expiredTime: moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
+          expiredTime: proposalInfo.expiredTime || moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
         };
         break;
       default:
         // eslint-disable-next-line no-case-declarations,max-len
-        const proposalInfoFromChain = await config.contracts[proposalType.toLowerCase()].contract.GetProposal.call(proposalId);
         if (!proposalInfoFromChain) {
           return {};
         }
-        proposalInfo = {
-          ...proposalInfo,
-          ...proposalInfoFromChain,
-          expiredTime: formatTimestamp(proposalInfoFromChain.expiredTime)
-        };
     }
     const {
       contractMethodName: contractMethod,
@@ -244,12 +209,18 @@ async function proposalCreatedFormatter(transaction) {
       expiredTime,
       organizationAddress,
       proposer,
-      toBeReleased
+      toBeReleased,
+      ...leftInfo
     } = proposalInfo;
-    const isExistOrg = await Organizations.isExist(organizationAddress);
-    if (!isExistOrg) {
-      await organizationNotFound(organizationAddress, proposalType);
-    }
+    const filteredLeft = Object.keys(leftInfo).reduce((acc, key) => {
+      if (PROPOSAL_CREATED_INPUT.includes(key)) {
+        return {
+          ...acc,
+          [key]: leftInfo[key]
+        };
+      }
+      return acc;
+    }, {});
     result = {
       ...result,
       orgAddress: organizationAddress,
@@ -257,6 +228,7 @@ async function proposalCreatedFormatter(transaction) {
       contractAddress: toAddress,
       contractMethod,
       contractParams,
+      leftInfo: filteredLeft,
       expiredTime: formatTimestamp(expiredTime).utcOffset(0).format(),
       status: toBeReleased ? proposalStatus.APPROVED : proposalStatus.PENDING
     };
@@ -267,41 +239,47 @@ async function proposalCreatedFormatter(transaction) {
 
 async function proposalCreatedInsert(transaction) {
   const formattedData = await proposalCreatedFormatter(transaction);
-  return ProposalList.bulkCreate(formattedData);
-}
-
-function isProposalVoted(transaction) {
-  const {
-    Transaction
-  } = transaction;
-  const {
-    MethodName
-  } = Transaction;
-  return [
-    'Abstain',
-    'Approve',
-    'Reject',
-    'ApproveMultiProposals'
-  ].includes(MethodName);
+  return Promise.all(formattedData.map(item => ProposalList.findOrCreate({
+    where: {
+      proposalId: item.proposalId
+    },
+    defaults: item
+  })));
 }
 
 async function proposalVotedReducer(transactionList) {
   const proposalIdsMap = transactionList.reduce((acc, item, txIndex) => {
     const {
-      Transaction,
+      Logs = []
     } = item;
-    const {
-      Params,
-      MethodName
-    } = Transaction;
-    const parsedParams = parseParams(Params);
-    let proposalIdArr = [parsedParams];
-    if (MethodName === 'ApproveMultiProposals') {
-      proposalIdArr = parsedParams.proposalIds;
-    }
+    let proposalIdArr = [];
+    (Logs || []).forEach(log => {
+      const {
+        Name,
+        Address
+      } = log;
+      if (
+        [
+          'ReferendumReceiptCreated',
+          'ReceiptCreated'
+        ].includes(Name)
+        && [
+          config.contracts.parliament.address,
+          config.contracts.referendum.address,
+          config.contracts.association.address
+        ].includes(Address)
+      ) {
+        const proposalType = addressProposalTypesMap[Address];
+        const { contract } = config.contracts[proposalType.toLowerCase()];
+        const logResults = contract.deserializeLog(Logs, Address === config.contracts.referendum.address
+          ? 'ReferendumReceiptCreated' : 'ReceiptCreated');
+        proposalIdArr = [...proposalIdArr, logResults.map(v => v.proposalId)];
+      }
+    });
     const result = {
       ...acc
     };
+    proposalIdArr = lodash.uniq(proposalIdArr);
     proposalIdArr.forEach(id => {
       if (result[id]) {
         result[id] = [...result[id], txIndex];
@@ -313,6 +291,9 @@ async function proposalVotedReducer(transactionList) {
   }, {});
   const proposalIds = Object.keys(proposalIdsMap);
   console.log('proposalIds', proposalIds);
+  if (proposalIds.length === 0) {
+    return [];
+  }
   const existIds = await ProposalList.getExistProposalIds(proposalIds);
   const txIndexes = lodash.uniq(existIds.reduce((acc, key) => [...acc, ...proposalIdsMap[key]], []));
   txIndexes.sort((pre, next) => pre - next);
@@ -329,59 +310,41 @@ const ACTION_COUNTS_MAP = {
 async function proposalVotedFormatter(transaction) {
   const {
     Logs = [],
-    TransactionId,
-    Transaction,
-    time
+    TransactionId
   } = transaction;
-  const {
-    From,
-    To,
-    Params,
-    MethodName
-  } = Transaction;
-  let action = MethodName;
-  let proposalIds = [];
-  const parsedParams = parseParams(Params);
-  if (MethodName === 'ApproveMultiProposals') {
-    action = 'Approve';
-    proposalIds = parsedParams.proposalIds;
-  } else {
-    proposalIds = [parsedParams];
-  }
-  const proposalType = addressProposalTypesMap[To];
-  let logResults = [];
-  if (proposalType === proposalTypes.REFERENDUM) {
-    logResults = await deserializeLogs(Logs, 'Transferred');
-    const decimals = await Promise.all(logResults.map(v => Tokens.getTokenDecimal(v.deserializeLogResult.symbol)));
-    proposalIds = proposalIds.map((v, i) => {
-      const decimal = decimals[i];
-      const transferred = logResults[i].deserializeLogResult;
-      const amount = new Decimal(transferred.amount).dividedBy(`1e${decimal}`).toString();
-      return {
-        ...transferred,
-        proposalId: v,
-        amount
-      };
-    });
-  } else {
-    proposalIds = proposalIds.map(v => ({ proposalId: v, amount: 1 }));
-  }
-  return Promise.all(proposalIds.map(async item => {
+  let logResults = await deserializeLogs(Logs, 'ReferendumReceiptCreated');
+  logResults = [...logResults, ...(await deserializeLogs(Logs, 'ReceiptCreated'))];
+  return Promise.all((logResults).map(async log => {
+    const {
+      contractAddress,
+      deserializeLogResult
+    } = log;
     const {
       proposalId,
-      amount,
-      symbol = 'none'
-    } = item;
+      time,
+      symbol = 'none',
+      address: voter,
+      receiptType
+    } = deserializeLogResult;
+    let amount = deserializeLogResult.amount || 1;
+    const proposalType = addressProposalTypesMap[contractAddress];
+    if (!proposalType) {
+      return false;
+    }
     const { contract } = config.contracts[proposalType.toLowerCase()];
     const proposalInfo = await contract.GetProposal.call(proposalId);
     const isExist = await ProposalList.isExist(proposalId);
     if (!isExist) {
       return false;
     }
+    if (proposalType === proposalTypes.REFERENDUM) {
+      const decimal = await Tokens.getTokenDecimal(symbol);
+      amount = new Decimal(amount).dividedBy(`1e${decimal}`).toString();
+    }
     const result = {
       update: {
         proposalId,
-        action: ACTION_COUNTS_MAP[action],
+        action: ACTION_COUNTS_MAP[receiptType],
         amount,
         status: (proposalInfo && proposalInfo.toBeReleased)
           ? proposalStatus.APPROVED
@@ -390,12 +353,12 @@ async function proposalVotedFormatter(transaction) {
       vote: {
         txId: TransactionId,
         proposalId,
-        voter: From,
+        voter,
         amount,
         symbol,
-        action,
+        action: receiptType,
         proposalType,
-        time
+        time: formatTimestamp(time)
       }
     };
     return result;
@@ -419,7 +382,14 @@ async function proposalVotedInsert(transaction) {
       status
     } = update;
     return Promise.all([
-      Votes.create(vote, { transaction: t }),
+      Votes.findOrCreate({
+        where: {
+          voter: vote.voter,
+          proposalId: vote.proposalId
+        },
+        defaults: vote,
+        transaction: t
+      }),
       ProposalList.update({
         status,
         // watch out increment
@@ -432,13 +402,6 @@ async function proposalVotedInsert(transaction) {
       })
     ]);
   })));
-}
-
-function isProposalReleased(transaction) {
-  const {
-    Logs = []
-  } = transaction;
-  return (Logs || []).filter(({ Name }) => Name === 'ProposalReleased').length > 0;
 }
 
 async function proposalReleasedFormatter(transaction) {
@@ -511,13 +474,13 @@ function proposalClaimedInsert(transaction) {
 }
 
 module.exports = {
-  isProposalRelated,
+  // isProposalRelated,
   isProposalCreated,
   proposalCreatedInsert,
-  isProposalVoted,
+  // isProposalVoted,
   proposalVotedReducer,
   proposalVotedInsert,
-  isProposalReleased,
+  // isProposalReleased,
   proposalReleasedInsert,
   isProposalClaimed,
   proposalClaimedInsert

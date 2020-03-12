@@ -64,7 +64,7 @@ async function deserializeLogs(logs = [], logName) {
     if (NonIndexed) {
       serializedData.push(NonIndexed);
     }
-    const deserializeLogResult = serializedData.reduce((acc, v) => {
+    let deserializeLogResult = serializedData.reduce((acc, v) => {
       let deserialize = dataType.decode(Buffer.from(v, 'base64'));
       deserialize = dataType.toObject(deserialize, {
         enums: String, // enums as string names
@@ -80,23 +80,13 @@ async function deserializeLogs(logs = [], logName) {
         ...deserialize
       };
     }, {});
-    Object.entries(dataType.fields).forEach(([fieldName, field]) => {
-      const fieldValue = deserializeLogResult[fieldName];
-      if (fieldValue === null || fieldValue === undefined) {
-        return;
-      }
-      if (field.type === '.aelf.Address' && typeof fieldValue !== 'string') {
-        deserializeLogResult[fieldName] = Array.isArray(fieldValue)
-          ? fieldValue.map(AElf.pbUtils.getRepForAddress) : AElf.pbUtils.getRepForAddress(fieldValue);
-      }
-      if (field.type === '.aelf.Hash' && typeof fieldValue !== 'string') {
-        deserializeLogResult[fieldName] = Array.isArray(fieldValue)
-          ? fieldValue.map(AElf.pbUtils.getRepForHash) : AElf.pbUtils.getRepForHash(fieldValue);
-      }
-    });
+    // eslint-disable-next-line max-len
+    deserializeLogResult = AElf.utils.transform.transform(dataType, deserializeLogResult, AElf.utils.transform.OUTPUT_TRANSFORMERS);
+    deserializeLogResult = AElf.utils.transform.transformArrayToMap(dataType, deserializeLogResult);
     return {
       contractAddress: Address,
-      deserializeLogResult
+      deserializeLogResult,
+      name: dataTypeName
     };
   });
   return results;

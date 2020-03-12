@@ -41,7 +41,8 @@ const VoteData = props => {
   useEffect(() => {
     let realProposalStatus = status;
     if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-      realProposalStatus = moment(expiredTime).isBefore(moment()) ? proposalStatus.EXPIRED : status;
+      // eslint-disable-next-line max-len
+      realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
     }
     setCanThisVote(realProposalStatus === proposalStatus.PENDING && votedStatus === 'none' && canVote);
   }, [status, votedStatus, expiredTime]);

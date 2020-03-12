@@ -1,6 +1,6 @@
 [
   {
-    "target": "http://18.163.40.216:8000",
+    "target": "http://18.162.41.20:8000",
     "context": [
       "/api/blockChain"
     ],

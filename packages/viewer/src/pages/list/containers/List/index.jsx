@@ -19,13 +19,36 @@ import config from '../../../../common/config';
 import './index.less';
 import { innerHeight, sendMessage } from '../../../../common/utils';
 
+
+function removeAElfPrefix(name) {
+  if (/^(AElf\.)(.*?)+/.test(name)) {
+    return name.split('.')[name.split('.').length - 1];
+  }
+  return name;
+}
+
 const ListColumn = [
+  {
+    title: 'Contract Name',
+    dataIndex: 'contractName',
+    key: 'contractName',
+    ellipsis: true,
+    width: 120,
+    render: (name, record) => (name && +name !== -1 ? (
+      <a
+        href={`${config.viewer.viewerUrl}?address=${record.address}`}
+        title={name}
+      >
+        {removeAElfPrefix(name)}
+      </a>
+    ) : '-')
+  },
   {
     title: 'Contract Address',
     dataIndex: 'address',
     key: 'address',
     ellipsis: true,
-    width: 400,
+    width: 360,
     render: address => (
       <a href={`${config.viewer.viewerUrl}?address=${address}`}>
         {`ELF_${address}_${config.viewer.chainId}`}
@@ -50,7 +73,7 @@ const ListColumn = [
     dataIndex: 'author',
     key: 'author',
     ellipsis: true,
-    width: 400,
+    width: 360,
     render: address => (
       <a
         href={`${config.viewer.addressUrl}/${address}`}

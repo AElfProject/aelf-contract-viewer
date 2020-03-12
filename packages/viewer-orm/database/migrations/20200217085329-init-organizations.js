@@ -10,7 +10,7 @@ module.exports = {
     await queryInterface.addIndex(
       tableName,
       {
-        // unique: true,
+        unique: true,
         fields: [
           {
             attribute: 'org_address'

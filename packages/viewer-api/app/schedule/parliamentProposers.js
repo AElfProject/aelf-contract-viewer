@@ -4,7 +4,7 @@ const { getContract } = require('../utils');
 class BPList extends Subscription {
   static get schedule() {
     return {
-      cron: '0 0 */6 * * *',
+      cron: '0 0 */1 * * *',
       type: 'all',
       immediate: true
     };

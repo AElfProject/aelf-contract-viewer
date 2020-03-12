@@ -242,7 +242,7 @@ const ProposalList = () => {
         <Switch>
           <Case condition={loadingStatus === LOADING_STATUS.LOADING || loadingStatus === LOADING_STATUS.SUCCESS}>
             <Spin spinning={loadingStatus === LOADING_STATUS.LOADING}>
-              <Row gutter={16}>
+              <Row type="flex" gutter={16}>
                 {list.map(item => (
                   <Col span={12} key={item.proposalId}>
                     <Proposal

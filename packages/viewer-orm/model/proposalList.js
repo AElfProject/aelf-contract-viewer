@@ -4,6 +4,9 @@
  */
 const moment = require('moment');
 const Sequelize = require('sequelize');
+const {
+  formatTimeWithZone
+} = require('../common/utils');
 const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
@@ -50,7 +53,15 @@ const proposalListDescription = {
     allowNull: false,
     defaultValue: NOW,
     field: 'created_at',
-    comment: 'proposal created time'
+    comment: 'proposal created time',
+    get() {
+      const time = this.getDataValue('createAt');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   proposalId: {
     type: STRING(255),
@@ -80,7 +91,15 @@ const proposalListDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'expired_time'
+    field: 'expired_time',
+    get() {
+      const time = this.getDataValue('expiredTime');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   // 除以token的decimals
   approvals: {
@@ -97,6 +116,23 @@ const proposalListDescription = {
     type: BIGINT,
     allowNull: false,
     defaultValue: 0
+  },
+  leftInfo: {
+    type: TEXT('long'),
+    allowNull: true,
+    field: 'left_info',
+    get() {
+      let data;
+      try {
+        data = this.getDataValue('leftInfo');
+        return JSON.parse(data);
+      } catch (e) {
+        return data || {};
+      }
+    },
+    set(value) {
+      this.setDataValue('leftInfo', JSON.stringify(value));
+    }
   },
   status: {
     // 无执行失败的情况，因为无法判断是否是失败
@@ -119,7 +155,15 @@ const proposalListDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'released_time'
+    field: 'released_time',
+    get() {
+      const time = this.getDataValue('releasedTime');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   createdBy: {
     type: ENUM('USER', 'SYSTEM_CONTRACT'),

@@ -52,6 +52,7 @@ import {
 } from '../../common/utils';
 import ApproveTokenModal from '../ProposalList/ApproveTokenModal';
 import { LOG_IN_ACTIONS } from '../../actions/common';
+import { validateURL } from '../../../../common/utils';
 
 const {
   viewer
@@ -119,7 +120,8 @@ function Extra(props) {
   } = props;
   let realProposalStatus = status;
   if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-    realProposalStatus = moment(expiredTime).isBefore(moment()) ? proposalStatus.EXPIRED : status;
+    // eslint-disable-next-line max-len
+    realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
   }
   const canRelease = logStatus === LOG_STATUS.LOGGED && currentWallet && proposer === currentWallet.address;
   return (
@@ -203,7 +205,8 @@ const ProposalDetail = () => {
     proposalType,
     canVote,
     votedStatus,
-    createdBy
+    createdBy,
+    leftInfo
   } = info.proposal;
 
   const send = async action => {
@@ -300,6 +303,24 @@ const ProposalDetail = () => {
                       >
                         {`ELF_${proposer}_${viewer.chainId}`}
                       </a>
+                    </span>
+                  </Col>
+                  <Col span={12} className="detail-flex">
+                    <span className="sub-title gap-right">URL:</span>
+                    <span className="text-ellipsis">
+                      {
+                        validateURL(leftInfo.proposalDescriptionUrl || '')
+                          ? (
+                            <a
+                              href={leftInfo.proposalDescriptionUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={leftInfo.proposalDescriptionUrl}
+                            >
+                              {leftInfo.proposalDescriptionUrl}
+                            </a>
+                          ) : '-'
+                      }
                     </span>
                   </Col>
                   {

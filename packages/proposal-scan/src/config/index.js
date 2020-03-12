@@ -61,15 +61,6 @@ function getContractAddress(contracts) {
   const sideChainController = contractAddress.crossChain.contract.GetSideChainLifetimeController.call({
     sync: true
   }) || {};
-  const feeController = contractAddress.token.contract.GetMethodFeeController.call({
-    sync: true
-  }) || {};
-  const userFeeController = contractAddress.token.contract.GetUserFeeController.call({
-    sync: true
-  }) || {};
-  const developerFeeController = contractAddress.token.contract.GetDeveloperFeeController.call({
-    sync: true
-  }) || {};
   return {
     aelf,
     wallet,
@@ -79,32 +70,7 @@ function getContractAddress(contracts) {
       ProposeNewContract: deployController,
       ProposeUpdateContract: deployController,
       ProposeContractCodeCheck: codeController,
-      RequestSideChainCreation: sideChainController,
-      MethodFee: feeController,
-      ParliamentUserFee: {
-        contractAddress: contractAddress.parliament.address,
-        ownerAddress: userFeeController.parliamentController
-      },
-      AssociationUserFee: {
-        contractAddress: contractAddress.association.address,
-        ownerAddress: userFeeController.rootController
-      },
-      ReferendumUserFee: {
-        contractAddress: contractAddress.referendum.address,
-        ownerAddress: userFeeController.referendumController
-      },
-      ParliamentDeveloperFee: {
-        contractAddress: contractAddress.parliament.address,
-        ownerAddress: developerFeeController.parliamentController
-      },
-      AssociationDeveloperFee: {
-        contractAddress: contractAddress.association.address,
-        ownerAddress: developerFeeController.rootController
-      },
-      AssociationDeveloperDevFee: {
-        contractAddress: contractAddress.association.address,
-        ownerAddress: developerFeeController.developerController
-      }
+      RequestSideChainCreation: sideChainController
     }
   };
 }
@@ -126,5 +92,6 @@ config.constants.addressProposalTypesMap = Object.values(config.contracts).reduc
 }, {});
 
 config.scannerName = 'proposal-scan';
+config.dbScannerName = 'proposal-claimed';
 
 module.exports = config;

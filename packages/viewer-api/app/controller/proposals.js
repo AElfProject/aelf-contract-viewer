@@ -5,7 +5,7 @@
 const Controller = require('../core/baseController');
 const {
   getTxResult,
-  parseJSON
+  deserializeLog
 } = require('../utils');
 
 const paramRules = {
@@ -413,21 +413,31 @@ class ProposalsController extends Controller {
       if (isExist) {
         throw new Error('contract name has been taken');
       } else {
+        getTxResult(txId).then(res => {
+          if (res.Status === 'MINED') {
+            const {
+              Logs = []
+            } = res;
+            const log = (Logs || []).filter(v => v.Name === 'ProposalCreated');
+            if (log.length === 0) {
+              return;
+            }
+            const result = deserializeLog(log[0]);
+            if (result.length === 1) {
+              app.model.ContractNames.addName({
+                contractName,
+                txId,
+                action,
+                address,
+                proposalId: result[0].proposalId
+              });
+            }
+          }
+        }).catch(err => {
+          console.log(err);
+        });
         this.sendBody({});
       }
-      getTxResult(txId).then(res => {
-        if (res.Status === 'MINED') {
-          app.model.ContractNames.addName({
-            contractName,
-            txId,
-            action,
-            address,
-            proposalId: parseJSON(res.ReadableReturnValue)
-          });
-        }
-      }).catch(err => {
-        console.log(err);
-      });
     } catch (e) {
       this.error(e);
       this.sendBody();

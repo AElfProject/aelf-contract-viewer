@@ -3,6 +3,9 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
+const {
+  formatTimeWithZone
+} = require('../common/utils');
 const { commonModelOptions } = require('../common/viewer');
 
 const {
@@ -57,7 +60,15 @@ const contractNamesDescription = {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'create_at'
+    field: 'create_at',
+    get() {
+      const time = this.getDataValue('createAt');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   }
 };
 

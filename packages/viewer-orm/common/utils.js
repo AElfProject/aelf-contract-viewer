@@ -2,6 +2,7 @@
  * @file common
  * @author atom-yang
  */
+const moment = require('moment');
 
 const AUTH_RETRIES = Symbol('authenticateRetries');
 
@@ -31,6 +32,11 @@ async function authenticate(database) {
   }
 }
 
+function formatTimeWithZone(time, zone = 0) {
+  return moment(time).utcOffset(zone).format('YYYY/MM/DD HH:mm:ssZ');
+}
+
 module.exports = {
-  authenticate
+  authenticate,
+  formatTimeWithZone
 };

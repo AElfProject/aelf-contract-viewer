@@ -3,6 +3,9 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
+const {
+  formatTimeWithZone
+} = require('../common/utils');
 const { commonModelOptions } = require('../common/viewer');
 const config = require('../config');
 
@@ -91,13 +94,29 @@ const votesDescription = {
   time: {
     type: DATE,
     allowNull: false,
-    defaultValue: NOW
+    defaultValue: NOW,
+    get() {
+      const time = this.getDataValue('time');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   },
   claimedTime: {
     type: DATE,
     allowNull: false,
     defaultValue: NOW,
-    field: 'claimed_time'
+    field: 'claimed_time',
+    get() {
+      const time = this.getDataValue('claimedTime');
+      try {
+        return formatTimeWithZone(time);
+      } catch (e) {
+        return time;
+      }
+    }
   }
 };
 

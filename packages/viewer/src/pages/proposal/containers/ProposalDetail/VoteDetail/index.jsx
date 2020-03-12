@@ -204,7 +204,8 @@ const VoteDetail = props => {
           setPersonVote({
             list: votes,
             left: left.toString(),
-            canReclaim: left.gt(0) && (moment(expiredTime).isBefore(moment()) || status === proposalStatus.RELEASED)
+            // eslint-disable-next-line max-len
+            canReclaim: left.gt(0) && (moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) || status === proposalStatus.RELEASED)
           });
         }).catch(e => {
           message.error(e.message || 'Get personal vote history failed');
