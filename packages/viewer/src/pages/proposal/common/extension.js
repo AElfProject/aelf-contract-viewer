@@ -130,6 +130,7 @@ export default class Extension {
     } = params;
     if (!this.contracts[contractAddress]) {
       await this.checkPermission();
+      console.log('check permission');
       const con = await this.elfInstance.chain.contractAt(contractAddress, {
         address: this.currentWallet.address
       });
@@ -154,12 +155,14 @@ export default class Extension {
           let { permissions } = result;
           permissions = permissions.filter(item => item.appName === APP_NAME);
           let notInPermission = [];
+          let contractsInPermission = [];
           if (permissions.length > 0) {
-            let {
-              contracts: contractsInPermission
-            } = permissions[0];
-            contractsInPermission = contractsInPermission.map(item => item.contractAddress);
-            notInPermission = contracts.filter(({ contractAddress: a }) => contractsInPermission.indexOf(a) === -1);
+            // eslint-disable-next-line prefer-destructuring
+            contractsInPermission = permissions[0].contracts || [];
+            console.log('contractsInPermission', contractsInPermission);
+            const contractsAddressInPermission = contractsInPermission.map(item => item.contractAddress);
+            // eslint-disable-next-line max-len
+            notInPermission = contracts.filter(({ contractAddress: a }) => contractsAddressInPermission.indexOf(a) === -1);
           } else {
             notInPermission = [...contracts];
           }
@@ -169,7 +172,7 @@ export default class Extension {
               chainId: viewer.chainId,
               payload: {
                 address: this.currentWallet.address,
-                contracts
+                contracts: [...notInPermission, ...contractsInPermission]
               }
             }, (err, res) => {
               if (err) {

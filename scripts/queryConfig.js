@@ -13,6 +13,31 @@ const contractNames = [
     contractName: 'AElf.ContractNames.Token'
   },
   {
+    name: 'Dividend',
+    description: 'contract Dividend',
+    contractName: 'AElf.ContractNames.Treasury'
+  },
+  {
+    name: 'Consensus.Dpos',
+    description: 'contract Consensus',
+    contractName: 'AElf.ContractNames.Consensus'
+  },
+  {
+    name: 'Token Converter',
+    description: 'contract Token Converter',
+    contractName: 'AElf.ContractNames.TokenConverter'
+  },
+  {
+    name: 'Election',
+    description: 'contract Election',
+    contractName: 'AElf.ContractNames.Election'
+  },
+  {
+    name: 'Profit',
+    description: 'contract Profit',
+    contractName: 'AElf.ContractNames.Profit'
+  },
+  {
     name: 'Parliament',
     description: 'contract Parliament',
     contractName: 'AElf.ContractNames.Parliament'
