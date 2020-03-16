@@ -111,8 +111,9 @@ class Operation extends DBBaseOperation {
     }
   }
 
-  removeBlocksAfterLIB(blocks = [], LIBHeight) {
-    return (blocks || []).filter(block => +block.Header.Height <= +LIBHeight);
+  removeBlocksAfterLIB(blocks = [], lastHeight, LIBHeight) {
+    return (blocks || []).filter(block => +block.Header.Height <= +LIBHeight
+      && +block.Header.Height > +lastHeight);
   }
 
   addTime(block, transactions) {
@@ -134,6 +135,7 @@ class Operation extends DBBaseOperation {
       LIBHeight,
       type
     } = data;
+    const lastHeight = await ScanCursor.getLastId(config.scannerName) || 0;
     // eslint-disable-next-line no-restricted-syntax
     for (const processor of INSERT_PHASE) {
       const {
@@ -147,7 +149,7 @@ class Operation extends DBBaseOperation {
       const {
         blocks = []
       } = results[tag];
-      const filteredBlocks = this.removeBlocksAfterLIB(blocks, LIBHeight);
+      const filteredBlocks = this.removeBlocksAfterLIB(blocks, lastHeight, LIBHeight);
       const transactions = filteredBlocks
         .reduce((acc, v) => {
           let {
@@ -172,6 +174,9 @@ class Operation extends DBBaseOperation {
       }
     }
     if (type !== QUERY_TYPE.MISSING) {
+      console.log('largestHeight', largestHeight);
+      console.log('LIBHeight', LIBHeight);
+      console.log('min height', Math.min(+LIBHeight, +largestHeight));
       await ScanCursor.updateLastIncId(Math.min(+LIBHeight, +largestHeight) || 0, config.scannerName);
     }
   }

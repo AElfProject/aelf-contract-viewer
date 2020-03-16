@@ -44,7 +44,10 @@ const VoteData = props => {
       // eslint-disable-next-line max-len
       realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
     }
-    setCanThisVote(realProposalStatus === proposalStatus.PENDING && votedStatus === 'none' && canVote);
+    setCanThisVote((
+      realProposalStatus === proposalStatus.PENDING
+      || realProposalStatus === proposalStatus.APPROVED
+    ) && votedStatus === 'none' && canVote);
   }, [status, votedStatus, expiredTime]);
   return (
     <Card

@@ -105,7 +105,10 @@ const Proposal = props => {
     realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
   }
 
-  const canThisUserVote = realProposalStatus === proposalStatus.PENDING && votedStatus === 'none' && canVote;
+  const canThisUserVote = (
+    realProposalStatus === proposalStatus.PENDING
+    || realProposalStatus === proposalStatus.APPROVED
+  ) && votedStatus === 'none' && canVote;
   const canRelease = logStatus === LOG_STATUS.LOGGED && currentAccount && proposer === currentAccount;
 
   return (
