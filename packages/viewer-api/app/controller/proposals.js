@@ -181,7 +181,7 @@ class ProposalsController extends Controller {
             } = organizationMemberList;
             const assoVotedIds = await app.model.Votes.hasVoted(
               address,
-              proposalTypes.REFERENDUM,
+              proposalTypes.ASSOCIATION,
               [ proposalId ]
             );
             proposal = {
@@ -332,7 +332,7 @@ class ProposalsController extends Controller {
             }, {});
             const assoVotedIds = await app.model.Votes.hasVoted(
               address,
-              proposalTypes.REFERENDUM,
+              proposalTypes.ASSOCIATION,
               list.map(v => v.proposalId)
             );
             list = list.map(item => {
