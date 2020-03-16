@@ -29,7 +29,7 @@ function removeAElfPrefix(name) {
 
 const ListColumn = [
   {
-    title: 'Contract Name',
+    title: <span title="Contract Name">Contract Name</span>,
     dataIndex: 'contractName',
     key: 'contractName',
     ellipsis: true,
@@ -48,7 +48,7 @@ const ListColumn = [
     dataIndex: 'address',
     key: 'address',
     ellipsis: true,
-    width: 360,
+    width: 320,
     render: address => (
       <a href={`${config.viewer.viewerUrl}?address=${address}`}>
         {`ELF_${address}_${config.viewer.chainId}`}
@@ -56,9 +56,10 @@ const ListColumn = [
     )
   },
   {
-    title: 'Contract Type',
+    title: <span title="Contract Type">Contract Type</span>,
     dataIndex: 'isSystemContract',
     key: 'isSystemContract',
+    ellipsis: true,
     render: isSystemContract => (
       <Tag color={isSystemContract ? 'green' : 'blue'}>{isSystemContract ? 'System' : 'User'}</Tag>
     )
@@ -73,7 +74,7 @@ const ListColumn = [
     dataIndex: 'author',
     key: 'author',
     ellipsis: true,
-    width: 360,
+    width: 320,
     render: address => (
       <a
         href={`${config.viewer.addressUrl}/${address}`}
@@ -87,7 +88,8 @@ const ListColumn = [
   {
     title: 'Last Updated At',
     dataIndex: 'updateTime',
-    key: 'updateTime'
+    key: 'updateTime',
+    width: 150
   }
 ];
 
