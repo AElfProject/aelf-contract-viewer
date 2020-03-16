@@ -174,8 +174,11 @@ class ProposalsController extends Controller {
               leftOrgInfo
             } = organization;
             const {
-              organizationMemberList = []
+              organizationMemberList = {}
             } = leftOrgInfo;
+            const {
+              organizationMembers
+            } = organizationMemberList;
             const assoVotedIds = await app.model.Votes.hasVoted(
               address,
               proposalTypes.REFERENDUM,
@@ -183,7 +186,7 @@ class ProposalsController extends Controller {
             );
             proposal = {
               ...proposal,
-              canVote: Array.isArray(organizationMemberList) ? organizationMemberList.includes(address) : false,
+              canVote: Array.isArray(organizationMembers) ? organizationMembers.includes(address) : false,
               votedStatus: assoVotedIds[proposalId] || 'none'
             };
             break;
@@ -317,11 +320,14 @@ class ProposalsController extends Controller {
                 leftOrgInfo
               } = item;
               const {
-                organizationMemberList = []
+                organizationMemberList = {}
               } = leftOrgInfo;
+              const {
+                organizationMembers = []
+              } = organizationMemberList;
               return {
                 ...acc,
-                [orgAddress]: Array.isArray(organizationMemberList) ? organizationMemberList.includes(address) : false
+                [orgAddress]: Array.isArray(organizationMembers) ? organizationMembers.includes(address) : false
               };
             }, {});
             const assoVotedIds = await app.model.Votes.hasVoted(
