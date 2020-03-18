@@ -35,7 +35,7 @@ class HistoryController extends Controller {
         };
       } else if (address) {
         try {
-          AElf.utils.base58.decode(address);
+          AElf.utils.base58.decode(address.trim());
           result = await app.model.Files.getFilesByAddress(address);
           const contractInfo = await app.model.Contracts.getInfoByAddress(address);
           result = {
@@ -43,7 +43,7 @@ class HistoryController extends Controller {
             ...contractInfo
           };
         } catch (e) {
-          throw new Error('The address you passed is not valid');
+          throw new Error(e.message || 'The address you passed is not valid');
         }
       } else {
         throw new Error('You have to pass a valid code hash or contract address');
