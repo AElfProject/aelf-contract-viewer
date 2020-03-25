@@ -4,11 +4,11 @@
  */
 import { message } from 'antd';
 import moment from 'moment';
-import contants, { FAKE_WALLET } from './constants';
+import constants, { FAKE_WALLET } from './constants';
 
 const {
   viewer
-} = contants;
+} = constants;
 
 export const arrayToMap = arr => arr.reduce((acc, v) => ({
   ...acc,

@@ -254,7 +254,6 @@ async function getTokenList(search = '') {
     const { list = [] } = await request(API_PATH.GET_TOKEN_LIST, {
       search
     }, { method: 'GET' });
-    console.log(list);
     if (list.length === 0) {
       throw new Error('Empty token');
     }
@@ -339,6 +338,38 @@ function getContractParams(formValue, tokenList) {
   }
 }
 
+function getWhiteList() {
+  return request(API_PATH.GET_ORGANIZATIONS, {
+    pageNum: 1,
+    proposalType: proposalTypes.PARLIAMENT
+  }, {
+    method: 'GET'
+  }).then(res => {
+    const {
+      bpList = [],
+      parliamentProposerList = []
+    } = res;
+    return {
+      bpList,
+      parliamentProposerList
+    };
+  }).catch(e => {
+    console.error(e);
+    return [];
+  });
+}
+
+const SELECT_OPTIONS_WITH_AUTHORITY = [
+  proposalTypes.PARLIAMENT,
+  proposalTypes.ASSOCIATION,
+  proposalTypes.REFERENDUM
+];
+
+const SELECT_OPTIONS_WITH_NO_AUTHORITY = [
+  proposalTypes.ASSOCIATION,
+  proposalTypes.REFERENDUM
+];
+
 const CreateOrganization = props => {
   const {
     form
@@ -349,23 +380,32 @@ const CreateOrganization = props => {
   } = form;
   const common = useSelector(state => state.common);
   const {
-    wallet
+    wallet,
+    currentWallet
   } = common;
   const [tokenList, setTokenList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectOptions, setSelectOptions] = useState(SELECT_OPTIONS_WITH_AUTHORITY);
   const [formData, setFormData] = useState({
-    proposalType: proposalTypes.PARLIAMENT
+    proposalType: proposalTypes.ASSOCIATION
   });
+  // const [whiteList, setWhiteList] = useState([]);
   useEffect(() => {
     getTokenList().then(list => {
       setTokenList(list);
+    });
+    getWhiteList().then(arr => {
+      const whiteList = [...arr.bpList, ...arr.parliamentProposerList];
+      console.log(whiteList);
+      if (whiteList.indexOf(currentWallet.address) === -1) {
+        setSelectOptions(SELECT_OPTIONS_WITH_NO_AUTHORITY);
+      }
     });
   }, []);
 
   async function handleSubmit() {
     try {
       const formValue = await validateFields();
-      console.log(formValue);
       setIsLoading(true);
       const param = getContractParams(formValue, tokenList);
       const result = await wallet.invoke({
@@ -410,15 +450,17 @@ const CreateOrganization = props => {
           {
             getFieldDecorator(FIELDS_MAP.proposalType.name, {
               ...FIELDS_MAP.proposalType.form,
-              initialValue: proposalTypes.PARLIAMENT
+              initialValue: ''
             })(
               <Select
                 placeholder={FIELDS_MAP.proposalType.placeholder}
                 onChange={handleProposalTypeChange}
               >
-                <Select.Option value={proposalTypes.PARLIAMENT}>{proposalTypes.PARLIAMENT}</Select.Option>
-                <Select.Option value={proposalTypes.ASSOCIATION}>{proposalTypes.ASSOCIATION}</Select.Option>
-                <Select.Option value={proposalTypes.REFERENDUM}>{proposalTypes.REFERENDUM}</Select.Option>
+                {
+                  selectOptions.map(v => (
+                    <Select.Option value={v} key={v}>{v}</Select.Option>
+                  ))
+                }
               </Select>
             )
           }
