@@ -52,7 +52,7 @@ import {
 } from '../../common/utils';
 import ApproveTokenModal from '../ProposalList/ApproveTokenModal';
 import { LOG_IN_ACTIONS } from '../../actions/common';
-import { validateURL } from '../../../../common/utils';
+import { innerHeight, sendMessage, validateURL } from '../../../../common/utils';
 
 const {
   viewer
@@ -180,6 +180,11 @@ const ProposalDetail = () => {
         organization: result.organization,
         parliamentProposerList: result.parliamentProposerList,
         loadingStatus: LOADING_STATUS.SUCCESS
+      });
+      innerHeight(1200).then(height => {
+        sendMessage({ height });
+      }).catch(err => {
+        console.error(err);
       });
     }).catch(e => {
       console.error(e);
