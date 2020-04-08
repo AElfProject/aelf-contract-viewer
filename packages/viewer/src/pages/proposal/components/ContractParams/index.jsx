@@ -5,11 +5,11 @@
 import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import {
-  Form,
   DatePicker,
   Input,
   Checkbox,
-  Button
+  Button,
+  Form
 } from 'antd';
 import PropTypes from 'prop-types';
 import {
@@ -39,7 +39,6 @@ const RepeatedForm = props => {
   const {
     formKey,
     Comp,
-    getFieldDecorator,
     formOption,
     layout
   } = props;
@@ -58,11 +57,11 @@ const RepeatedForm = props => {
           key={v}
           label={formKey}
           className="repeated-form-item"
+          name={`${formKey}[${i}]`}
+          {...formOption}
         >
           {
-            getFieldDecorator(`${formKey}[${i}]`, {
-              ...formOption
-            })(Comp)
+            Comp
           }
           <Button
             onClick={() => deleteItem(i)}
@@ -92,7 +91,6 @@ RepeatedForm.propTypes = {
     ]),
     getValueFromEvent: PropTypes.func
   }).isRequired,
-  getFieldDecorator: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   layout: PropTypes.object.isRequired,
   formKey: PropTypes.string.isRequired
@@ -136,7 +134,6 @@ const formItemsKeys = Object.keys(INPUT_TYPE_FROM_ITEM_MAP);
 const ContractParams = props => {
   const {
     inputType,
-    getFieldDecorator,
     layout = {}
   } = props;
   const formDescriptor = useMemo(() => getParams(inputType), [inputType]);
@@ -164,7 +161,6 @@ const ContractParams = props => {
               name={name}
               Comp={<Comp />}
               formOption={form}
-              getFieldDecorator={getFieldDecorator}
             />
           );
         }
@@ -174,9 +170,7 @@ const ContractParams = props => {
             label={key}
             {...layout}
           >
-            {
-              getFieldDecorator(key, form)(<Comp />)
-            }
+            <Comp />
           </FormItem>
         );
       })}
@@ -203,7 +197,6 @@ ContractParams.propTypes = {
   inputType: PropTypes.shape({
     fields: PropTypes.object
   }),
-  getFieldDecorator: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   layout: PropTypes.object.isRequired,
 };

@@ -17,13 +17,13 @@ import {
   Switch,
   Case
 } from 'react-if';
+import { HistoryOutlined } from '@ant-design/icons';
 import {
   Result,
   Skeleton,
   message,
   Steps,
   Divider,
-  Icon,
   Alert
 } from 'antd';
 import useLocation from 'react-use/lib/useLocation';
@@ -336,7 +336,7 @@ const Reader = () => {
                 <div
                   className="contract-history"
                 >
-                  <h2><Icon className="gap-right" type="history" />History</h2>
+                  <h2><HistoryOutlined className="gap-right" />History</h2>
                   <Divider />
                   <Steps
                     progressDot

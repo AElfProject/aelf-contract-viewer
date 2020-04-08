@@ -4,7 +4,6 @@
  */
 import React, { useEffect, useState } from 'react';
 import AElf from 'aelf-sdk';
-import PropTypes from 'prop-types';
 import Decimal from 'decimal.js';
 import {
   Link
@@ -13,16 +12,17 @@ import ReactIf from 'react-if';
 import {
   useSelector
 } from 'react-redux';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
-  Form,
   Button,
   Select,
   Tooltip,
-  Icon,
   InputNumber,
   Input,
   Switch,
-  message, Divider
+  message,
+  Divider,
+  Form
 } from 'antd';
 import constants, {
   API_PATH
@@ -57,7 +57,7 @@ const formItemLayout = {
   },
 };
 
-function validateAddressList(rule, value) {
+async function validateAddressList(rule, value) {
   if (value && value.length > 0) {
     const inValid = value.split(',').filter(v => {
       try {
@@ -67,7 +67,9 @@ function validateAddressList(rule, value) {
         return true;
       }
     });
-    return inValid.length === 0 || new Error(`${inValid[0]} is not a valid address`);
+    if (inValid.length !== 0) {
+      throw new Error(`${inValid[0]} is not a valid address`);
+    }
   }
   return true;
 }
@@ -83,110 +85,96 @@ const FIELDS_MAP = {
           After selecting one, you will need to operate according to its rules.
           For specific rules, see 'Proposal rules'"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Please select a proposal mode',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select a proposal mode!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select a proposal mode!'
+      }
+    ]
   },
   minimalApprovalThreshold: {
-    name: 'proposalReleaseThreshold.minimalApprovalThreshold',
+    name: ['proposalReleaseThreshold', 'minimalApprovalThreshold'],
     label: 'Minimal Approval Threshold',
     placeholder: '',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please set the threshold'
-        },
-        {
-          message: 'Minimal Approval Threshold needs to be larger than 0',
-          validator(rule, value) {
-            return value > 0;
-          }
+    rules: [
+      {
+        required: true,
+        message: 'Please set the threshold'
+      },
+      {
+        validator(rule, value) {
+          // eslint-disable-next-line max-len
+          return value > 0 ? Promise.resolve() : Promise.reject(new Error('Minimal Approval Threshold needs to be larger than 0'));
         }
-      ]
-    }
+      }
+    ]
   },
   maximalRejectionThreshold: {
-    name: 'proposalReleaseThreshold.maximalRejectionThreshold',
+    name: ['proposalReleaseThreshold', 'maximalRejectionThreshold'],
     label: 'Maximal Rejection Threshold',
     placeholder: '',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please set the threshold'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please set the threshold'
+      }
+    ]
   },
   maximalAbstentionThreshold: {
-    name: 'proposalReleaseThreshold.maximalAbstentionThreshold',
+    name: ['proposalReleaseThreshold', 'maximalAbstentionThreshold'],
     label: 'Maximal Abstention Threshold',
     placeholder: '',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please set the threshold'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please set the threshold'
+      }
+    ]
   },
   minimalVoteThreshold: {
-    name: 'proposalReleaseThreshold.minimalVoteThreshold',
+    name: ['proposalReleaseThreshold', 'minimalVoteThreshold'],
     label: 'Minimal Vote Threshold',
     placeholder: '',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please set the threshold'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please set the threshold'
+      }
+    ]
   },
   tokenSymbol: {
     name: 'tokenSymbol',
     label: 'Token Symbol',
     placeholder: 'Please select a token',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select a token!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select a token!'
+      }
+    ]
   },
   proposerAuthorityRequired: {
-    name: 'proposerAuthorityRequired',
     label: (
       <span>
         Proposer Authority Required&nbsp;
         <Tooltip
           title="set to false to allow anyone to create a new proposal"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: '',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please set the value!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please set the value!'
+      }
+    ],
+    valuePropName: 'checked'
   },
   members: {
     name: 'members',
@@ -198,20 +186,18 @@ const FIELDS_MAP = {
           separated by commas, such as
           `28Y8JA1i2cN6oHvdv7EraXJr9a1gY6D1PpJXw9QtRMRwKcBQMK,x7G7VYqqeVAH8aeAsb7gYuTQ12YS1zKuxur9YES3cUj72QMxJ`"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Input the address list of members, separated by commas',
-    form: {
-      rules: [
-        {
-          required: false,
-          type: 'string',
-          // message: 'Please input the correct members list',
-          validator: validateAddressList
-        }
-      ]
-    }
+    rules: [
+      {
+        required: false,
+        type: 'string',
+        // message: 'Please input the correct members list',
+        validator: validateAddressList
+      }
+    ]
   },
   proposers: {
     name: 'proposers',
@@ -223,20 +209,18 @@ const FIELDS_MAP = {
           separated by commas, such as
            `28Y8JA1i2cN6oHvdv7EraXJr9a1gY6D1PpJXw9QtRMRwKcBQMK,x7G7VYqqeVAH8aeAsb7gYuTQ12YS1zKuxur9YES3cUj72QMxJ`"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Input the address list of proposers, separated by commas',
-    form: {
-      rules: [
-        {
-          required: false,
-          type: 'string',
-          // message: 'Please input the correct proposers list',
-          validator: validateAddressList
-        }
-      ]
-    }
+    rules: [
+      {
+        required: false,
+        type: 'string',
+        // message: 'Please input the correct proposers list',
+        validator: validateAddressList
+      }
+    ]
   }
 };
 
@@ -370,12 +354,15 @@ const SELECT_OPTIONS_WITH_NO_AUTHORITY = [
   proposalTypes.REFERENDUM
 ];
 
-const CreateOrganization = props => {
+const FORM_INITIAL = {
+  proposalType: '',
+  proposerAuthorityRequired: false,
+  tokenSymbol: 'ELF'
+};
+
+const CreateOrganization = () => {
+  const [form] = Form.useForm();
   const {
-    form
-  } = props;
-  const {
-    getFieldDecorator,
     validateFields
   } = form;
   const common = useSelector(state => state.common);
@@ -396,7 +383,6 @@ const CreateOrganization = props => {
     });
     getWhiteList().then(arr => {
       const whiteList = [...arr.bpList, ...arr.parliamentProposerList];
-      console.log(whiteList);
       if (whiteList.indexOf(currentWallet.address) === -1) {
         setSelectOptions(SELECT_OPTIONS_WITH_NO_AUTHORITY);
       }
@@ -415,7 +401,7 @@ const CreateOrganization = props => {
       });
       showTransactionResult(result);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       message.error((e.errorMessage || {}).message || e.message || 'Please input the required form field');
     } finally {
       setIsLoading(false);
@@ -441,83 +427,61 @@ const CreateOrganization = props => {
       </div>
       <Divider />
       <Form
+        form={form}
+        initialValues={FORM_INITIAL}
         {...formItemLayout}
       >
         <FormItem
           label={FIELDS_MAP.proposalType.label}
           required
+          {...FIELDS_MAP.proposalType}
         >
-          {
-            getFieldDecorator(FIELDS_MAP.proposalType.name, {
-              ...FIELDS_MAP.proposalType.form,
-              initialValue: ''
-            })(
-              <Select
-                placeholder={FIELDS_MAP.proposalType.placeholder}
-                onChange={handleProposalTypeChange}
-              >
-                {
-                  selectOptions.map(v => (
-                    <Select.Option value={v} key={v}>{v}</Select.Option>
-                  ))
-                }
-              </Select>
-            )
-          }
+          <Select
+            placeholder={FIELDS_MAP.proposalType.placeholder}
+            onChange={handleProposalTypeChange}
+          >
+            {
+              selectOptions.map(v => (
+                <Select.Option value={v} key={v}>{v}</Select.Option>
+              ))
+            }
+          </Select>
         </FormItem>
         <ConditionSwitch>
           <Case condition={formData.proposalType === proposalTypes.PARLIAMENT}>
             <FormItem
               label={FIELDS_MAP.proposerAuthorityRequired.label}
               required
+              {...FIELDS_MAP.proposerAuthorityRequired}
             >
-              {
-                getFieldDecorator(FIELDS_MAP.proposerAuthorityRequired.name, {
-                  ...FIELDS_MAP.proposerAuthorityRequired.form,
-                  initialValue: false,
-                  valuePropName: 'checked'
-                })(
-                  <Switch />
-                )
-              }
+              <Switch />
             </FormItem>
           </Case>
           <Case condition={formData.proposalType === proposalTypes.ASSOCIATION}>
             <FormItem
               label={FIELDS_MAP.members.label}
+              {...FIELDS_MAP.members}
             >
-              {
-                getFieldDecorator(FIELDS_MAP.members.name, {
-                  ...FIELDS_MAP.members.form
-                })(
-                  <TextArea
-                    placeholder={FIELDS_MAP.members.placeholder}
-                    autoSize
-                  />
-                )
-              }
+              <TextArea
+                placeholder={FIELDS_MAP.members.placeholder}
+                autoSize
+              />
             </FormItem>
           </Case>
           <Case condition={formData.proposalType === proposalTypes.REFERENDUM}>
             <FormItem
               label={FIELDS_MAP.tokenSymbol.label}
               required
+              {...FIELDS_MAP.tokenSymbol}
             >
-              {
-                getFieldDecorator(FIELDS_MAP.tokenSymbol.name, {
-                  ...FIELDS_MAP.tokenSymbol.form,
-                  initialValue: 'ELF'
-                })(
-                  <Select
-                    showSearch
-                    optionFilterProp="children"
-                    filterOption={commonFilter}
-                    placeholder={FIELDS_MAP.tokenSymbol.placeholder}
-                  >
-                    {tokenList.map(v => (<Select.Option key={v.symbol} value={v.symbol}>{v.symbol}</Select.Option>))}
-                  </Select>
-                )
-              }
+              <Select
+                showSearch
+                optionFilterProp="children"
+                filterOption={commonFilter}
+                placeholder={FIELDS_MAP.tokenSymbol.placeholder}
+              >
+                {tokenList.map(v => (<Select.Option key={v.symbol} value={v.symbol}>{v.symbol}</Select.Option>))}
+              </Select>
             </FormItem>
           </Case>
         </ConditionSwitch>
@@ -526,75 +490,50 @@ const CreateOrganization = props => {
             ? (
               <FormItem
                 label={FIELDS_MAP.proposers.label}
+                {...FIELDS_MAP.proposers}
               >
-                {
-                  getFieldDecorator(FIELDS_MAP.proposers.name, {
-                    ...FIELDS_MAP.proposers.form
-                  })(
-                    <TextArea
-                      placeholder={FIELDS_MAP.proposers.placeholder}
-                      autoSize
-                    />
-                  )
-                }
+                <TextArea
+                  placeholder={FIELDS_MAP.proposers.placeholder}
+                  autoSize
+                />
               </FormItem>
             ) : null
         }
         <FormItem
           label={FIELDS_MAP.minimalApprovalThreshold.label}
           required
+          {...FIELDS_MAP.minimalApprovalThreshold}
         >
-          {
-            getFieldDecorator(FIELDS_MAP.minimalApprovalThreshold.name, {
-              ...FIELDS_MAP.minimalApprovalThreshold.form
-            })(
-              <InputNumber
-                {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
-              />
-            )
-          }
+          <InputNumber
+            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+          />
         </FormItem>
         <FormItem
           label={FIELDS_MAP.maximalRejectionThreshold.label}
           required
+          {...FIELDS_MAP.maximalRejectionThreshold}
         >
-          {
-            getFieldDecorator(FIELDS_MAP.maximalRejectionThreshold.name, {
-              ...FIELDS_MAP.maximalRejectionThreshold.form
-            })(
-              <InputNumber
-                {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
-              />
-            )
-          }
+          <InputNumber
+            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+          />
         </FormItem>
         <FormItem
           label={FIELDS_MAP.maximalAbstentionThreshold.label}
           required
+          {...FIELDS_MAP.maximalAbstentionThreshold}
         >
-          {
-            getFieldDecorator(FIELDS_MAP.maximalAbstentionThreshold.name, {
-              ...FIELDS_MAP.maximalAbstentionThreshold.form
-            })(
-              <InputNumber
-                {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
-              />
-            )
-          }
+          <InputNumber
+            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+          />
         </FormItem>
         <FormItem
           label={FIELDS_MAP.minimalVoteThreshold.label}
           required
+          {...FIELDS_MAP.minimalVoteThreshold}
         >
-          {
-            getFieldDecorator(FIELDS_MAP.minimalVoteThreshold.name, {
-              ...FIELDS_MAP.minimalVoteThreshold.form
-            })(
-              <InputNumber
-                {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
-              />
-            )
-          }
+          <InputNumber
+            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+          />
         </FormItem>
         <FormItem {...tailFormItemLayout}>
           <Button
@@ -611,14 +550,4 @@ const CreateOrganization = props => {
   );
 };
 
-CreateOrganization.propTypes = {
-  form: PropTypes.shape({
-    getFieldDecorator: PropTypes.func,
-    getFieldsValue: PropTypes.func,
-    getFieldValue: PropTypes.func,
-    setFieldsValue: PropTypes.func,
-    validateFields: PropTypes.func
-  }).isRequired
-};
-
-export default Form.create()(CreateOrganization);
+export default CreateOrganization;

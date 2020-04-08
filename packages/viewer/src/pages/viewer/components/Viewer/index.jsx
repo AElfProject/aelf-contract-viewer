@@ -5,6 +5,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import copy from 'copy-to-clipboard';
 import PropTypes from 'prop-types';
+import { CopyOutlined } from '@ant-design/icons';
 import {
   Button,
   message
@@ -110,7 +111,7 @@ const Viewer = props => {
           <Button
             onClick={handleCopy}
             type="circle"
-            icon="copy"
+            icon={<CopyOutlined />}
             title="Copy code"
           />
         </div>

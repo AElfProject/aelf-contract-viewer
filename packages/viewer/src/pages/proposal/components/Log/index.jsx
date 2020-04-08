@@ -6,12 +6,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { If, Then, Else } from 'react-if';
-import {
-  Button,
-  Dropdown,
-  Menu,
-  Icon
-} from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Menu } from 'antd';
 import { logOut, logIn } from '../../actions/common';
 import {
   LOG_STATUS
@@ -63,7 +59,7 @@ const LogButton = props => {
             <Then>
               <Dropdown overlay={<OverLay loading={loading} address={address} />}>
                 <Button>
-                  {name} <Icon type="down" />
+                  {name} <DownOutlined />
                 </Button>
               </Dropdown>
             </Then>

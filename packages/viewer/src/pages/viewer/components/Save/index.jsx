@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import {
   saveAs
 } from 'file-saver';
+import { DownloadOutlined } from '@ant-design/icons';
 import {
   Button,
   message
@@ -39,7 +40,7 @@ const SaveAsZip = props => {
     <Button
       title={title}
       shape="circle"
-      icon="download"
+      icon={<DownloadOutlined />}
       loading={loading}
       onClick={download}
       {...rest}

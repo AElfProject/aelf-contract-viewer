@@ -6,12 +6,12 @@ import React, { useMemo } from 'react';
 import roundTo from 'round-to';
 import { Switch, Case } from 'react-if';
 import PropTypes from 'prop-types';
+import { EditOutlined } from '@ant-design/icons';
 import {
   Card,
   Row,
   Select,
   Col,
-  Icon,
   Divider
 } from 'antd';
 import config from '../../../../../common/config';
@@ -248,7 +248,7 @@ const Organization = props => {
             {orgAddress}
           </div>
           {canEdit
-            ? (<Icon type="edit" color="purple" onClick={handleEdit} />) : null}
+            ? (<EditOutlined color="purple" onClick={handleEdit} />) : null}
         </div>
         <Divider />
         <div className="organization-list-item-info">

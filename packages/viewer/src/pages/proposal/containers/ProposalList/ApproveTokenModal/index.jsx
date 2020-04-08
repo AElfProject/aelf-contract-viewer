@@ -6,10 +6,10 @@ import PropTypes from 'prop-types';
 import { Switch, Case } from 'react-if';
 import Decimal from 'decimal.js';
 import {
+  Form,
   Modal,
   InputNumber,
   Steps,
-  Form,
   message,
   Spin
 } from 'antd';
@@ -64,6 +64,25 @@ const sendTransaction = async (wallet, contractAddress, method, param) => {
   return result;
 };
 
+const formDesc = {
+  amount: {
+    name: 'amount',
+    initialValue: 0,
+    rules: [
+      {
+        required: true,
+        message: 'Please input the amount'
+      },
+      {
+        type: 'number',
+        validator(rule, value) {
+          return value > 0 ? Promise.resolve() : Promise.reject(new Error('Value must be a number larger than 0'));
+        }
+      }
+    ]
+  }
+};
+
 const ApproveTokenModal = props => {
   const {
     action,
@@ -73,11 +92,11 @@ const ApproveTokenModal = props => {
     onConfirm,
     visible,
     wallet,
-    tokenSymbol,
-    form
+    tokenSymbol
   } = props;
+  const [form] = Form.useForm();
   const {
-    getFieldDecorator,
+    // getFieldDecorator,
     validateFields
   } = form;
   const [decimal, setDecimal] = useState(8);
@@ -199,6 +218,7 @@ const ApproveTokenModal = props => {
       <Switch>
         <Case condition={stepInfo.current === 0}>
           <Form
+            form={form}
             className="approve-token-form"
             {...formItemLayout}
           >
@@ -209,30 +229,12 @@ const ApproveTokenModal = props => {
             </FormItem>
             <FormItem
               label="Amount"
+              {...formDesc.amount}
             >
-              {
-                getFieldDecorator('amount', {
-                  initialValue: 0,
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input the amount'
-                    },
-                    {
-                      type: 'number',
-                      validator(rule, value) {
-                        return value > 0;
-                      },
-                      message: 'Value must be a number larger than 0'
-                    }
-                  ]
-                })(
-                  <InputNumber
-                    precision={4}
-                    min={0}
-                  />
-                )
-              }
+              <InputNumber
+                precision={4}
+                min={0}
+              />
             </FormItem>
           </Form>
         </Case>
@@ -268,14 +270,7 @@ ApproveTokenModal.propTypes = {
   visible: PropTypes.bool.isRequired,
   wallet: PropTypes.shape({
     invoke: PropTypes.func
-  }).isRequired,
-  form: PropTypes.shape({
-    getFieldDecorator: PropTypes.func,
-    getFieldsValue: PropTypes.func,
-    getFieldValue: PropTypes.func,
-    setFieldsValue: PropTypes.func,
-    validateFields: PropTypes.func
   }).isRequired
 };
 
-export default Form.create()(ApproveTokenModal);
+export default ApproveTokenModal;

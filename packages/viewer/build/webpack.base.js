@@ -80,13 +80,6 @@ const baseConfig = {
             limit: 8192
           }
         }]
-      },
-      {
-        loader: 'webpack-ant-icon-loader',
-        enforce: 'pre',
-        include: [
-          require.resolve('@ant-design/icons/lib/dist')
-        ]
       }
     ]
   },

@@ -8,11 +8,11 @@ import PropTypes from 'prop-types';
 import {
   Link
 } from 'react-router-dom';
+import { CheckCircleOutlined, CloseCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
   Tag,
-  Icon,
   Divider
 } from 'antd';
 import constants, {
@@ -33,9 +33,9 @@ const {
 } = constants;
 
 export const ACTIONS_ICON_MAP = {
-  [proposalActions.APPROVE]: <Icon type="check-circle" className="gap-right-small" />,
-  [proposalActions.REJECT]: <Icon type="close-circle" className="gap-right-small" />,
-  [proposalActions.ABSTAIN]: <Icon type="minus-circle" className="gap-right-small" />
+  [proposalActions.APPROVE]: <CheckCircleOutlined className="gap-right-small" />,
+  [proposalActions.REJECT]: <CloseCircleOutlined className="gap-right-small" />,
+  [proposalActions.ABSTAIN]: <MinusCircleOutlined className="gap-right-small" />
 };
 
 const Title = props => {

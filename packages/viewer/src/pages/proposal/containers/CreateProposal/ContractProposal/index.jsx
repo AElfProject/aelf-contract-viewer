@@ -4,16 +4,16 @@
  */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import {
   Radio,
   Input,
   Button,
   Upload,
   Select,
-  Form,
   message,
   Tooltip,
-  Icon
+  Form
 } from 'antd';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
@@ -95,12 +95,11 @@ function readFile(file) {
 
 const ContractProposal = props => {
   const {
-    form,
     loading,
     submit
   } = props;
+  const [form] = Form.useForm();
   const {
-    getFieldDecorator,
     validateFields,
     setFieldsValue
   } = form;
@@ -178,76 +177,77 @@ const ContractProposal = props => {
 
   return (
     <div className="contract-proposal">
-      <Form {...formItemLayout}>
+      <Form
+        form={form}
+        initialValues={{
+          action: 'ProposeNewContract',
+          address: '',
+          name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
+        }}
+        {...formItemLayout}
+      >
         <FormItem
           label="Contract Action"
+          name="action"
         >
-          {getFieldDecorator('action', {
-            initialValue: 'ProposeNewContract'
-          })(
-            <Radio.Group
-              onChange={handleAction}
-            >
-              <Radio value="ProposeNewContract">Deploy Contract</Radio>
-              <Radio value="ProposeUpdateContract">Update Contract</Radio>
-            </Radio.Group>
-          )}
+          <Radio.Group
+            onChange={handleAction}
+          >
+            <Radio value="ProposeNewContract">Deploy Contract</Radio>
+            <Radio value="ProposeUpdateContract">Update Contract</Radio>
+          </Radio.Group>
         </FormItem>
         {
           isUpdate
             ? (
               <FormItem
                 label="Contract Address"
+                name="address"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please select a contract address!'
+                  }
+                ]}
               >
-                {getFieldDecorator('address', {
-                  initialValue: '',
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please select a contract address!'
-                    }
-                  ]
-                })(
-                  <Select
-                    placeholder="Please select a contract address"
-                    showSearch
-                    optionFilterProp="children"
-                    filterOption={contractFilter}
-                    onChange={handleContractChange}
-                  >
-                    {
-                      contractList.map(v => (
-                        <Select.Option
-                          key={v.address}
-                          value={v.address}
-                        >
-                          {v.contractName || v.address}
-                        </Select.Option>
-                      ))
-                    }
-                  </Select>
-                )}
+                <Select
+                  placeholder="Please select a contract address"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={contractFilter}
+                  onChange={handleContractChange}
+                >
+                  {
+                    contractList.map(v => (
+                      <Select.Option
+                        key={v.address}
+                        value={v.address}
+                      >
+                        {v.contractName || v.address}
+                      </Select.Option>
+                    ))
+                  }
+                </Select>
               </FormItem>
             ) : null
         }
         <FormItem
           label="Contract Name"
-        >
-          {getFieldDecorator('name', {
-            initialValue: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName,
-            validateTrigger: 'onBlur',
-            rules: [
+          name="name"
+          validateTrigger="onBlur"
+          rules={
+            [
               {
                 required: false,
                 type: 'string',
-                asyncValidator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo)
+                validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo)
               }
             ]
-          })(
-            <Input
-              disabled={isUpdate && currentContractInfo.isSystemContract}
-            />
-          )}
+          }
+        >
+          <Input
+            disabled={isUpdate && currentContractInfo.isSystemContract}
+          />
         </FormItem>
         <FormItem
           label={(
@@ -257,36 +257,36 @@ const ContractProposal = props => {
                 title="When creating a 'Contract Deployment' proposal, you only need to upload the file,
                 more information can be viewed on the public proposal page after the application is successful"
               >
-                <Icon className="main-color" type="question-circle-o" />
+                <QuestionCircleOutlined className="main-color" />
               </Tooltip>
             </span>
           )}
-        >
-          {getFieldDecorator('file', {
-            valuePropName: 'fileList',
-            getValueFromEvent: normFile,
-            rules: [
+          name="file"
+          valuePropName="fileList"
+          getValueFromEvent={normFile}
+          rules={
+            [
               {
                 required: true,
                 message: 'Please upload the DLL file!'
               },
               {
-                asyncValidator: validateFile
+                validator: validateFile
               }
             ]
-          })(
-            <Upload
-              accept=".dll"
-              beforeUpload={() => false}
-              onChange={handleUpload}
-            >
-              <Button disabled={fileLength === 1}>
-                <Icon type="upload" className="gap-right-small" />
-                Click to Upload
-              </Button>
-            </Upload>
-          )}
-          <span className="small-tip">Only support DLL file, less than 2MB</span>
+          }
+        >
+          <Upload
+            accept=".dll"
+            beforeUpload={() => false}
+            onChange={handleUpload}
+            extra="Only support DLL file, less than 2MB"
+          >
+            <Button disabled={fileLength === 1}>
+              <UploadOutlined className="gap-right-small" />
+              Click to Upload
+            </Button>
+          </Upload>
         </FormItem>
         <Form.Item {...tailFormItemLayout}>
           <Button
@@ -304,15 +304,8 @@ const ContractProposal = props => {
 };
 
 ContractProposal.propTypes = {
-  form: PropTypes.shape({
-    getFieldDecorator: PropTypes.func,
-    getFieldsValue: PropTypes.func,
-    getFieldValue: PropTypes.func,
-    setFieldsValue: PropTypes.func,
-    validateFields: PropTypes.func
-  }).isRequired,
   submit: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired
 };
 
-export default Form.create()(ContractProposal);
+export default ContractProposal;

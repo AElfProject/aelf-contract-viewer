@@ -5,10 +5,10 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { If, Then } from 'react-if';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
   Card,
   Divider,
-  Icon,
   Tooltip,
   Row,
   Col,
@@ -82,10 +82,7 @@ const ContractDetail = props => {
           <span>
             Contract Details
             <Tooltip title="Specific information about the contract invoked by the proposal">
-              <Icon
-                className="gap-left main-color"
-                type="question-circle-o"
-              />
+              <QuestionCircleOutlined className="gap-left main-color" />
             </Tooltip>
           </span>
         )

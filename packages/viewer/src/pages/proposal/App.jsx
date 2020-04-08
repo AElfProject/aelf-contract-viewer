@@ -16,11 +16,8 @@ import {
   useSelector,
   useDispatch
 } from 'react-redux';
-import {
-  Tabs,
-  Popover,
-  Icon
-} from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Tabs, Popover } from 'antd';
 import {
   logIn,
   LOG_IN_ACTIONS
@@ -116,7 +113,7 @@ const App = () => {
               placement="bottom"
             >
               <span className="gap-right-small">
-                <Icon type="exclamation-circle" className="gap-right-small main-color" />
+                <ExclamationCircleOutlined className="gap-right-small main-color" />
                 Proposal Rules
               </span>
             </Popover>

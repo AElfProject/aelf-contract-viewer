@@ -9,13 +9,13 @@ import React, {
   lazy
 } from 'react';
 import moment from 'moment';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
   Form,
   Select,
   DatePicker,
   Button,
   Tooltip,
-  Icon,
   // eslint-disable-next-line no-unused-vars
   Radio,
   Input,
@@ -37,7 +37,7 @@ import {
 } from '../../../common/utils';
 import constants, { API_PATH } from '../../../common/constants';
 import { request } from '../../../../../common/request';
-import ContractParams from '../../../components/ContractParams';
+// import ContractParams from '../../../components/ContractParams';
 // import JSONEditor from '../../../components/JSONEditor';
 import './index.less';
 import { validateURL } from '../../../../../common/utils';
@@ -61,6 +61,7 @@ const formItemLayout = {
 
 const FIELDS_MAP = {
   formProposalType: {
+    name: 'formProposalType',
     label: (
       <span>
         Proposal Mode&nbsp;
@@ -69,20 +70,19 @@ const FIELDS_MAP = {
           After selecting one, you will need to operate according to its rules.
           For specific rules, see 'Proposal rules'"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Please select a proposal mode',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select a proposal mode!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select a proposal mode!'
+      }
+    ]
   },
   formOrgAddress: {
+    name: 'formOrgAddress',
     label: (
       <span>
         Organization&nbsp;
@@ -92,93 +92,86 @@ const FIELDS_MAP = {
           You also need to follow the rules of the organization.
           For the specific rules, see 'Organizations Tab'"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Please select an organization',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select an organization!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select an organization!'
+      }
+    ]
   },
   formContractAddress: {
+    name: 'formContractAddress',
     label: 'Contract Address',
     placeholder: 'Please select a contract',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select a contract!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select a contract!'
+      }
+    ]
   },
   formContractMethod: {
+    name: 'formContractMethod',
     label: 'Method Name',
     placeholder: 'Please select a contract method',
-    form: {
-      rules: [
-        {
-          required: true,
-          message: 'Please select a contact method!'
-        }
-      ]
-    }
+    rules: [
+      {
+        required: true,
+        message: 'Please select a contact method!'
+      }
+    ]
   },
   params: {
     label: 'Method Params'
   },
   formExpiredTime: {
+    name: 'formExpiredTime',
     label: (
       <span>
         Expiration Time&nbsp;
         <Tooltip
           title="Proposals must be voted on and released before the expiration time"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>),
     placeholder: 'Please select a time',
-    form: {
-      rules: [
-        {
-          type: 'object',
-          required: true,
-          message: 'Please select a time!'
-        }
-      ]
-    }
+    rules: [
+      {
+        type: 'object',
+        required: true,
+        message: 'Please select a time!'
+      }
+    ]
   },
   formDescriptionURL: {
+    name: 'formDescriptionURL',
     label: (
       <span>
         URL&nbsp;
         <Tooltip
           title="Please provide a URL describing the proposal"
         >
-          <Icon className="main-color" type="question-circle-o" />
+          <QuestionCircleOutlined className="main-color" />
         </Tooltip>
       </span>
     ),
     placeholder: 'Please input the description URL of proposal',
-    form: {
-      validateTrigger: 'onBlur',
-      rules: [
-        {
-          validator(rule, value) {
-            if (value && value.length > 0) {
-              return validateURL(`https://${value}`);
-            }
-            return true;
-          },
-          message: 'Please check your URL format'
+    validateTrigger: 'onBlur',
+    rules: [
+      {
+        validator(rule, value) {
+          if (value && value.length > 0 && !validateURL(`https://${value}`)) {
+            return Promise.reject(new Error('Please check your URL format'));
+          }
+          return Promise.resolve();
         }
-      ]
-    }
+      }
+    ]
   },
 };
 
@@ -208,19 +201,6 @@ const tailFormItemLayout = {
     sm: {
       span: 16,
       offset: 6
-    }
-  }
-};
-
-const paramsLayout = {
-  labelCol: {
-    sm: {
-      span: 18
-    }
-  },
-  wrapperCol: {
-    sm: {
-      span: 18
     }
   }
 };
@@ -316,23 +296,34 @@ function parsedParamsWithoutSpecial(inputType, originalParams) {
 
 const URLPrefix = props => {
   const {
-    getFieldDecorator,
     formField
   } = props;
-  return getFieldDecorator(formField, {
-    initialValue: 'https://',
-  })(
-    <Select>
-      <Select.Option value="https://">https://</Select.Option>
-      <Select.Option value="http://">http://</Select.Option>
-    </Select>,
+  return (
+    <FormItem
+      name={formField}
+      required
+      noStyle
+    >
+      <Select>
+        <Select.Option value="https://">https://</Select.Option>
+        <Select.Option value="http://">http://</Select.Option>
+      </Select>
+    </FormItem>
   );
 };
 
 URLPrefix.propTypes = {
-  getFieldDecorator: PropTypes.func.isRequired,
   formField: PropTypes.string.isRequired
 };
+
+const SuspenseJSONEditor = props => (
+  <Suspense fallback={<Spin className="text-ellipsis" />}>
+    <JSONEditor
+      className="params-input"
+      {...props}
+    />
+  </Suspense>
+);
 
 const NormalProposal = props => {
   const {
@@ -343,11 +334,10 @@ const NormalProposal = props => {
     contractAddress,
     submit,
     wallet,
-    currentWallet,
-    form
+    currentWallet
   } = props;
+  const [form] = Form.useForm();
   const {
-    getFieldDecorator,
     setFieldsValue,
     validateFields
   } = form;
@@ -481,7 +471,7 @@ const NormalProposal = props => {
       let parsed;
       if (paramsInputMethod === 'format') {
         parsed = parsedParams(inputType, leftParams);
-        // todo: 校验不好使，对于integer string类型不好操作
+        // 校验不好使，对于integer string类型不好操作
         // const error = inputType.verify(parsedParamsWithoutSpecial(inputType, leftParams));
         // if (error) {
         //   throw new Error(`Contract params ${error}`);
@@ -489,7 +479,7 @@ const NormalProposal = props => {
       } else {
         console.log(leftParams.realSpecialPlain);
         parsed = parseJSON(leftParams.realSpecialPlain);
-        // todo: 无法verify
+        // 无法verify
         // const error = inputType.verify(parsedParamsWithoutSpecial(inputType, parsed));
         // if (error) {
         //   throw new Error(`Contract params ${error}`);
@@ -525,175 +515,133 @@ const NormalProposal = props => {
   return (
     <div className="normal-proposal">
       <Form
+        form={form}
         {...formItemLayout}
+        initialValues={{
+          formProposalType: isModify ? proposalType : '',
+          formOrgAddress: isModify ? orgAddress : '',
+          formContractAddress: isModify ? contractAddress : '',
+          formPrefix: 'https://',
+          realSpecialPlain: ''
+        }}
       >
         <FormItem
           label={FIELDS_MAP.formProposalType.label}
           required
+          {...FIELDS_MAP.formProposalType}
         >
-          {
-            getFieldDecorator('formProposalType', {
-              ...FIELDS_MAP.formProposalType.form,
-              initialValue: isModify ? proposalType : ''
-            })(
-              <Select
-                placeholder={FIELDS_MAP.formProposalType.placeholder}
-                onChange={handleProposalTypeChange}
-              >
-                <Select.Option value={proposalTypes.PARLIAMENT}>{proposalTypes.PARLIAMENT}</Select.Option>
-                <Select.Option value={proposalTypes.ASSOCIATION}>{proposalTypes.ASSOCIATION}</Select.Option>
-                <Select.Option value={proposalTypes.REFERENDUM}>{proposalTypes.REFERENDUM}</Select.Option>
-              </Select>
-            )
-          }
+          <Select
+            placeholder={FIELDS_MAP.formProposalType.placeholder}
+            onChange={handleProposalTypeChange}
+          >
+            <Select.Option value={proposalTypes.PARLIAMENT}>{proposalTypes.PARLIAMENT}</Select.Option>
+            <Select.Option value={proposalTypes.ASSOCIATION}>{proposalTypes.ASSOCIATION}</Select.Option>
+            <Select.Option value={proposalTypes.REFERENDUM}>{proposalTypes.REFERENDUM}</Select.Option>
+          </Select>
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formOrgAddress.label}
           required
+          {...FIELDS_MAP.formOrgAddress}
         >
-          {
-            getFieldDecorator('formOrgAddress', {
-              ...FIELDS_MAP.formOrgAddress.form,
-              initialValue: isModify ? orgAddress : ''
-            })(
-              <Select
-                placeholder={FIELDS_MAP.formOrgAddress.placeholder}
-                loading={loadingStatus.orgAddress}
-                showSearch
-                optionFilterProp="children"
-                filterOption={commonFilter}
-              >
-                {
-                  organizationList
-                    .map(v => (<Select.Option key={v} value={v}>{v}</Select.Option>))
-                }
-              </Select>
-            )
-          }
+          <Select
+            placeholder={FIELDS_MAP.formOrgAddress.placeholder}
+            loading={loadingStatus.orgAddress}
+            showSearch
+            optionFilterProp="children"
+            filterOption={commonFilter}
+          >
+            {
+              organizationList
+                .map(v => (<Select.Option key={v} value={v}>{v}</Select.Option>))
+            }
+          </Select>
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formContractAddress.label}
           required
+          {...FIELDS_MAP.formContractAddress}
         >
-          {
-            getFieldDecorator('formContractAddress', {
-              ...FIELDS_MAP.formContractAddress.form,
-              initialValue: isModify ? contractAddress : ''
-            })(
-              <Select
-                placeholder={FIELDS_MAP.formContractAddress.placeholder}
-                onChange={handleContractAddressChange}
-                showSearch
-                optionFilterProp="children"
-                filterOption={(...args) => contractFilter(...args, contractList)}
-                loading={loadingStatus.contractAddress}
-              >
-                {
-                  contractList.map(v => (
-                    <Select.Option
-                      key={v.address}
-                      value={v.address}
-                    >
-                      {v.contractName || v.address}
-                    </Select.Option>
-                  ))
-                }
-              </Select>
-            )
-          }
+          <Select
+            placeholder={FIELDS_MAP.formContractAddress.placeholder}
+            onChange={handleContractAddressChange}
+            showSearch
+            optionFilterProp="children"
+            filterOption={(...args) => contractFilter(...args, contractList)}
+            loading={loadingStatus.contractAddress}
+          >
+            {
+              contractList.map(v => (
+                <Select.Option
+                  key={v.address}
+                  value={v.address}
+                >
+                  {v.contractName || v.address}
+                </Select.Option>
+              ))
+            }
+          </Select>
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formContractMethod.label}
           required
+          {...FIELDS_MAP.formContractMethod}
         >
-          {
-            getFieldDecorator('formContractMethod', {
-              ...FIELDS_MAP.formContractMethod.form
-            })(
-              <Select
-                placeholder={FIELDS_MAP.formContractMethod.placeholder}
-                showSearch
-                optionFilterProp="children"
-                filterOption={commonFilter}
-                loading={loadingStatus.contractMethod}
-                onChange={handleMethodChange}
-              >
-                {
-                  methods.list
-                    .map(v => (<Select.Option key={v} value={v}>{v}</Select.Option>))
-                }
-              </Select>
-            )
-          }
+          <Select
+            placeholder={FIELDS_MAP.formContractMethod.placeholder}
+            showSearch
+            optionFilterProp="children"
+            filterOption={commonFilter}
+            loading={loadingStatus.contractMethod}
+            onChange={handleMethodChange}
+          >
+            {
+              methods.list
+                .map(v => (<Select.Option key={v} value={v}>{v}</Select.Option>))
+            }
+          </Select>
         </FormItem>
         <FormItem
           label={FIELDS_MAP.params.label}
           className={methods && methods.methodName && !methods.isEmpty ? 'normal-proposal-params' : ''}
           required
+          name="realSpecialPlain"
+          trigger="onBlur"
         >
-          {
-            paramsInputMethod === 'format' && methods && methods.methodName ? (
-              <ContractParams
-                layout={paramsLayout}
-                getFieldDecorator={getFieldDecorator}
-                inputType={CONTRACT_INSTANCE_MAP[methods.contractAddress][methods.methodName].inputType}
-              />
-            ) : null
-          }
           {
             paramsInputMethod === 'plain' && methods && methods.methodName && !methods.isEmpty ? (
               (
-                <Suspense fallback={<Spin className="text-ellipsis" />}>
-                  {
-                    getFieldDecorator('realSpecialPlain', {
-                      initialValue: '',
-                      trigger: 'onBlur'
-                    })(
-                      <JSONEditor
-                        className="params-input"
-                        type={methods.isSingleString ? 'plaintext' : 'json'}
-                      />
-                      // <TextArea autoSize />
-                    )
-                  }
-                </Suspense>
+                <SuspenseJSONEditor
+                  type={methods.isSingleString ? 'plaintext' : 'json'}
+                />
               )
-            ) : null
+            ) : <div />
           }
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formDescriptionURL.label}
+          {...FIELDS_MAP.formDescriptionURL}
         >
-          {getFieldDecorator('formDescriptionURL', {
-            ...FIELDS_MAP.formDescriptionURL.form
-          })(
-            <Input
-              addonBefore={(
-                <URLPrefix
-                  getFieldDecorator={getFieldDecorator}
-                  formField="formPrefix"
-                />
-              )}
-              placeholder={FIELDS_MAP.formDescriptionURL.placeholder}
-            />
-          )}
+          <Input
+            addonBefore={(
+              <URLPrefix
+                formField="formPrefix"
+              />
+            )}
+            placeholder={FIELDS_MAP.formDescriptionURL.placeholder}
+          />
         </FormItem>
         <FormItem
           label={FIELDS_MAP.formExpiredTime.label}
           required
+          {...FIELDS_MAP.formExpiredTime}
         >
-          {
-            getFieldDecorator('formExpiredTime', {
-              ...FIELDS_MAP.formExpiredTime.form
-            })(
-              <DatePicker
-                showTime
-                disabledDate={disabledDate}
-                disabledTime={disabledDate}
-                placeholder={FIELDS_MAP.formExpiredTime.placeholder}
-              />
-            )
-          }
+          <DatePicker
+            showTime
+            disabledDate={disabledDate}
+            disabledTime={disabledDate}
+            placeholder={FIELDS_MAP.formExpiredTime.placeholder}
+          />
         </FormItem>
         <Form.Item {...tailFormItemLayout}>
           <Button
@@ -725,13 +673,6 @@ NormalProposal.propTypes = {
   currentWallet: PropTypes.shape({
     address: PropTypes.string,
     publicKey: PropTypes.string
-  }).isRequired,
-  form: PropTypes.shape({
-    getFieldDecorator: PropTypes.func,
-    getFieldsValue: PropTypes.func,
-    getFieldValue: PropTypes.func,
-    setFieldsValue: PropTypes.func,
-    validateFields: PropTypes.func
   }).isRequired
 };
 
@@ -741,4 +682,4 @@ NormalProposal.defaultProps = {
   contractAddress: ''
 };
 
-export default Form.create()(NormalProposal);
+export default NormalProposal;
