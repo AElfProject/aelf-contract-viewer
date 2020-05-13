@@ -25,7 +25,7 @@ import {
   If,
   Then
 } from 'react-if';
-import Total from '../../components/Total';
+import Total from '../../../../components/Total';
 import constants, { LOADING_STATUS, LOG_STATUS } from '../../common/constants';
 import Organization from './Organization';
 import {
@@ -33,7 +33,7 @@ import {
 } from '../../actions/proposalDetail';
 import { getOrganizations } from '../../actions/organizationList';
 import './index.less';
-import { innerHeight, sendMessage } from '../../../../common/utils';
+import { removePrefixOrSuffix, sendHeight } from '../../../../common/utils';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -77,11 +77,7 @@ const OrganizationList = () => {
   }, [params.search]);
 
   useEffect(() => {
-    innerHeight(500).then(height => {
-      sendMessage({ height });
-    }).catch(err => {
-      console.error(err);
-    });
+    sendHeight(500);
   }, [list]);
 
   const onPageNumChange = pageNum => fetchList({
@@ -94,7 +90,7 @@ const OrganizationList = () => {
       fetchList({
         ...params,
         pageNum: 1,
-        search: value.trim()
+        search: removePrefixOrSuffix(value.trim())
       });
     }
   };

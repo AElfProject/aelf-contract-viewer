@@ -16,6 +16,9 @@ const {
   Tokens
 } = require('viewer-orm/model/tokens');
 const {
+  Members
+} = require('viewer-orm/model/members');
+const {
   deserializeLogs
 } = require('../utils');
 const config = require('../config');
@@ -98,6 +101,25 @@ async function organizationCreatedInserter(formattedData) {
         proposalType,
         relatedTxId: txId
       }));
+      if (proposalType === config.constants.proposalTypes.ASSOCIATION) {
+        const {
+          organizationMemberList = {}
+        } = leftOrgInfo;
+        const {
+          organizationMembers = []
+        } = organizationMemberList;
+        return Promise.all([
+          Organizations.create({
+            ...item,
+            releaseThreshold
+          }, { transaction: t }),
+          Proposers.bulkCreate(proposers, { transaction: t }),
+          Members.bulkCreate((organizationMembers || []).map(v => ({
+            member: v,
+            orgAddress
+          })), { transaction: t })
+        ]);
+      }
       return Promise.all([
         Organizations.create({
           ...item,
@@ -185,6 +207,38 @@ async function organizationUpdatedInsert(transaction) {
           transaction: t
         }),
         Proposers.bulkCreate(proposers, { transaction: t })
+      ]);
+    }
+    if (name === 'OrganizationMemberChanged') {
+      const {
+        organizationMemberList = {}
+      } = leftOrgInfo;
+      const {
+        organizationMembers = []
+      } = organizationMemberList;
+      const members = (organizationMembers || []).map(v => ({
+        member: v,
+        orgAddress
+      }));
+      // 不可在事务中删除
+      await Members.destroy({
+        where: {
+          orgAddress
+        }
+      });
+      return Promise.all([
+        Organizations.update({
+          orgHash,
+          releaseThreshold,
+          leftOrgInfo,
+          updatedAt: time
+        }, {
+          where: {
+            orgAddress
+          },
+          transaction: t
+        }),
+        Members.bulkCreate(members, { transaction: t })
       ]);
     }
     return Organizations.update({

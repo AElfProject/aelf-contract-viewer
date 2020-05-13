@@ -8,8 +8,7 @@ import {
   Switch,
   Redirect,
   Route,
-  useLocation,
-  Link
+  useLocation
 } from 'react-router-dom';
 import useUseLocation from 'react-use/lib/useLocation';
 import {
@@ -33,24 +32,45 @@ import OrganizationList from './containers/OrganizationList';
 import CreateProposal from './containers/CreateProposal';
 import CreateOrganization from './containers/CreateOrganization';
 import ProposalDetail from './containers/ProposalDetail';
+import MyProposal from './containers/MyProposal';
 import Rules from './components/Rules';
 import {
-  innerHeight,
   sendMessage
 } from '../../common/utils';
 
 const { TabPane } = Tabs;
 
-const ROUTES_TABS = [
-  'proposals',
-  'organizations',
-  'apply'
-];
+const ROUTES_UNDER_TABS = {
+  proposals: [
+    'proposals',
+    'proposalDetails'
+  ],
+  organizations: [
+    'organizations',
+    'createOrganizations'
+  ],
+  apply: [
+    'apply'
+  ],
+  myProposals: [
+    'myProposals'
+  ]
+};
 
 function useRouteMatch(path) {
-  const pathKey = path.replace(/\//, '').toLowerCase();
+  const pathKey = path.split('/')[1];
+  let result = 'proposals';
   try {
-    return ROUTES_TABS.filter(v => pathKey.indexOf(v.toLowerCase()) > -1)[0] || 'proposals';
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key of Object.keys(ROUTES_UNDER_TABS)) {
+      const l = ROUTES_UNDER_TABS[key].filter(v => v === pathKey);
+      if (l.length > 0) {
+        // eslint-disable-next-line prefer-destructuring
+        result = l[0];
+        break;
+      }
+    }
+    return result;
   } catch (e) {
     return 'proposals';
   }
@@ -71,12 +91,7 @@ const App = () => {
     sendMessage({
       href: fullPath.href
     });
-    innerHeight(500).then(height => {
-      sendMessage({ height });
-    }).catch(err => {
-      console.error(err);
-    });
-    console.log(fullPath);
+    // sendHeight(500);
   }, [fullPath]);
 
   useEffect(() => {
@@ -121,10 +136,13 @@ const App = () => {
           </>
         )}
       >
-        <TabPane tab={(<Link className="tab-link" to="/proposals">Proposals</Link>)} key="proposals" />
+        <TabPane tab="Proposals" key="proposals" />
         {logStatus === LOG_STATUS.LOGGED
           ? <TabPane tab="Apply" key="apply" /> : null}
-        <TabPane tab={(<Link className="tab-link" to="/organizations">Organizations</Link>)} key="organizations" />
+        <TabPane tab="Organizations" key="organizations" />
+        {logStatus === LOG_STATUS.LOGGED
+          ? <TabPane tab="My Proposals" key="myProposals" />
+          : null}
       </Tabs>
       <div className="proposal-container">
         <Switch>
@@ -147,6 +165,12 @@ const App = () => {
             {
               logStatus === LOG_STATUS.LOGGED
                 ? <CreateProposal /> : <Redirect to="/proposals" />
+            }
+          </Route>
+          <Route path="/myProposals">
+            {
+              logStatus === LOG_STATUS.LOGGED
+                ? <MyProposal /> : <Redirect to="/proposals" />
             }
           </Route>
           <Route path="/createOrganizations">

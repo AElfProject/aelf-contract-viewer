@@ -405,6 +405,7 @@ const NormalProposal = props => {
         orgAddress: true
       });
       list = await getOrganizationBySearch(wallet, currentWallet, type);
+      list = list.list || [];
     } catch (e) {
       message.error(e.message || 'Querying contract address list failed!');
     } finally {
@@ -477,7 +478,6 @@ const NormalProposal = props => {
         //   throw new Error(`Contract params ${error}`);
         // }
       } else {
-        console.log(leftParams.realSpecialPlain);
         parsed = parseJSON(leftParams.realSpecialPlain);
         // 无法verify
         // const error = inputType.verify(parsedParamsWithoutSpecial(inputType, parsed));
@@ -507,7 +507,6 @@ const NormalProposal = props => {
         }
       });
     } catch (e) {
-      console.log(e);
       message.error(e.message || 'Please input the required form!');
     }
   };

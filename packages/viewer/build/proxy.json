@@ -1,6 +1,6 @@
 [
   {
-    "target": "http://18.162.41.20:8000",
+    "target": "http://192.168.199.205:8000",
     "context": [
       "/api/blockChain"
     ],
@@ -10,6 +10,16 @@
   },
   {
     "target": "http://127.0.0.1:7740",
+    "context": [
+      "/api/viewer",
+      "/api/proposal"
+    ],
+    "headers": {
+      "Host": "test.aelf.io"
+    }
+  },
+  {
+    "target": "http://127.0.0.1:7101",
     "context": [
       "/api"
     ],

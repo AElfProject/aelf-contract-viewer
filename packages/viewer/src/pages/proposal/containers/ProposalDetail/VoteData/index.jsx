@@ -10,7 +10,6 @@ import {
   Button,
   Card
 } from 'antd';
-import moment from 'moment';
 import VoteChart from '../../../components/VoteChart';
 import constants, {
   organizationInfoPropTypes
@@ -39,14 +38,9 @@ const VoteData = props => {
   } = props;
   const [canThisUserVote, setCanThisVote] = useState(false);
   useEffect(() => {
-    let realProposalStatus = status;
-    if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-      // eslint-disable-next-line max-len
-      realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
-    }
     setCanThisVote((
-      realProposalStatus === proposalStatus.PENDING
-      || realProposalStatus === proposalStatus.APPROVED
+      status === proposalStatus.PENDING
+      || status === proposalStatus.APPROVED
     ) && votedStatus === 'none' && canVote);
   }, [status, votedStatus, expiredTime]);
   return (

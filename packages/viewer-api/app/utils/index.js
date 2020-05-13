@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
+const moment = require('moment');
 
 let zero = null;
 let wallet = null;
@@ -59,10 +60,26 @@ async function deserializeLog(log) {
   return contract.deserializeLog([ log ], Name);
 }
 
+function getActualProposalStatus(proposalInfo, proposalStatus) {
+  let {
+    status,
+    expiredTime
+  } = proposalInfo;
+  if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
+    // eslint-disable-next-line max-len
+    status = moment(expiredTime).isBefore(moment()) ? proposalStatus.EXPIRED : status;
+  }
+  return {
+    ...proposalInfo,
+    status
+  };
+}
+
 
 module.exports = {
   getContract,
   getTxResult,
   parseJSON,
-  deserializeLog
+  deserializeLog,
+  getActualProposalStatus
 };

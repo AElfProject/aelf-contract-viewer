@@ -51,6 +51,56 @@ class VotesController extends Controller {
     }
   };
 
+  allVotesRules = {
+    search: {
+      type: 'string',
+      required: false,
+      allowEmpty: true,
+      trim: true
+    },
+    pageSize: {
+      type: 'int',
+      convertType: 'int',
+      min: 10,
+      required: true
+    },
+    pageNum: {
+      type: 'int',
+      convertType: 'int',
+      min: 1,
+      required: true
+    },
+    address: {
+      type: 'string',
+      required: true
+    }
+  };
+
+  async getAllPersonalVotes() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(this.allVotesRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        pageSize,
+        pageNum,
+        search = '',
+        address
+      } = ctx.request.query;
+      const list = await app.model.Votes.allPersonVote(
+        address,
+        pageSize,
+        pageNum,
+        search
+      );
+      this.sendBody(list);
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
 
   async getPersonalList() {
     const { ctx, app } = this;
@@ -63,12 +113,6 @@ class VotesController extends Controller {
         proposalId,
         address
       } = ctx.request.query;
-      const {
-        isAudit
-      } = ctx;
-      if (!isAudit) {
-        throw new Error('need log in and sign');
-      }
       const list = await app.model.Votes.personalVoteHistory(address, proposalId);
       this.sendBody(list);
     } catch (e) {

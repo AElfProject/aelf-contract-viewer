@@ -59,7 +59,6 @@ const sendTransaction = async (wallet, contractAddress, method, param) => {
     param,
     contractMethod: method
   });
-  console.log(result);
   showTransactionResult(result);
   return result;
 };

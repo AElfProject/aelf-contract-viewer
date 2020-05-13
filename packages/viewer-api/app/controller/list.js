@@ -28,7 +28,10 @@ class ListController extends Controller {
   async getList() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(getListRules, ctx.request.query);
+      const errors = app.validator.validate(getListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         address = '',
         pageSize = 10,

@@ -119,8 +119,8 @@ function formatTimestamp(timestamp) {
   return moment(time);
 }
 
-function asyncFilter(array, predicate) {
-  return Promise.all(array.map((v, i) => predicate(v, i)))
+function asyncFilter(array, predicate, ...args) {
+  return Promise.all(array.map(v => predicate(v, ...args)))
     .then(results => array.filter((_, i) => results[i]));
 }
 

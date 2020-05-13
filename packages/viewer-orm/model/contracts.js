@@ -138,7 +138,7 @@ class Contracts extends Model {
         ['id', 'DESC']
       ],
       offset: (pageNum - 1) * pageSize,
-      limit: pageSize
+      limit: +pageSize
     });
     const total = result.count;
     const list = result.rows.map(v => v.toJSON());

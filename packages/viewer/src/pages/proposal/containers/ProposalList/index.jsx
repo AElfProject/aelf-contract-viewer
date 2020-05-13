@@ -19,7 +19,7 @@ import {
   Empty,
   Result
 } from 'antd';
-import Total from '../../components/Total';
+import Total from '../../../../components/Total';
 import constants, { LOADING_STATUS, LOG_STATUS } from '../../common/constants';
 import Proposal from './Proposal';
 import { getProposals } from '../../actions/proposalList';
@@ -30,7 +30,7 @@ import {
   sendTransaction,
   getSignParams
 } from '../../common/utils';
-import { innerHeight, sendMessage } from '../../../../common/utils';
+import { removePrefixOrSuffix, sendHeight } from '../../../../common/utils';
 import { LOG_IN_ACTIONS } from '../../actions/common';
 
 const { TabPane } = Tabs;
@@ -69,11 +69,7 @@ const ProposalList = () => {
   // const { proposalType } = useParams();
 
   useEffect(() => {
-    innerHeight(500).then(height => {
-      sendMessage({ height });
-    }).catch(err => {
-      console.error(err);
-    });
+    sendHeight(500);
   }, [list]);
 
   const fetchList = async param => {
@@ -106,12 +102,12 @@ const ProposalList = () => {
     pageNum
   });
 
-  const onSearch = value => {
+  const onSearch = async value => {
     if (value && value.trim().length > 0) {
-      fetchList({
+      await fetchList({
         ...params,
         pageNum: 1,
-        search: value.trim()
+        search: removePrefixOrSuffix((value || '').trim())
       });
     }
   };

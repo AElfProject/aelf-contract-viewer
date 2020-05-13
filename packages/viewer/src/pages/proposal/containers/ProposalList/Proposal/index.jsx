@@ -99,15 +99,10 @@ const Proposal = props => {
     handleReject,
     handleAbstain
   } = props;
-  let realProposalStatus = status;
-  if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-    // eslint-disable-next-line max-len
-    realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
-  }
 
   const canThisUserVote = (
-    realProposalStatus === proposalStatus.PENDING
-    || realProposalStatus === proposalStatus.APPROVED
+    status === proposalStatus.PENDING
+    || status === proposalStatus.APPROVED
   ) && votedStatus === 'none' && canVote;
   const canRelease = logStatus === LOG_STATUS.LOGGED && currentAccount && proposer === currentAccount;
 
@@ -135,10 +130,10 @@ const Proposal = props => {
               ? (<Tag color="purple">{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
           </div>
           <div className="proposal-list-item-id-status">
-            <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>
-              {PROPOSAL_STATUS_CAPITAL[realProposalStatus]}
+            <Tag color={STATUS_COLOR_MAP[status]}>
+              {PROPOSAL_STATUS_CAPITAL[status]}
             </Tag>
-            {realProposalStatus === proposalStatus.APPROVED && canRelease
+            {status === proposalStatus.APPROVED && canRelease
               // eslint-disable-next-line max-len
               ? (<Button proposal-id={proposalId} type="link" size="small" onClick={handleRelease}>Release&gt;</Button>) : null}
           </div>

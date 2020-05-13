@@ -144,6 +144,42 @@ class Votes extends Model {
     });
   }
 
+  static async allPersonVote(voter, pageSize, pageNum, search = '') {
+    let whereCondition = {
+      voter
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        proposalId: {
+          [Op.substring]: search
+        }
+      };
+    }
+    const result = await Votes.findAndCountAll({
+      attributes: [
+        'txId',
+        'voter',
+        'amount',
+        'symbol',
+        'action',
+        'time'
+      ],
+      order: [
+        ['id', 'DESC']
+      ],
+      where: whereCondition,
+      limit: +pageSize,
+      offset: (pageNum - 1) * pageSize
+    });
+    const total = result.count;
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
+  }
+
   static async voteHistory(proposalId, pageSize, pageNum, search) {
     let whereCondition = {
       proposalId
@@ -178,7 +214,7 @@ class Votes extends Model {
         ['id', 'DESC']
       ],
       where: whereCondition,
-      limit: pageSize,
+      limit: +pageSize,
       offset: (pageNum - 1) * pageSize
     });
     const total = result.count;

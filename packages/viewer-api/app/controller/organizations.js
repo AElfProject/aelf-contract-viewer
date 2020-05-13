@@ -91,6 +91,103 @@ class OrganizationsController extends Controller {
     }
   }
 
+  async getAuditListByPage() {
+    const { ctx, app } = this;
+    const { config } = app;
+    try {
+      const errors = app.validator.validate(this.auditListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        address,
+        pageSize,
+        pageNum,
+        search = '',
+        proposalType
+      } = ctx.request.query;
+      let list = [];
+      let total = 0;
+      // 根据用户地址查询有权限使用的组织全列表
+      if (proposalType === config.constants.proposalTypes.PARLIAMENT) {
+        const { BPList = [], parliamentProposerList = [] } = app.cache;
+        // 如果为BP节点，则所有的Parliament组织均可创建提案
+        const isBp = BPList.includes(address);
+        // 如果在白名单里，则所有的Parliament组织均可创建提案
+        const isProposer = parliamentProposerList.includes(address);
+        const organizationList = await app.model.Organizations.getAuditOrganizations(proposalType, search);
+        list = organizationList.filter(item => {
+          const {
+            leftOrgInfo
+          } = item;
+          const { proposerAuthorityRequired } = leftOrgInfo;
+          return isBp || !proposerAuthorityRequired || isProposer;
+        }).map(v => v.orgAddress);
+        total = list.length;
+        list = list.slice((pageNum - 1) * pageSize, pageNum * pageSize);
+        list = await app.model.Organizations.getBatchOrganizations(list);
+      } else {
+        const results = await app.model.Proposers.getOrganizationsByPage(proposalType, address, pageNum, pageSize, search);
+        total = results.total;
+        list = results.list.map(item => item.orgAddress);
+        list = await app.model.Organizations.getBatchOrganizations(list);
+      }
+      this.sendBody({
+        list,
+        total
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async getOrgOfOwner() {
+    const { ctx, app } = this;
+    const { config } = app;
+    try {
+      const errors = app.validator.validate(this.auditListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        address,
+        pageSize,
+        pageNum,
+        search = '',
+        proposalType
+      } = ctx.request.query;
+      let list = [];
+      let total = 0;
+      // 根据用户地址查询有权限使用的组织全列表
+      if (proposalType === config.constants.proposalTypes.PARLIAMENT) {
+        const { BPList = [] } = app.cache;
+        // 如果为BP节点，则所有的Parliament组织均可创建提案
+        const isBp = BPList.includes(address);
+        if (isBp) {
+          const results = await app.model.Organizations.getOrganizations(proposalType, pageNum, pageSize, search);
+          list = results.list;
+          total = results.total;
+        }
+      } else if (proposalType === config.constants.proposalTypes.ASSOCIATION) {
+        const results = await app.model.Members.getOrgAddressByMember(address, pageNum, pageSize, search);
+        total = results.total;
+        list = await app.model.Organizations.getBatchOrganizations(results.list.map(v => v.orgAddress));
+      } else if (proposalType === config.constants.proposalTypes.REFERENDUM) {
+        const results = await app.model.Organizations.getOrganizations(proposalType, pageNum, pageSize, search);
+        list = results.list;
+        total = results.total;
+      }
+      this.sendBody({
+        list,
+        total
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
   async getList() {
     const { ctx, app } = this;
     try {

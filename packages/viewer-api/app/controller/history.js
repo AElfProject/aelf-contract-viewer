@@ -17,7 +17,10 @@ class HistoryController extends Controller {
   async getHistory() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(getListRules, ctx.request.query);
+      const errors = app.validator.validate(getListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         address
       } = ctx.request.query;

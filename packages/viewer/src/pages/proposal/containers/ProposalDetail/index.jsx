@@ -19,13 +19,13 @@ import {
   Result,
   Row,
   Col,
-  Tabs
+  Tabs,
+  Typography
 } from 'antd';
 import {
   useSelector,
   useDispatch
 } from 'react-redux';
-import Title from 'antd/lib/typography/Title';
 import {
   ACTIONS_ICON_MAP
 } from '../ProposalList/Proposal';
@@ -52,11 +52,14 @@ import {
 } from '../../common/utils';
 import ApproveTokenModal from '../ProposalList/ApproveTokenModal';
 import { LOG_IN_ACTIONS } from '../../actions/common';
-import { innerHeight, sendMessage, validateURL } from '../../../../common/utils';
+import { sendHeight, validateURL } from '../../../../common/utils';
 
 const {
   viewer
 } = config;
+const {
+  Title
+} = Typography;
 
 const {
   TabPane
@@ -112,22 +115,16 @@ CountDown.defaultProps = {
 function Extra(props) {
   const {
     status,
-    expiredTime,
     logStatus,
     currentWallet,
     proposer,
     handleRelease
   } = props;
-  let realProposalStatus = status;
-  if (status === proposalStatus.APPROVED || status === proposalStatus.PENDING) {
-    // eslint-disable-next-line max-len
-    realProposalStatus = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) ? proposalStatus.EXPIRED : status;
-  }
   const canRelease = logStatus === LOG_STATUS.LOGGED && currentWallet && proposer === currentWallet.address;
   return (
     <div className="proposal-list-item-id-status">
-      <Tag color={STATUS_COLOR_MAP[realProposalStatus]}>{PROPOSAL_STATUS_CAPITAL[realProposalStatus]}</Tag>
-      {realProposalStatus === proposalStatus.APPROVED && canRelease
+      <Tag color={STATUS_COLOR_MAP[status]}>{PROPOSAL_STATUS_CAPITAL[status]}</Tag>
+      {status === proposalStatus.APPROVED && canRelease
         // eslint-disable-next-line max-len
         ? (<Button type="link" size="small" onClick={handleRelease}>Release&gt;</Button>) : null}
     </div>
@@ -139,7 +136,6 @@ Extra.propTypes = {
     address: PropTypes.string,
     publicKey: PropTypes.string
   }).isRequired,
-  expiredTime: PropTypes.string.isRequired,
   status: PropTypes.oneOf(Object.values(proposalStatus)).isRequired,
   logStatus: PropTypes.oneOf(Object.values(LOG_STATUS)).isRequired,
   proposer: PropTypes.string.isRequired,
@@ -181,11 +177,7 @@ const ProposalDetail = () => {
         parliamentProposerList: result.parliamentProposerList,
         loadingStatus: LOADING_STATUS.SUCCESS
       });
-      innerHeight(1200).then(height => {
-        sendMessage({ height });
-      }).catch(err => {
-        console.error(err);
-      });
+      sendHeight(800);
     }).catch(e => {
       console.error(e);
       setInfo({

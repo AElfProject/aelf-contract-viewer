@@ -11,7 +11,69 @@ const SCAN_TAGS = {
   PROPOSAL_VOTED: 'PROPOSAL_VOTED',
   PROPOSAL_RELEASED: 'PROPOSAL_RELEASED',
   ORGANIZATION_UPDATED: 'ORGANIZATION_UPDATED',
-  PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED'
+  PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
+  TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED'
+};
+
+const TOKEN_BALANCE_CHANGED_EVENT = [
+  {
+    type: 'Name',
+    filterText: 'Transferred',
+    formatter(eventResult) {
+      const {
+        from,
+        to,
+        symbol
+      } = eventResult;
+      return [
+        {
+          owner: from,
+          symbol
+        },
+        {
+          owner: to,
+          symbol
+        }
+      ];
+    }
+  },
+  {
+    type: 'Name',
+    filterText: 'Burned',
+    formatter(eventResult) {
+      const {
+        burner,
+        symbol
+      } = eventResult;
+      return [
+        {
+          owner: burner,
+          symbol
+        }
+      ];
+    }
+  },
+  {
+    type: 'Name',
+    filterText: 'Issued',
+    formatter(eventResult) {
+      const {
+        to,
+        symbol
+      } = eventResult;
+      return [
+        {
+          owner: to,
+          symbol
+        }
+      ];
+    }
+  }
+];
+
+const EVENT_TYPE_MAP = {
+  Name: AElf.utils.isEventInBloom,
+  Address: AElf.utils.isAddressInBloom
 };
 
 const listeners = [
@@ -54,6 +116,19 @@ const listeners = [
         || AElf.utils.isEventInBloom(bloom, 'OrganizationThresholdChanged');
     },
     tag: SCAN_TAGS.ORGANIZATION_UPDATED
+  },
+  {
+    checker(bloom) {
+      return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
+        const {
+          type,
+          filterText
+        } = event;
+        const func = EVENT_TYPE_MAP[type];
+        return func(bloom, filterText);
+      }).filter(v => v === true).length > 0;
+    },
+    tag: SCAN_TAGS.TOKEN_TRANSFERRED
   }
 ];
 
@@ -71,5 +146,6 @@ const claimed = {
 
 module.exports = {
   SCAN_TAGS,
-  listeners
+  listeners,
+  TOKEN_BALANCE_CHANGED_EVENT
 };

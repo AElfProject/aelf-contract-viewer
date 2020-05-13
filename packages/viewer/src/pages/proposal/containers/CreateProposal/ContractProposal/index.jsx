@@ -159,10 +159,9 @@ const ContractProposal = props => {
         address,
         name
       };
-      console.log(submitObj);
       submit(submitObj);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       message.error(e.message || 'Please input the required form!');
     }
   }

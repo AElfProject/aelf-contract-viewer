@@ -65,7 +65,7 @@ const ContractDetail = props => {
         const decoded = contract[contractMethod].unpackPackedInput(base64ToHex(contractParams));
         setParams(JSON.stringify(decoded, null, 2));
       }).catch(e => {
-        console.log(e);
+        console.error(e);
         // message.error(e.message || 'Chain server is not reachable');
       });
     } else {

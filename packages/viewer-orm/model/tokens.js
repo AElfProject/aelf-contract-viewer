@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
+const Decimal = require('decimal.js');
 const { scanModelOptions } = require('../common/scan');
 
 const {
@@ -33,11 +34,6 @@ const tokensDescription = {
     type: STRING(64),
     allowNull: false,
     field: 'chain_id'
-  },
-  blockHash: {
-    type: STRING(64),
-    allowNull: false,
-    field: 'block_hash'
   },
   tx_id: {
     type: STRING(64),
@@ -71,12 +67,24 @@ class Tokens extends Model {
         }
       };
     }
-    return Tokens.findAll({
-      attributes: ['symbol', 'decimals'],
+    const list = await Tokens.findAll({
+      attributes: ['symbol', 'decimals', 'totalSupply'],
       where: whereCondition,
       order: [
         ['id', 'ASC']
       ]
+    });
+    return (list || []).map(v => ({
+      ...v.toJSON(),
+      totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString()
+    }));
+  }
+
+  static getTokenInfo(symbol) {
+    return Tokens.findOne({
+      where: {
+        symbol
+      }
     });
   }
 

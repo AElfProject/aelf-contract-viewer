@@ -16,11 +16,14 @@ const getCodeRules = {
   }
 };
 
-class HistoryController extends Controller {
+class FileController extends Controller {
   async getFile() {
     const { ctx, app } = this;
     try {
-      app.validator.validate(getCodeRules, ctx.request.query);
+      const errors = app.validator.validate(getCodeRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
       const {
         address,
         codeHash
@@ -56,4 +59,4 @@ class HistoryController extends Controller {
   }
 }
 
-module.exports = HistoryController;
+module.exports = FileController;

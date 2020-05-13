@@ -10,9 +10,9 @@ import {
   Table,
   Pagination,
   message,
-  Tag
+  Tag,
+  Typography
 } from 'antd';
-import Title from 'antd/lib/typography/Title';
 import Decimal from 'decimal.js';
 import moment from 'moment';
 import {
@@ -21,7 +21,7 @@ import {
 } from 'react-if';
 import config from '../../../../../common/config';
 import { request } from '../../../../../common/request';
-import Total from '../../../components/Total';
+import Total from '../../../../../components/Total';
 import constants, {
   API_PATH,
   LOG_STATUS,
@@ -34,7 +34,11 @@ import {
   sendTransaction
 } from '../../../common/utils';
 import './index.less';
+import { removePrefixOrSuffix } from '../../../../../common/utils';
 
+const {
+  Title
+} = Typography;
 const {
   viewer
 } = config;
@@ -217,7 +221,7 @@ const VoteDetail = props => {
     fetchList({
       ...list.params,
       pageNum: 1,
-      search: value
+      search: removePrefixOrSuffix((value || '').trim())
     });
   }
 

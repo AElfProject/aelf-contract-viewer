@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 const JSONEditor = props => {
-  console.log(props);
   const {
     value,
     type,

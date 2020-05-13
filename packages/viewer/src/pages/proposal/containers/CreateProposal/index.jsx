@@ -32,7 +32,7 @@ const {
 async function addContractName(wallet, currentWallet, params) {
   const signedParams = await getSignParams(wallet, currentWallet);
   if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.GET_AUDIT_ORGANIZATIONS, {
+    return request(API_PATH.ADD_CONTRACT_NAME, {
       ...params,
       ...signedParams,
     });

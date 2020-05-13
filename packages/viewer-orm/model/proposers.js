@@ -56,6 +56,45 @@ const proposersDescription = {
 };
 
 class Proposers extends Model {
+  static async getOrganizationsByPage(
+    proposalType,
+    proposer,
+    pageNum,
+    pageSize,
+    search = ''
+  ) {
+    let whereCondition = {
+      proposalType,
+      proposer
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        orgAddress: {
+          [Op.substring]: search
+        }
+      };
+    }
+    const result = await Proposers.findAndCountAll({
+      attributes: [
+        'proposer',
+        'orgAddress'
+      ],
+      order: [
+        ['id', 'DESC']
+      ],
+      where: whereCondition,
+      limit: +pageSize,
+      offset: (pageNum - 1) * pageSize
+    });
+    const total = result.count;
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
+  }
+
   static async getOrganizations(proposalType, proposer, search = '') {
     let whereCondition = {
       proposer,

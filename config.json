@@ -26,7 +26,6 @@
     "AElf.ContractNames.Economic"
   ],
   "viewer": {
-    "viewerUrl": "/viewer/viewer.html",
     "addressUrl": "/address",
     "txUrl": "/tx",
     "blockUrl": "/block",
@@ -35,31 +34,56 @@
       {
         "contractName": "Genesis",
         "description": "contract Genesis",
-        "contractAddress": "2gaQh4uxg6tzyH1ADLoDxvHA14FMpzEiMqsQ6sDG5iHT8cmjp8"
+        "contractAddress": "pykr77ft9UUKJZLVq15wCH8PinBSjVRQ12sD1Ayq92mKFsJ1i"
       },
       {
         "description": "contract Token",
-        "contractAddress": "25CecrU94dmMdbhC3LWMKxtoaL4Wv8PChGvVJM6PxkHAyvXEhB",
+        "contractAddress": "JRmBduh4nXWi1aXgdUsj5gJrzeZb2LxmrAbf7W99faZSvoAaE",
         "contractName": "Token"
       },
       {
+        "description": "contract Dividend",
+        "contractAddress": "KNdM6U6PyPsgyena8rPHTbCoMrkrALhxAy1b8Qx2cgi4169xr",
+        "contractName": "Dividend"
+      },
+      {
+        "description": "contract Consensus",
+        "contractAddress": "pGa4e5hNGsgkfjEGm72TEvbF7aRDqKBd4LuXtab4ucMbXLcgJ",
+        "contractName": "Consensus.Dpos"
+      },
+      {
+        "description": "contract Token Converter",
+        "contractAddress": "SietKh9cArYub9ox6E4rU94LrzPad6TB72rCwe3X1jQ5m1C34",
+        "contractName": "Token Converter"
+      },
+      {
+        "description": "contract Election",
+        "contractAddress": "NrVf8B7XUduXn1oGHZeF1YANFXEXAhvCymz2WPyKZt4DE2zSg",
+        "contractName": "Election"
+      },
+      {
+        "description": "contract Profit",
+        "contractAddress": "2ZUgaDqWSh4aJ5s5Ker2tRczhJSNep4bVVfrRBRJTRQdMTbA5W",
+        "contractName": "Profit"
+      },
+      {
         "description": "contract Parliament",
-        "contractAddress": "R8nWLhsyLsY9Di4ULKQ41ddV8j1HbLikT3RjbLBDPGxnJFCv3",
+        "contractAddress": "2JT8xzjR5zJ8xnBvdgBZdSjfbokFSbF5hDdpUCbXeWaJfPDmsK",
         "contractName": "Parliament"
       },
       {
         "description": "contract Association",
-        "contractAddress": "29RDBXTqwnpWPSPHGatYsQXW2E17YrQUCj7QhcEZDnhPb6ThHW",
+        "contractAddress": "XyRN9VNabpBiVUFeX2t7ZUR2b3tWV7U31exufJ2AUepVb5t56",
         "contractName": "Association"
       },
       {
         "description": "contract Referendum",
-        "contractAddress": "2F5C128Srw5rHCXoSY2C7uT5sAku48mkgiaTTp1Hiprhbb7ED9",
+        "contractAddress": "NxSBGHE3zs85tpnX1Ns4awQUtFL8Dnr6Hux4C4E18WZsW4zzJ",
         "contractName": "Referendum"
       },
       {
         "description": "contract CrossChain",
-        "contractAddress": "x7G7VYqqeVAH8aeAsb7gYuTQ12YS1zKuxur9YES3cUj72QMxJ",
+        "contractAddress": "2SQ9LeGZYSWmfJcYuQkDQxgd3HzwjamAaaL4Tge2eFSXw2cseq",
         "contractName": "CrossChain"
       }
     ]
@@ -71,9 +95,11 @@
       "ASSOCIATION": "Association"
     },
     "proposalStatus": {
+      "ALL": "all",
       "PENDING": "pending",
       "APPROVED": "approved",
-      "RELEASED": "released"
+      "RELEASED": "released",
+      "EXPIRED": "expired"
     },
     "proposalActions": {
       "APPROVE": "Approve",

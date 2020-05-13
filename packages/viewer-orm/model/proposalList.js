@@ -350,7 +350,43 @@ class ProposalList extends Model {
         ['id', 'DESC']
       ],
       offset: (pageNum - 1) * pageSize,
-      limit: pageSize
+      limit: +pageSize
+    });
+    const total = result.count;
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
+  }
+
+  static async getAppliedProposal(
+    address,
+    proposalType,
+    pageNum,
+    pageSize,
+    search = ''
+  ) {
+    let whereCondition = {
+      proposalType,
+      proposer: address
+    };
+    if ((search || '').trim().length > 0) {
+      whereCondition = {
+        ...whereCondition,
+        proposalId: {
+          [Op.substring]: search
+        }
+      };
+    }
+    const result = await ProposalList.findAndCountAll({
+      attributes: ['proposalId', 'createAt', 'createTxId', 'status', 'expiredTime'],
+      where: whereCondition,
+      order: [
+        ['id', 'DESC']
+      ],
+      offset: (pageNum - 1) * pageSize,
+      limit: +pageSize
     });
     const total = result.count;
     const list = result.rows.map(v => v.toJSON());

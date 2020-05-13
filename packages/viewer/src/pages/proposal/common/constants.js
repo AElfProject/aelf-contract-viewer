@@ -14,14 +14,17 @@ export const API_PATH = {
   GET_ALL_CONTRACTS: '/api/viewer/allContracts',
   GET_PROPOSAL_LIST: '/api/proposal/list',
   GET_PROPOSAL_INFO: '/api/proposal/proposalInfo',
-  GET_TOKEN_LIST: '/api/proposal/tokenList',
   CHECK_CONTRACT_NAME: '/api/proposal/checkContractName',
   ADD_CONTRACT_NAME: '/api/proposal/addContractName',
   GET_AUDIT_ORGANIZATIONS: '/api/proposal/auditOrganizations',
   GET_ORGANIZATIONS: '/api/proposal/organizations',
   GET_VOTED_LIST: '/api/proposal/votedList',
   GET_PERSONAL_VOTED_LIST: '/api/proposal/personalVotedList',
-  GET_CONTRACT_NAME: '/api/viewer/getContractName'
+  GET_CONTRACT_NAME: '/api/viewer/getContractName',
+  GET_AUDIT_ORG_BY_PAGE: '/api/proposal/auditOrganizationsByPage',
+  GET_ORG_OF_OWNER: '/api/proposal/orgOfOwner',
+  GET_APPLIED_PROPOSALS: '/api/proposal/appliedList',
+  GET_ALL_PERSONAL_VOTES: '/api/proposal/allPersonalVotes'
 };
 
 export const LOG_STATUS = {
@@ -82,17 +85,11 @@ export const ACTIONS_COLOR_MAP = {
   [proposalActions.ABSTAIN]: '#646464',
 };
 
-const fullProposalStatus = {
-  ...proposalStatus,
-  ALL: 'all',
-  EXPIRED: 'expired'
-};
-
 export const STATUS_COLOR_MAP = {
-  [fullProposalStatus.PENDING]: '#d34a64',
-  [fullProposalStatus.APPROVED]: '#05ac90',
-  [fullProposalStatus.RELEASED]: '#5c28a9',
-  [fullProposalStatus.EXPIRED]: '#646464',
+  [proposalStatus.PENDING]: '#d34a64',
+  [proposalStatus.APPROVED]: '#05ac90',
+  [proposalStatus.RELEASED]: '#5c28a9',
+  [proposalStatus.EXPIRED]: '#646464',
 };
 
 export const CONTRACT_TEXT_MAP = {
@@ -104,16 +101,14 @@ export const CONTRACT_TEXT_MAP = {
 export const PROPOSAL_STATUS_CAPITAL = {
   [proposalStatus.PENDING]: 'Pending',
   [proposalStatus.APPROVED]: 'Approved',
-  expired: 'Expired',
+  [proposalStatus.EXPIRED]: 'Expired',
   [proposalStatus.RELEASED]: 'Released',
 };
 
 export default {
   ...constants,
   proposalStatus: {
-    ...proposalStatus,
-    ALL: 'all',
-    EXPIRED: 'expired'
+    ...proposalStatus
   },
   viewer,
   DEFAUT_RPCSERVER:

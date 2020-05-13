@@ -33,6 +33,9 @@ import {
   getContractAddress,
   showTransactionResult
 } from '../../common/utils';
+import {
+  getTokenList
+} from '../../../../common/utils';
 import './index.less';
 
 const {
@@ -232,24 +235,6 @@ const tailFormItemLayout = {
     }
   }
 };
-
-async function getTokenList(search = '') {
-  try {
-    const { list = [] } = await request(API_PATH.GET_TOKEN_LIST, {
-      search
-    }, { method: 'GET' });
-    if (list.length === 0) {
-      throw new Error('Empty token');
-    }
-    return list;
-  } catch (e) {
-    console.error(e);
-    return [{
-      symbol: 'ELF',
-      decimals: 8
-    }];
-  }
-}
 
 const INPUT_PROPS_MAP = {
   [proposalTypes.PARLIAMENT]: {

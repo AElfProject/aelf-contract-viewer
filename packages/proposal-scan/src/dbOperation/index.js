@@ -21,6 +21,9 @@ const {
   proposalReleasedInsert
 } = require('../formatter/proposal');
 const {
+  tokenTransferredInsert
+} = require('../formatter/account');
+const {
   organizationCreatedInsert,
   organizationUpdatedInsert
 } = require('../formatter/organization');
@@ -59,6 +62,11 @@ const INSERT_PHASE = [
     tag: SCAN_TAGS.ORGANIZATION_UPDATED,
     // filter: isOrganizationUpdated,
     insert: organizationUpdatedInsert
+  },
+  {
+    desc: 'token transferred',
+    tag: SCAN_TAGS.TOKEN_TRANSFERRED,
+    insert: tokenTransferredInsert
   }
 ];
 
@@ -161,7 +169,7 @@ class Operation extends DBBaseOperation {
       let filtered = transactions;
       if (filter) {
         // eslint-disable-next-line no-await-in-loop
-        filtered = await asyncFilter(transactions, filter);
+        filtered = await asyncFilter(transactions, filter, type);
       }
       if (reducer) {
         // eslint-disable-next-line no-await-in-loop
@@ -170,7 +178,7 @@ class Operation extends DBBaseOperation {
       // eslint-disable-next-line no-restricted-syntax
       for (const item of filtered) {
         // eslint-disable-next-line no-await-in-loop
-        await insert(item);
+        await insert(item, type);
       }
     }
     if (type !== QUERY_TYPE.MISSING) {

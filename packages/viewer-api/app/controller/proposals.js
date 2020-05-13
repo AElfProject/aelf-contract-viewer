@@ -5,7 +5,8 @@
 const Controller = require('../core/baseController');
 const {
   getTxResult,
-  deserializeLog
+  deserializeLog,
+  getActualProposalStatus
 } = require('../utils');
 
 const paramRules = {
@@ -36,7 +37,7 @@ class ProposalsController extends Controller {
     },
     status: {
       type: 'enum',
-      values: [ 'all', ...Object.values(this.app.config.constants.proposalStatus), 'expired' ],
+      values: Object.values(this.app.config.constants.proposalStatus),
       default: 'all',
       required: false,
     },
@@ -64,6 +65,38 @@ class ProposalsController extends Controller {
       values: [ '0', '1' ],
       default: '0',
       required: false
+    }
+  };
+
+  appliedProposalListRules = {
+    proposalType: {
+      type: 'enum',
+      values: Object.values(this.app.config.constants.proposalTypes),
+      required: true
+    },
+    search: {
+      type: 'string',
+      required: false,
+      allowEmpty: true,
+      trim: true
+    },
+    pageSize: {
+      type: 'int',
+      convertType: 'int',
+      default: 6,
+      min: 6,
+      required: false
+    },
+    pageNum: {
+      type: 'int',
+      convertType: 'int',
+      min: 1,
+      required: false
+    },
+    address: {
+      type: 'string',
+      trim: true,
+      required: true
     }
   };
 
@@ -107,7 +140,7 @@ class ProposalsController extends Controller {
   async getProposalById() {
     const { ctx, app } = this;
     const { config } = app;
-    const { constants: { proposalTypes } } = config;
+    const { constants: { proposalTypes, proposalStatus } } = config;
     try {
       const { BPList = [], parliamentProposerList = [] } = app.cache;
       const errors = app.validator.validate(paramRules, ctx.request.query);
@@ -201,7 +234,7 @@ class ProposalsController extends Controller {
         };
       }
       this.sendBody({
-        proposal,
+        proposal: getActualProposalStatus(proposal, proposalStatus),
         bpList: BPList,
         organization,
         parliamentProposerList
@@ -215,7 +248,7 @@ class ProposalsController extends Controller {
   async getList() {
     const { ctx, app } = this;
     const { config } = app;
-    const { constants: { proposalTypes } } = config;
+    const { constants: { proposalTypes, proposalStatus } } = config;
     try {
       const errors = app.validator.validate(this.proposalListRules, ctx.request.query);
       if (errors) {
@@ -359,7 +392,7 @@ class ProposalsController extends Controller {
       }
       this.sendBody({
         isAudit,
-        list,
+        list: list.map(v => getActualProposalStatus(v, proposalStatus)),
         bpCount: BPList.length,
         total
       });
@@ -464,6 +497,40 @@ class ProposalsController extends Controller {
       this.sendBody({
         list
       });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async appliedProposal() {
+    const { ctx, app } = this;
+    const { config } = app;
+    const { constants: { proposalStatus } } = config;
+    try {
+      const {
+        address,
+        search,
+        pageSize = 20,
+        pageNum = 1,
+        proposalType
+      } = ctx.request.query;
+      const errors = app.validator.validate(this.appliedProposalListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      let result = await app.model.ProposalList.getAppliedProposal(
+        address,
+        proposalType,
+        +pageNum,
+        +pageSize,
+        search
+      );
+      result = {
+        ...result,
+        list: result.list.map(v => getActualProposalStatus(v, proposalStatus))
+      };
+      this.sendBody(result);
     } catch (e) {
       this.error(e);
       this.sendBody();

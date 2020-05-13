@@ -2,6 +2,11 @@
  * @file utils
  * @author atom-yang
  */
+import AElf from 'aelf-sdk';
+import debounce from 'lodash.debounce';
+import { endsWith, startsWith } from 'lodash';
+import config from './config';
+import { request } from './request';
 
 export async function innerHeight(minHeight = 400, time = 0, timeout = 500, maxTime = 10) {
   const currentTime = time + 1;
@@ -32,6 +37,14 @@ export function sendMessage(message = {}, origin = '*') {
     }, origin);
   }
 }
+
+export const sendHeight = debounce(minHeight => {
+  innerHeight(minHeight).then(height => {
+    sendMessage({ height });
+  }).catch(err => {
+    console.error(err);
+  });
+}, 100);
 
 const regWeburl = new RegExp(
   '^'
@@ -76,3 +89,140 @@ const regWeburl = new RegExp(
 );
 
 export const validateURL = url => regWeburl.test(url);
+
+export const removePrefixOrSuffix = address => {
+  let result = address;
+  if (typeof result !== 'string' || !result) {
+    return '';
+  }
+  if (startsWith(result, 'ELF_')) {
+    [, result] = result.split('ELF_');
+  }
+  if (endsWith(result, `_${config.viewer.chainId}`)) {
+    [result] = result.split(`_${config.viewer.chainId}`);
+  }
+  if (/_/.test(result)) {
+    [result] = result.split('_').sort((a, b) => b.length || 0 - a.length || 0);
+  }
+  return result;
+};
+
+const fakeWallet = AElf.wallet.getWalletByPrivateKey(config.wallet.privateKey);
+
+const DEFAUT_RPCSERVER = process.env.NODE_ENV === 'production'
+  ? `${window.location.protocol}//${window.location.host}/chain`
+  : `${window.location.protocol}//${window.location.host}`;
+
+const contractsInstance = {};
+const contractsNamesMap = {};
+const defaultAElfInstance = new AElf(new AElf.providers.HttpProvider(DEFAUT_RPCSERVER));
+
+export async function getContractInstance(address) {
+  if (!contractsInstance[address]) {
+    contractsInstance[address] = await defaultAElfInstance.chain.contractAt(address, fakeWallet);
+  }
+  return contractsInstance[address];
+}
+
+export async function getContractByName(name) {
+  if (!contractsNamesMap[name]) {
+    const {
+      GenesisContractAddress
+    } = await defaultAElfInstance.getChainStatus();
+    const zeroContract = await getContractInstance(GenesisContractAddress);
+    contractsNamesMap[name] = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(name));
+  }
+  return getContractInstance(contractsNamesMap[name]);
+}
+
+export async function getBalances(address, search = '') {
+  try {
+    const balances = await request(config.API_PATH.GET_BALANCES_BY_ADDRESS, {
+      address,
+      search
+    }, {
+      method: 'GET'
+    });
+    if (balances.length === 0) {
+      throw new Error('Zero Balances');
+    }
+    return balances;
+  } catch (e) {
+    console.error(e);
+    return [
+      {
+        balance: 0,
+        symbol: 'ELF'
+      }
+    ];
+  }
+}
+
+export async function getTokenList(search = '') {
+  let tokens;
+  try {
+    const { list = [] } = await request(config.API_PATH.GET_TOKEN_LIST, {
+      search
+    }, {
+      method: 'GET'
+    });
+    if (list.length === 0) {
+      throw new Error('Empty Tokens');
+    }
+    tokens = list;
+  } catch (e) {
+    tokens = [{
+      symbol: 'ELF',
+      decimals: 8,
+      totalSupply: '1000000000'
+    }];
+  }
+  return tokens.reduce((acc, v) => ({
+    ...acc,
+    [v.symbol]: v
+  }), {});
+}
+
+export async function getContractDividend(address) {
+  try {
+    const contract = await getContractInstance(address);
+    if (contract.GetProfitsAmount) {
+      const result = await contract.GetProfitsAmount.call();
+      return result || {};
+    }
+    return {};
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
+}
+
+let CONTRACT_NAMES = {};
+export const getContractNames = async () => {
+  if (Object.keys(CONTRACT_NAMES).length > 0) {
+    return CONTRACT_NAMES;
+  }
+  let res = {};
+  try {
+    res = await request(config.API_PATH.GET_ALL_CONTRACT_NAME, {}, {
+      method: 'GET'
+    });
+  } catch (e) {
+    return CONTRACT_NAMES;
+  }
+  const {
+    list
+  } = res || {};
+  CONTRACT_NAMES = (list || []).reduce((acc, v) => ({
+    ...acc,
+    [v.address]: v
+  }), {});
+  return CONTRACT_NAMES;
+};
+
+export function removeAElfPrefix(name) {
+  if (/^(AElf\.)(.*?)+/.test(name)) {
+    return name.split('.')[name.split('.').length - 1];
+  }
+  return name;
+}

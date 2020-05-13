@@ -98,7 +98,7 @@ class Transactions extends Model {
       order: [
         ['id', 'ASC']
       ],
-      limit: pageSize,
+      limit: +pageSize,
       offset: pageNum * pageSize
     });
     if (!ids) {
