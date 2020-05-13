@@ -170,7 +170,7 @@ const ContractList = () => {
 
   return (
     <div className="contract-list">
-      <Bread title="Contract" />
+      <Bread title="Contract List" />
       <div className="contract-list-search">
         <h2>&nbsp;</h2>
         <Search

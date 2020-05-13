@@ -68,6 +68,38 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
         }
       ];
     }
+  },
+  {
+    type: 'Name',
+    filterText: 'CrossChainReceived',
+    formatter(eventResult) {
+      const {
+        to,
+        symbol
+      } = eventResult;
+      return [
+        {
+          owner: to,
+          symbol
+        }
+      ];
+    }
+  },
+  {
+    type: 'Name',
+    filterText: 'CrossChainTransferred',
+    formatter(eventResult) {
+      const {
+        from,
+        symbol
+      } = eventResult;
+      return [
+        {
+          owner: from,
+          symbol
+        }
+      ];
+    }
   }
 ];
 

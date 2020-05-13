@@ -71,7 +71,7 @@ const AccountInfo = () => {
     <Layout>
       <Content>
         <div className="main-container">
-          <Bread title="Contract" subTitle={`ELF_${address}_${config.viewer.chainId}`} />
+          <Bread title="Account" subTitle={`ELF_${address}_${config.viewer.chainId}`} />
           <DetailHeader columns={columns} />
           <Tabs>
             <TabPane tab="Transaction" key="transaction">
