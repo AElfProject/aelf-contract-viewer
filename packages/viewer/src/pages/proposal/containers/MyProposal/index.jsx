@@ -4,7 +4,8 @@
  */
 import React, {
   useEffect,
-  useState
+  useState,
+  useMemo
 } from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -214,17 +215,6 @@ const LIST_TABS = {
         }
       },
       {
-        title: 'Token Amount',
-        dataIndex: 'amount',
-        key: 'amount',
-        render(text, record) {
-          if (text) {
-            return <div>{text}&nbsp;${record.symbol}</div>;
-          }
-          return '-';
-        }
-      },
-      {
         title: 'Tx ID',
         dataIndex: 'txId',
         key: 'txId',
@@ -250,6 +240,26 @@ const LIST_TABS = {
     rowKey: 'txId'
   }
 };
+
+const REFERENDUM_TOKEN_COLUMN_ITEM = {
+  title: 'Token Amount',
+  dataIndex: 'amount',
+  key: 'amount',
+  render(text, record) {
+    if (text) {
+      return <div>{text}&nbsp;${record.symbol}</div>;
+    }
+    return '-';
+  }
+};
+
+function getTableColumns(proposalType, currentMenu) {
+  const { columns } = LIST_TABS[currentMenu];
+  if (proposalType === proposalTypes.REFERENDUM && currentMenu === MENU_PATH.VOTES) {
+    return [...columns.slice(0, 2), REFERENDUM_TOKEN_COLUMN_ITEM, ...columns.slice(2)];
+  }
+  return columns;
+}
 
 const MyProposal = () => {
   const [params, setParams] = useState({
@@ -303,7 +313,10 @@ const MyProposal = () => {
       message.error('Network error');
     });
   }
-
+  const tableColumns = useMemo(() => getTableColumns(params.proposalType, params.currentMenu), [
+    params.proposalType,
+    params.currentMenu
+  ]);
   useEffect(() => {
     fetch({
       ...params,
@@ -445,7 +458,7 @@ const MyProposal = () => {
             pageSize={params.pageSize}
             onSearch={onSearch}
             onPageChange={onPageChange}
-            tableColumns={LIST_TABS[params.currentMenu].columns}
+            tableColumns={tableColumns}
             list={result.list}
             total={result.total}
             searchPlaceholder={LIST_TABS[params.currentMenu].placeholder}

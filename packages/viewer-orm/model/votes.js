@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const Sequelize = require('sequelize');
+const Decimal = require('decimal.js');
 const {
   formatTimeWithZone
 } = require('../common/utils');
@@ -55,6 +56,14 @@ const votesDescription = {
     type: DECIMAL(64, 8),
     allowNull: false,
     defaultValue: 0,
+    get() {
+      const amount = this.getDataValue('amount');
+      try {
+        return new Decimal(amount).toString();
+      } catch (e) {
+        return amount;
+      }
+    }
   },
   symbol: {
     type: STRING(255),
@@ -203,6 +212,7 @@ class Votes extends Model {
     }
     const result = await Votes.findAndCountAll({
       attributes: [
+        'proposalId',
         'txId',
         'voter',
         'amount',
