@@ -87,9 +87,11 @@ class VotesController extends Controller {
         pageSize,
         pageNum,
         search = '',
-        address
+        address,
+        proposalType
       } = ctx.request.query;
       const list = await app.model.Votes.allPersonVote(
+        proposalType,
         address,
         pageSize,
         pageNum,

@@ -247,7 +247,7 @@ const REFERENDUM_TOKEN_COLUMN_ITEM = {
   key: 'amount',
   render(text, record) {
     if (text) {
-      return <div>{text}&nbsp;${record.symbol}</div>;
+      return <div>{text}&nbsp;{record.symbol}</div>;
     }
     return '-';
   }

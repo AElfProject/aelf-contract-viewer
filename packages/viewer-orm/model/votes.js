@@ -153,9 +153,10 @@ class Votes extends Model {
     });
   }
 
-  static async allPersonVote(voter, pageSize, pageNum, search = '') {
+  static async allPersonVote(proposalType, voter, pageSize, pageNum, search = '') {
     let whereCondition = {
-      voter
+      voter,
+      proposalType
     };
     if (search) {
       whereCondition = {
@@ -167,6 +168,7 @@ class Votes extends Model {
     }
     const result = await Votes.findAndCountAll({
       attributes: [
+        'proposalId',
         'txId',
         'voter',
         'amount',
@@ -212,7 +214,6 @@ class Votes extends Model {
     }
     const result = await Votes.findAndCountAll({
       attributes: [
-        'proposalId',
         'txId',
         'voter',
         'amount',
