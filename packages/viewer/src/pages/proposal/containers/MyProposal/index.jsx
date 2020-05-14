@@ -337,7 +337,7 @@ const MyProposal = () => {
       search: '',
       address,
       proposalType: type
-    }, MENU_PATH.APPLIED);
+    }, params.currentMenu);
   };
 
   const handleMenuChange = async e => {
