@@ -88,54 +88,52 @@ const ContractDetail = props => {
         )
       }
     >
+      <If condition={!!name}>
+        <Then>
+          <>
+            <Row>
+              <Col span={4}>
+                <span className="sub-title">Contract Name</span>
+              </Col>
+              <Col span={20}>{name}</Col>
+            </Row>
+            <Divider />
+          </>
+        </Then>
+      </If>
       <Row>
-        <If condition={!!name}>
-          <Then>
-            <>
-              <Row>
-                <Col span={4}>
-                  <span className="sub-title">Contract Name</span>
-                </Col>
-                <Col span={20}>{name}</Col>
-              </Row>
-              <Divider />
-            </>
-          </Then>
-        </If>
-        <Row>
-          <Col span={4}>
-            <span className="sub-title">Contract Address</span>
-          </Col>
-          <Col span={20}>
-            <a
-              href={getContractURL(contractAddress)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {`ELF_${contractAddress}_${viewer.chainId}`}
-            </a>
-          </Col>
-        </Row>
-        <Divider />
-        <Row>
-          <Col span={4}>
-            <span className="sub-title">Contract Method Name</span>
-          </Col>
-          <Col span={20}>
-            <Tag color="purple">{contractMethod}</Tag>
-          </Col>
-        </Row>
-        <Divider />
-        <Row>
-          <Col span={4}>
-            <span className="sub-title">Contract Params</span>
-          </Col>
-          <Col span={20}>
-            <pre className="view-params">
-              {params}
-            </pre>
-          </Col>
-        </Row>
+        <Col span={4}>
+          <span className="sub-title">Contract Address</span>
+        </Col>
+        <Col span={20}>
+          <a
+            href={getContractURL(contractAddress)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {`ELF_${contractAddress}_${viewer.chainId}`}
+          </a>
+        </Col>
+      </Row>
+      <Divider />
+      <Row>
+        <Col span={4}>
+          <span className="sub-title">Contract Method Name</span>
+        </Col>
+        <Col span={20}>
+          <Tag color="purple">{contractMethod}</Tag>
+        </Col>
+      </Row>
+      <Divider />
+      <Row>
+        <Col span={4}>
+          <span className="sub-title">Contract Params</span>
+        </Col>
+        <Col span={20}>
+          <pre className="view-params">
+            {params}
+          </pre>
+        </Col>
       </Row>
     </Card>
   );
