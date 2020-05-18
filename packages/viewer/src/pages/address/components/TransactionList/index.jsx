@@ -15,7 +15,7 @@ import {
   message
 } from 'antd';
 import config from '../../../../common/config';
-import { getContractNames, removeAElfPrefix } from '../../../../common/utils';
+import { getContractNames, removeAElfPrefix, sendHeight } from '../../../../common/utils';
 import Total from '../../../../components/Total';
 
 function getTableColumns(contractNames, ownerAddress) {
@@ -187,8 +187,10 @@ const TransactionList = props => {
           ...apiParams,
           loading: false
         });
+        sendHeight(500);
       })
       .catch(e => {
+        sendHeight(500);
         console.error(e);
         message.error('Network error');
       });
