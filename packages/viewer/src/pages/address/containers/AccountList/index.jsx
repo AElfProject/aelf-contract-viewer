@@ -60,7 +60,7 @@ function getListColumn(preTotal) {
       key: 'percentage'
     },
     {
-      title: 'Transactions',
+      title: 'Transfers',
       dataIndex: 'count',
       key: 'count'
     }

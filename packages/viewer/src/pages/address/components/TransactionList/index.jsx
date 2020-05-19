@@ -21,7 +21,7 @@ import Total from '../../../../components/Total';
 function getTableColumns(contractNames, ownerAddress) {
   return [
     {
-      title: 'Tx ID',
+      title: 'Tx Id',
       dataIndex: 'tx_id',
       key: 'tx_id',
       ellipsis: true,
