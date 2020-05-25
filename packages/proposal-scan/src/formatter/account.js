@@ -85,7 +85,7 @@ async function getTokenDecimal(symbol) {
 
 async function calculateBalances(symbol, balance) {
   const decimal = await getTokenDecimal(symbol);
-  return new Decimal(balance).dividedBy(`1e${decimal}`).toString();
+  return new Decimal(balance).dividedBy(`1e${decimal || 8}`).toString();
 }
 
 let BALANCES_NOT_IN_LOOP = {};
@@ -111,7 +111,8 @@ async function tokenTransferredFormatter(transaction, type) {
     }));
 
   addressSymbols = addressSymbols
-    .filter(v => type !== QUERY_TYPE.LOOP && BALANCES_NOT_IN_LOOP[v] === undefined)
+    .filter(v => (type !== QUERY_TYPE.LOOP && BALANCES_NOT_IN_LOOP[v] === undefined)
+      || type === QUERY_TYPE.LOOP)
     .map(v => ({
       owner: v.split('_')[0],
       symbol: v.split('_')[1]
