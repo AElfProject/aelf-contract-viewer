@@ -15,7 +15,8 @@ config = {
       supportBigNumbers: true
     },
     define: {
-      timestamp: false
+      timestamp: false,
+      charset: 'utf8mb4'
     }
   },
   scanSql: {
@@ -26,7 +27,10 @@ config = {
       supportBigNumbers: true
     },
     define: {
-      timestamp: false
+      timestamp: false,
+      define: {
+        timestamp: false
+      }
     }
   }
 };
