@@ -27,10 +27,7 @@ config = {
       supportBigNumbers: true
     },
     define: {
-      timestamp: false,
-      define: {
-        timestamp: false
-      }
+      timestamp: false
     }
   }
 };
