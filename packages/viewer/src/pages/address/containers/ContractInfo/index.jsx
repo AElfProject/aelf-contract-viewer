@@ -22,7 +22,8 @@ import config from '../../../../common/config';
 import {
   getBalances,
   getContractDividend,
-  getTokenList, sendHeight
+  getTokenList,
+  sendHeight
 } from '../../../../common/utils';
 import Dividends from '../../components/Dividends';
 import '../../../../common/index.less';

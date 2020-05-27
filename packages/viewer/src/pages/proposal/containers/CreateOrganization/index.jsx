@@ -363,8 +363,8 @@ const CreateOrganization = () => {
   });
   // const [whiteList, setWhiteList] = useState([]);
   useEffect(() => {
-    getTokenList().then(list => {
-      setTokenList(list);
+    getTokenList().then(tokens => {
+      setTokenList(Object.keys(tokens).map(key => tokens[key]));
     });
     getWhiteList().then(arr => {
       const whiteList = [...arr.bpList, ...arr.parliamentProposerList];
