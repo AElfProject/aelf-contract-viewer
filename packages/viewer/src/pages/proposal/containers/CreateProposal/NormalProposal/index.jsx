@@ -405,7 +405,7 @@ const NormalProposal = props => {
         orgAddress: true
       });
       list = await getOrganizationBySearch(wallet, currentWallet, type);
-      list = list.list || [];
+      list = list || [];
     } catch (e) {
       message.error(e.message || 'Querying contract address list failed!');
     } finally {
