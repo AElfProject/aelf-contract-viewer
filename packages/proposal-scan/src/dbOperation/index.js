@@ -21,7 +21,8 @@ const {
   proposalReleasedInsert
 } = require('../formatter/proposal');
 const {
-  tokenTransferredInsert
+  tokenBalanceChangedInsert,
+  transferredInsert
 } = require('../formatter/account');
 const {
   organizationCreatedInsert,
@@ -64,9 +65,14 @@ const INSERT_PHASE = [
     insert: organizationUpdatedInsert
   },
   {
+    desc: 'token balance changed',
+    tag: SCAN_TAGS.TOKEN_BALANCE_CHANGED,
+    insert: tokenBalanceChangedInsert
+  },
+  {
     desc: 'token transferred',
     tag: SCAN_TAGS.TOKEN_TRANSFERRED,
-    insert: tokenTransferredInsert
+    insert: transferredInsert
   }
 ];
 

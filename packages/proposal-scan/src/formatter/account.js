@@ -7,6 +7,9 @@ const {
   Balance
 } = require('viewer-orm/model/balance');
 const {
+  Transfer
+} = require('viewer-orm/model/transfer');
+const {
   Tokens
 } = require('viewer-orm/model/tokens');
 const {
@@ -19,22 +22,24 @@ const {
   deserializeLogs
 } = require('../utils');
 const {
-  TOKEN_BALANCE_CHANGED_EVENT
+  TOKEN_BALANCE_CHANGED_EVENT,
+  TOKEN_TRANSFERRED_EVENT
 } = require('../config/constants');
 const config = require('../config');
 
-
-function deserializeTransferredLogs(logs) {
+function deserializeTransferredLogs(transaction, filters) {
+  const {
+    Logs = []
+  } = transaction;
   return Promise.all(
-    TOKEN_BALANCE_CHANGED_EVENT
-      .filter(v => v.type === 'Name')
+    filters
       .map(f => {
         const {
           formatter,
           filterText
         } = f;
-        return deserializeLogs(logs, filterText)
-          .then(res => res.map(r => formatter(r.deserializeLogResult)));
+        return deserializeLogs(Logs, filterText)
+          .then(res => res.map(r => formatter(r.deserializeLogResult, transaction)));
       })
   );
 }
@@ -46,6 +51,35 @@ async function getBalances(paramsArr, maxQuery = 3) {
       ...results,
       // eslint-disable-next-line no-await-in-loop,max-len
       ...(await Promise.all(paramsArr.slice(i, i + maxQuery).map(v => config.contracts.token.contract.GetBalance.call(v))))
+    ];
+  }
+  return results;
+}
+
+async function getTokenInfo(symbols, maxQuery = 3) {
+  let results = [];
+  for (let i = 0; i < symbols.length; i += maxQuery) {
+    results = [
+      ...results,
+      // eslint-disable-next-line no-await-in-loop,max-len
+      ...(await Promise.all(symbols.slice(i, i + maxQuery).map(async v => {
+        let result;
+        try {
+          result = await config
+            .contracts
+            .token
+            .contract
+            .GetTokenInfo.call({
+              symbol: v
+            });
+        } catch (e) {
+          result = {
+            symbol: v,
+            supply: 0
+          };
+        }
+        return result;
+      })))
     ];
   }
   return results;
@@ -88,20 +122,33 @@ async function calculateBalances(symbol, balance) {
   return new Decimal(balance).dividedBy(`1e${decimal || 8}`).toString();
 }
 
+const TOKEN_SUPPLY_CHANGED_EVENTS = [
+  'Issued',
+  'Burned',
+  'CrossChainTransferred',
+  'CrossChainReceived'
+];
+
+async function changeSupply(symbols) {
+  const tokenInfo = await getTokenInfo(symbols);
+  return Promise.all(tokenInfo.map(v => Tokens.updateTokenSupply(v.symbol, v.supply)));
+}
+
 let BALANCES_NOT_IN_LOOP = {};
 
-async function tokenTransferredFormatter(transaction, type) {
+async function tokenBalanceChangedFormatter(transaction, type) {
   const {
-    Logs = [],
     time
   } = transaction;
-  let addressSymbols = await deserializeTransferredLogs(Logs);
-  addressSymbols = lodash.uniq(
-    addressSymbols
-      .reduce((acc, v) => [...acc, ...v], [])
-      .reduce((acc, v) => [...acc, ...v], [])
-      .map(v => `${v.owner}_${v.symbol}`)
-  );
+  let addressSymbols = await deserializeTransferredLogs(transaction, TOKEN_BALANCE_CHANGED_EVENT);
+  addressSymbols = addressSymbols
+    .reduce((acc, v) => [...acc, ...v], [])
+    .reduce((acc, v) => [...acc, ...v], []);
+  const supplyChanged = addressSymbols.filter(v => TOKEN_SUPPLY_CHANGED_EVENTS.includes(v.action));
+  if (supplyChanged.length > 0) {
+    await changeSupply(supplyChanged.map(v => v.symbol));
+  }
+  addressSymbols = lodash.uniq(addressSymbols.map(v => `${v.owner}_${v.symbol}`));
   const balancesFromCache = addressSymbols
     .filter(v => type !== QUERY_TYPE.LOOP && BALANCES_NOT_IN_LOOP[v] !== undefined)
     .map(key => ({
@@ -141,15 +188,47 @@ async function tokenTransferredFormatter(transaction, type) {
   }));
 }
 
-function tokenTransferredInserter(formattedData) {
+function tokenBalanceChangedInserter(formattedData) {
   return sequelize.transaction(t => Promise.all(formattedData.map(data => Balance.addOrCreate(data, t))));
 }
 
-async function tokenTransferredInsert(transaction, type) {
-  const formattedData = await tokenTransferredFormatter(transaction, type);
-  return tokenTransferredInserter(formattedData);
+async function tokenBalanceChangedInsert(transaction, type) {
+  const formattedData = await tokenBalanceChangedFormatter(transaction, type);
+  return tokenBalanceChangedInserter(formattedData);
+}
+
+async function transferredFormatter(transaction) {
+  const {
+    TransactionId
+  } = transaction;
+  let transferInfo = await deserializeTransferredLogs(transaction, TOKEN_TRANSFERRED_EVENT);
+  transferInfo = transferInfo.reduce((acc, v) => [...acc, ...v], []);
+  return Promise.all(transferInfo.map(async item => {
+    const {
+      amount,
+      symbol
+    } = item;
+    const quantity = await calculateBalances(symbol, amount);
+    return {
+      ...item,
+      amount: quantity,
+      txId: TransactionId
+    };
+  }));
+}
+
+function transferredInserter(formattedData) {
+  return sequelize.transaction(t => Transfer.bulkCreate(formattedData, {
+    transaction: t
+  }));
+}
+
+async function transferredInsert(transaction, type) {
+  const formattedData = await transferredFormatter(transaction, type);
+  return transferredInserter(formattedData);
 }
 
 module.exports = {
-  tokenTransferredInsert
+  tokenBalanceChangedInsert,
+  transferredInsert
 };

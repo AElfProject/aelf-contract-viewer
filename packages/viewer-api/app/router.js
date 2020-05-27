@@ -38,4 +38,9 @@ module.exports = app => {
   router.get('/api/proposal/votedList', controller.votes.getList);
   router.get('/api/proposal/personalVotedList', controller.votes.getPersonalList);
   router.get('/api/proposal/allPersonalVotes', controller.votes.getAllPersonalVotes);
+
+  router.get('/api/viewer/getAllTokens', controller.tokens.getList);
+  router.get('/api/viewer/eventList', controller.events.getList);
+  router.get('/api/viewer/transferList', controller.transfer.getList);
+  router.get('/api/viewer/tokenTxList', controller.tokens.getTransactionList);
 };

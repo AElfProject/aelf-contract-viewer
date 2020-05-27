@@ -5,6 +5,9 @@
 const Sequelize = require('sequelize');
 const Decimal = require('decimal.js');
 const { scanModelOptions } = require('../common/scan');
+const {
+  Balance
+} = require('./balance');
 
 const {
   Model,
@@ -35,7 +38,7 @@ const tokensDescription = {
     allowNull: false,
     field: 'chain_id'
   },
-  tx_id: {
+  txId: {
     type: STRING(64),
     allowNull: false,
     field: 'tx_id'
@@ -49,6 +52,11 @@ const tokensDescription = {
     type: BIGINT,
     allowNull: false,
     field: 'total_supply'
+  },
+  supply: {
+    type: BIGINT,
+    allowNull: false,
+    field: 'supply'
   },
   decimals: {
     type: BIGINT,
@@ -99,6 +107,36 @@ class Tokens extends Model {
       return result.toJSON().decimals;
     }
     return 8;
+  }
+
+  static updateTokenSupply(symbol, supply) {
+    return Tokens.update({
+      supply
+    }, {
+      where: {
+        symbol
+      }
+    });
+  }
+
+  static async getAllToken(pageNum, pageSize) {
+    const offset = (pageNum - 1) * pageSize;
+    let tokenCount = await Balance.getTokenCount();
+    const total = tokenCount.length;
+    tokenCount = tokenCount.sort((a, b) => b.holders - a.holders);
+    const tokenSymbols = tokenCount.slice(offset, offset + pageSize);
+    const result = await Tokens.findAll({
+      where: {
+        symbol: {
+          [Op.in]: tokenSymbols.map(v => v.symbol)
+        }
+      }
+    });
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
   }
 }
 

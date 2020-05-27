@@ -13,6 +13,9 @@ const { Members } = require('viewer-orm/model/members');
 const { Votes } = require('viewer-orm/model/votes');
 const { ContractNames } = require('viewer-orm/model/contractNames');
 const { Balance } = require('viewer-orm/model/balance');
+const { Transfer } = require('viewer-orm/model/transfer');
+const { Events } = require('viewer-orm/model/events');
+const { TokenTx } = require('viewer-orm/model/tokenTx');
 
 module.exports = app => {
   app.cache = {};
@@ -27,6 +30,9 @@ module.exports = app => {
     ContractNames,
     Tokens,
     Members,
-    Balance
+    Balance,
+    Transfer,
+    Events,
+    TokenTx
   };
 };

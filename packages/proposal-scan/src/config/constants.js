@@ -12,12 +12,12 @@ const SCAN_TAGS = {
   PROPOSAL_RELEASED: 'PROPOSAL_RELEASED',
   ORGANIZATION_UPDATED: 'ORGANIZATION_UPDATED',
   PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
+  TOKEN_BALANCE_CHANGED: 'TOKEN_BALANCE_CHANGED',
   TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED'
 };
 
 const TOKEN_BALANCE_CHANGED_EVENT = [
   {
-    type: 'Name',
     filterText: 'Transferred',
     formatter(eventResult) {
       const {
@@ -28,17 +28,18 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
       return [
         {
           owner: from,
-          symbol
+          symbol,
+          action: 'Transferred'
         },
         {
           owner: to,
-          symbol
+          symbol,
+          action: 'Transferred'
         }
       ];
     }
   },
   {
-    type: 'Name',
     filterText: 'Burned',
     formatter(eventResult) {
       const {
@@ -48,13 +49,13 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
       return [
         {
           owner: burner,
-          symbol
+          symbol,
+          action: 'Burned'
         }
       ];
     }
   },
   {
-    type: 'Name',
     filterText: 'Issued',
     formatter(eventResult) {
       const {
@@ -64,13 +65,13 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
       return [
         {
           owner: to,
-          symbol
+          symbol,
+          action: 'Issued'
         }
       ];
     }
   },
   {
-    type: 'Name',
     filterText: 'CrossChainReceived',
     formatter(eventResult) {
       const {
@@ -80,13 +81,13 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
       return [
         {
           owner: to,
-          symbol
+          symbol,
+          action: 'CrossChainReceived'
         }
       ];
     }
   },
   {
-    type: 'Name',
     filterText: 'CrossChainTransferred',
     formatter(eventResult) {
       const {
@@ -96,17 +97,91 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
       return [
         {
           owner: from,
-          symbol
+          symbol,
+          action: 'CrossChainTransferred'
         }
       ];
     }
   }
 ];
 
-const EVENT_TYPE_MAP = {
-  Name: AElf.utils.isEventInBloom,
-  Address: AElf.utils.isAddressInBloom
-};
+const TOKEN_TRANSFERRED_EVENT = [
+  {
+    filterText: 'Transferred',
+    formatter(eventResult) {
+      return {
+        ...eventResult,
+        isCrossChain: 'no',
+        action: 'Transferred',
+        relatedChainId: config.chainId
+      };
+    }
+  },
+  {
+    filterText: 'Issued',
+    formatter(eventResult, transaction) {
+      const {
+        Transaction
+      } = transaction;
+      const {
+        From
+      } = Transaction;
+      return {
+        ...eventResult,
+        from: From,
+        isCrossChain: 'no',
+        action: 'Issued',
+        relatedChainId: config.chainId
+      };
+    }
+  },
+  {
+    filterText: 'CrossChainTransferred',
+    formatter(eventResult) {
+      const {
+        from,
+        to,
+        symbol,
+        amount,
+        memo,
+        toChainId
+      } = eventResult;
+      return {
+        from,
+        to,
+        symbol,
+        amount,
+        memo,
+        isCrossChain: 'Transfer',
+        action: 'CrossChainTransferred',
+        relatedChainId: AElf.utils.chainIdConvertor.chainIdToBase58(+toChainId)
+      };
+    }
+  },
+  {
+    filterText: 'CrossChainReceived',
+    formatter(eventResult) {
+      const {
+        from,
+        to,
+        symbol,
+        amount,
+        memo,
+        fromChainId
+      } = eventResult;
+      return {
+        from,
+        to,
+        symbol,
+        amount,
+        memo,
+        isCrossChain: 'Receive',
+        action: 'CrossChainReceived',
+        relatedChainId: AElf.utils.chainIdConvertor.chainIdToBase58(+fromChainId)
+      };
+    }
+  },
+];
 
 const listeners = [
   {
@@ -153,11 +228,20 @@ const listeners = [
     checker(bloom) {
       return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
         const {
-          type,
           filterText
         } = event;
-        const func = EVENT_TYPE_MAP[type];
-        return func(bloom, filterText);
+        return AElf.utils.isEventInBloom(bloom, filterText);
+      }).filter(v => v === true).length > 0;
+    },
+    tag: SCAN_TAGS.TOKEN_BALANCE_CHANGED
+  },
+  {
+    checker(bloom) {
+      return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
+        const {
+          filterText
+        } = event;
+        return AElf.utils.isEventInBloom(bloom, filterText);
       }).filter(v => v === true).length > 0;
     },
     tag: SCAN_TAGS.TOKEN_TRANSFERRED
@@ -179,5 +263,6 @@ const claimed = {
 module.exports = {
   SCAN_TAGS,
   listeners,
-  TOKEN_BALANCE_CHANGED_EVENT
+  TOKEN_BALANCE_CHANGED_EVENT,
+  TOKEN_TRANSFERRED_EVENT
 };

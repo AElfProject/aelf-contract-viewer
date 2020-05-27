@@ -15,7 +15,9 @@ const {
   DECIMAL,
   DATE,
   NOW,
-  Op
+  Op,
+  fn,
+  col
 } = Sequelize;
 
 const balanceDescription = {
@@ -138,6 +140,17 @@ class Balance extends Model {
         transaction
       });
     }
+  }
+
+  static getTokenCount() {
+    return Balance.findAll({
+      attributes: [
+        'symbol',
+        [fn('COUNT', col('symbol')), 'holders'],
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      group: 'symbol'
+    });
   }
 }
 

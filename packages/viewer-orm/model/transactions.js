@@ -7,6 +7,7 @@ const { scanModelOptions } = require('../common/scan');
 
 const {
   Model,
+  DECIMAL,
   BIGINT,
   STRING,
   TEXT,
@@ -71,6 +72,15 @@ const transactionsDescription = {
     allowNull: false,
     field: 'quantity'
   },
+  txFee: {
+    type: DECIMAL(64, 8),
+    allowNull: false,
+    field: 'tx_fee',
+    defaultValue: 0
+  },
+  resources: {
+    type: STRING(255)
+  },
   txStatus: {
     type: STRING(64),
     allowNull: false,
@@ -84,6 +94,23 @@ const transactionsDescription = {
 };
 
 class Transactions extends Model {
+  static getTransactionsByIds(txIds) {
+    return Transactions.findAll({
+      attributes: [
+        'txId',
+        'time',
+        'method',
+        'txFee',
+        'blockHeight'
+      ],
+      where: {
+        txId: {
+          [Op.in]: txIds
+        }
+      }
+    });
+  }
+
   static async getTransactionsByPage(pageSize, pageNum, lastId, addressTo) {
     const ids = await Transactions.findAll({
       attributes: ['id'],

@@ -15,7 +15,7 @@ const {
   Op
 } = Sequelize;
 
-const balanceDescription = {
+const transferDescription = {
   id: {
     type: BIGINT,
     autoIncrement: true,
@@ -42,6 +42,10 @@ const balanceDescription = {
     defaultValue: 0
   },
   symbol: {
+    type: STRING(255),
+    allowNull: false
+  },
+  action: {
     type: STRING(255),
     allowNull: false
   },
@@ -113,12 +117,12 @@ class Transfer extends Model {
   }
 }
 
-Transfer.init(balanceDescription, {
+Transfer.init(transferDescription, {
   ...commonModelOptions,
   tableName: 'transfer'
 });
 
 module.exports = {
   Transfer,
-  balanceDescription
+  transferDescription
 };
