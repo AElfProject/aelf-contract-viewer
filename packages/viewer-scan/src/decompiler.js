@@ -87,19 +87,29 @@ class Decompiler {
     } = await Code.getCodeById(lastId + 1);
     try {
       const result = await this.getData(code);
-      await Files.create({
-        address,
-        codeHash,
-        files: JSON.stringify(result),
-        status: true
+      await Files.findOrCreate({
+        where: {
+          codeHash
+        },
+        defaults: {
+          address,
+          codeHash,
+          files: JSON.stringify(result),
+          status: true
+        }
       });
     } catch (e) {
       console.error(e);
-      await Files.create({
-        address,
-        codeHash,
-        files: JSON.stringify(e),
-        status: false
+      await Files.findOrCreate({
+        where: {
+          codeHash
+        },
+        defaults: {
+          address,
+          codeHash,
+          files: JSON.stringify(e),
+          status: false
+        }
       });
     }
   }

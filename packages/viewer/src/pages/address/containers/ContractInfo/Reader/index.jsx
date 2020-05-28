@@ -26,6 +26,7 @@ import {
   Divider,
   Alert
 } from 'antd';
+import moment from 'moment';
 import {
   sendHeight
 } from '../../../../../common/utils';
@@ -332,7 +333,7 @@ const Reader = () => {
                       <Step
                         key={v.txId}
                         title={EventMap[v.event]}
-                        subTitle={v.updateTime}
+                        subTitle={moment(v.updateTime).format('YYYY/MM/DD HH:mm:ss')}
                         description={<StepDescription {...v} />}
                       />
                     ))}

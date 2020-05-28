@@ -5,6 +5,7 @@
 import React, { useMemo } from 'react';
 import roundTo from 'round-to';
 import { Switch, Case } from 'react-if';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import { EditOutlined } from '@ant-design/icons';
 import {
@@ -266,7 +267,7 @@ const Organization = props => {
           </div>
           <div className="organization-list-item-info-item">
             <span className="sub-title gap-right">Update Time:</span>
-            <span className="text-ellipsis">{updatedAt}</span>
+            <span className="text-ellipsis">{moment(updatedAt).format('YYYY/MM/DD HH:mm:ss')}</span>
           </div>
         </div>
         <Divider />

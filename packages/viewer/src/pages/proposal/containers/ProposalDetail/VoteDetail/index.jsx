@@ -115,7 +115,10 @@ const listColumn = [
   {
     title: 'Time',
     dataIndex: 'time',
-    key: 'time'
+    key: 'time',
+    render(time) {
+      return moment(time).format('YYYY/MM/DD HH:mm:ss');
+    }
   },
 ];
 
@@ -209,7 +212,7 @@ const VoteDetail = props => {
             list: votes,
             left: left.toString(),
             // eslint-disable-next-line max-len
-            canReclaim: left.gt(0) && (moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ').isBefore(moment()) || status === proposalStatus.RELEASED)
+            canReclaim: left.gt(0) && (moment(expiredTime).isBefore(moment()) || status === proposalStatus.RELEASED)
           });
         }).catch(e => {
           message.error(e.message || 'Get personal vote history failed');

@@ -283,11 +283,11 @@ const ProposalDetail = () => {
                 <Row gutter={48}>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Application Submitted:</span>
-                    <span className="text-ellipsis">{createAt}</span>
+                    <span className="text-ellipsis">{moment(createAt).format('YYYY/MM/DD HH:mm:ss')}</span>
                   </Col>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Proposal Expires:</span>
-                    <span className="text-ellipsis">{expiredTime}</span>
+                    <span className="text-ellipsis">{moment(expiredTime).format('YYYY/MM/DD HH:mm:ss')}</span>
                   </Col>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Proposer:</span>

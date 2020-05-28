@@ -45,7 +45,7 @@ const Title = props => {
     votedStatus,
     expiredTime
   } = props;
-  const momentExpired = moment(expiredTime, 'YYYY/MM/DD HH:mm:ssZ');
+  const momentExpired = moment(expiredTime);
   const now = moment();
   const threshold = moment().add(3, 'days');
   const showExpired = status !== proposalStatus.RELEASED && momentExpired.isAfter(now)
@@ -142,7 +142,7 @@ const Proposal = props => {
         <div className="proposal-list-item-info">
           <div className="proposal-list-item-info-item">
             <span className="sub-title gap-right">Proposal Expires:</span>
-            <span className="text-ellipsis">{expiredTime}</span>
+            <span className="text-ellipsis">{moment(expiredTime).format('YYYY/MM/DD HH:mm:ss')}</span>
           </div>
           <div className="proposal-list-item-info-item">
             <span className="sub-title gap-right">Contract:</span>

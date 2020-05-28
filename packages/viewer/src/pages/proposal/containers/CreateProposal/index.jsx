@@ -259,7 +259,7 @@ const CreateProposal = () => {
           <div className="proposal-result-list-item gap-bottom">
             <span className="sub-title gap-right">Expiration Time:</span>
             <span className="proposal-result-list-item-value text-ellipsis">
-              {normalResult.expiredTime && normalResult.expiredTime.format()}
+              {normalResult.expiredTime && normalResult.expiredTime.format('YYYY/MM/DD HH:mm:ss')}
             </span>
           </div>
         </div>

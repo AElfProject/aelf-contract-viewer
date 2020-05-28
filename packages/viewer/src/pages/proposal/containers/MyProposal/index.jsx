@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import {
   Link
 } from 'react-router-dom';
+import moment from 'moment';
 import {
   Menu,
   message,
@@ -98,7 +99,10 @@ const LIST_TABS = {
       {
         title: 'Application Time',
         dataIndex: 'createAt',
-        key: 'createAt'
+        key: 'createAt',
+        render(text) {
+          return moment(text).format('YYYY/MM/DD HH:mm:ss');
+        }
       }
     ],
     rowKey: 'proposalId'
@@ -141,7 +145,10 @@ const LIST_TABS = {
       {
         title: 'Update Time',
         dataIndex: 'updatedAt',
-        key: 'updatedAt'
+        key: 'updatedAt',
+        render(text) {
+          return moment(text).format('YYYY/MM/DD HH:mm:ss');
+        }
       }
     ],
     rowKey: 'orgAddress'
@@ -234,7 +241,10 @@ const LIST_TABS = {
       {
         title: 'Time',
         dataIndex: 'time',
-        key: 'time'
+        key: 'time',
+        render(time) {
+          return moment(time).format('YYYY/MM/DD HH:mm:ss');
+        }
       }
     ],
     rowKey: 'txId'
