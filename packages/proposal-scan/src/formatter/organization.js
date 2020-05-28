@@ -277,7 +277,8 @@ async function organizationUpdatedInsert(transaction) {
     return Organizations.update({
       orgHash,
       releaseThreshold,
-      leftOrgInfo
+      leftOrgInfo,
+      updatedAt: time
     }, {
       where: {
         orgAddress
