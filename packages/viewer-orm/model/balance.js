@@ -72,7 +72,8 @@ class Balance extends Model {
         'count'
       ],
       order: [
-        ['balance', 'DESC']
+        ['balance', 'DESC'],
+        ['id', 'DESC']
       ],
       where: {
         symbol

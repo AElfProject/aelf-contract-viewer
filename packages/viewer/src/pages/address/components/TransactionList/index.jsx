@@ -110,8 +110,9 @@ function getTableColumns(contractNames, ownerAddress) {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
+      width: 160,
       render(time) {
-        return moment(time).utcOffset(0).format('YYYY/MM/DD HH:mm:ssZ');
+        return moment(time).format('YYYY/MM/DD HH:mm:ss');
       }
     }
   ];

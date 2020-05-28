@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import {
   Divider,
   message,
@@ -34,7 +35,7 @@ const {
 
 const ListColumn = [
   {
-    title: <span title="Contract Name">Contract Name</span>,
+    title: <span title="Contract Name">Name</span>,
     dataIndex: 'contractName',
     key: 'contractName',
     ellipsis: true,
@@ -64,7 +65,7 @@ const ListColumn = [
     )
   },
   {
-    title: <span title="Contract Type">Contract Type</span>,
+    title: <span title="Contract Type">Type</span>,
     dataIndex: 'isSystemContract',
     key: 'isSystemContract',
     ellipsis: true,
@@ -97,7 +98,10 @@ const ListColumn = [
     title: 'Last Updated At',
     dataIndex: 'updateTime',
     key: 'updateTime',
-    width: 150
+    width: 150,
+    render(text) {
+      return moment(text).format('YYYY/MM/DD HH:mm:ss');
+    }
   }
 ];
 
