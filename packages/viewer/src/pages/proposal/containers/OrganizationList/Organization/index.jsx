@@ -310,7 +310,10 @@ const Organization = props => {
             <Col span={6}>
               <div className="organization-list-item-vote-desc text-center">
                 <div className="text-ellipsis" title="Approved Votes">Approved Votes</div>
-                <div>
+                <div
+                  className="text-ellipsis"
+                  title={`${votesData[proposalActions.APPROVE].num}(${votesData[proposalActions.APPROVE].rate})`}
+                >
                   <span className="sub-title gap-right-small">{votesData[proposalActions.APPROVE].num}</span>
                   <span>({votesData[proposalActions.APPROVE].rate})</span>
                 </div>
@@ -319,7 +322,10 @@ const Organization = props => {
             <Col span={6}>
               <div className="organization-list-item-vote-desc text-center">
                 <div className="text-ellipsis" title="Rejected Votes">Rejected Votes</div>
-                <div>
+                <div
+                  className="text-ellipsis"
+                  title={`${votesData[proposalActions.REJECT].num}(${votesData[proposalActions.REJECT].rate})`}
+                >
                   <span className="sub-title gap-right-small">{votesData[proposalActions.REJECT].num}</span>
                   <span>({votesData[proposalActions.REJECT].rate})</span>
                 </div>
@@ -328,7 +334,10 @@ const Organization = props => {
             <Col span={6}>
               <div className="organization-list-item-vote-desc text-center">
                 <div className="text-ellipsis" title="Abstained Votes">Abstained Votes</div>
-                <div>
+                <div
+                  className="text-ellipsis"
+                  title={`${votesData[proposalActions.ABSTAIN].num}(${votesData[proposalActions.ABSTAIN].rate})`}
+                >
                   <span className="sub-title gap-right-small">{votesData[proposalActions.ABSTAIN].num}</span>
                   <span>({votesData[proposalActions.ABSTAIN].rate})</span>
                 </div>
@@ -337,7 +346,10 @@ const Organization = props => {
             <Col span={6}>
               <div className="organization-list-item-vote-desc text-center">
                 <div className="text-ellipsis" title="Total Votes">Total Votes</div>
-                <div>
+                <div
+                  className="text-ellipsis"
+                  title={`${votesData.Total.num}(${votesData.Total.rate})`}
+                >
                   <span className="sub-title gap-right-small">{votesData.Total.num}</span>
                   <span>({votesData.Total.rate})</span>
                 </div>

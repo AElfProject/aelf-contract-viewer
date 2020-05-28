@@ -398,7 +398,10 @@ async function proposalVotedInsert(transaction) {
         voter: vote.voter,
         proposalId: vote.proposalId
       },
-      defaults: vote,
+      defaults: {
+        ...vote,
+        amount: vote.proposalType !== proposalTypes.REFERENDUM ? 1 : amount
+      },
       transaction: t
     });
     if (created) {
