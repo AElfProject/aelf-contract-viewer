@@ -109,26 +109,53 @@ async function organizationCreatedInserter(formattedData) {
           organizationMembers = []
         } = organizationMemberList;
         return Promise.all([
-          Organizations.create({
-            ...item,
-            releaseThreshold
-          }, { transaction: t }),
-          Proposers.bulkCreate(proposers, { transaction: t }),
+          Organizations.findOrCreate({
+            where: {
+              orgAddress: item.orgAddress
+            },
+            defaults: {
+              ...item,
+              releaseThreshold
+            },
+            transaction: t
+          }),
+          Proposers.bulkCreate(proposers, {
+            transaction: t,
+            updateOnDuplicate: Object.keys(Proposers.tableAttributes).filter(v => v !== 'id')
+          }),
           Members.bulkCreate((organizationMembers || []).map(v => ({
             member: v,
             orgAddress
-          })), { transaction: t })
+          })), {
+            transaction: t,
+            updateOnDuplicate: Object.keys(Members.tableAttributes).filter(v => v !== 'id')
+          })
         ]);
       }
       return Promise.all([
-        Organizations.create({
-          ...item,
-          releaseThreshold
-        }, { transaction: t }),
-        Proposers.bulkCreate(proposers, { transaction: t })
+        Organizations.findOrCreate({
+          where: {
+            orgAddress: item.orgAddress
+          },
+          defaults: {
+            ...item,
+            releaseThreshold
+          },
+          transaction: t
+        }),
+        Proposers.bulkCreate(proposers, {
+          transaction: t,
+          updateOnDuplicate: Object.keys(Proposers.tableAttributes).filter(v => v !== 'id')
+        })
       ]);
     }
-    return Organizations.create(item, { transaction: t });
+    return Organizations.findOrCreate({
+      where: {
+        orgAddress: item.orgAddress
+      },
+      defaults: item,
+      transaction: t
+    });
   })));
 }
 
@@ -206,7 +233,10 @@ async function organizationUpdatedInsert(transaction) {
           },
           transaction: t
         }),
-        Proposers.bulkCreate(proposers, { transaction: t })
+        Proposers.bulkCreate(proposers, {
+          transaction: t,
+          updateOnDuplicate: Object.keys(Proposers.tableAttributes).filter(v => v !== 'id')
+        })
       ]);
     }
     if (name === 'OrganizationMemberChanged') {
@@ -238,13 +268,17 @@ async function organizationUpdatedInsert(transaction) {
           },
           transaction: t
         }),
-        Members.bulkCreate(members, { transaction: t })
+        Members.bulkCreate(members, {
+          transaction: t,
+          updateOnDuplicate: Object.keys(Members.tableAttributes).filter(v => v !== 'id')
+        })
       ]);
     }
     return Organizations.update({
       orgHash,
       releaseThreshold,
-      leftOrgInfo
+      leftOrgInfo,
+      updatedAt: time
     }, {
       where: {
         orgAddress

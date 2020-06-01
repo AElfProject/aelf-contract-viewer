@@ -128,7 +128,12 @@ class Scanner {
 
   async insertProposal(transactions) {
     const result = transactions.filter(isContractProposalCreated);
-    await Proposal.bulkCreate(await Promise.all(result.map(proposalCreatedFormatter)));
+    await Proposal.bulkCreate(
+      await Promise.all(result.map(proposalCreatedFormatter)),
+      {
+        updateOnDuplicate: Object.keys(Proposal.tableAttributes).filter(v => v !== 'id')
+      }
+    );
   }
 
   async insertContract(transactions) {
@@ -184,7 +189,12 @@ class Scanner {
       if (eventName === 'ContractDeployed') {
         contractUpdated.address = address;
         // eslint-disable-next-line no-await-in-loop
-        await Contracts.create(contractUpdated);
+        await Contracts.findOrCreate({
+          where: {
+            address: contractUpdated.address
+          },
+          defaults: contractUpdated
+        });
       } else if (eventName === 'CodeUpdated') {
         // eslint-disable-next-line no-await-in-loop
         const lastUpdated = await Code.getLastUpdated(address);
@@ -226,7 +236,12 @@ class Scanner {
         });
       }
       // eslint-disable-next-line no-await-in-loop
-      await Code.create(codeData);
+      await Code.findOrCreate({
+        where: {
+          txId: codeData.txId
+        },
+        defaults: codeData
+      });
     }
   }
 

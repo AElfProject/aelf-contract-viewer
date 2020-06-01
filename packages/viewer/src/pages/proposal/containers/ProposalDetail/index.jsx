@@ -154,7 +154,8 @@ const ProposalDetail = () => {
     logStatus,
     aelf,
     wallet,
-    currentWallet
+    currentWallet,
+    isALLSettle
   } = common;
   const [info, setInfo] = useState({
     proposal: {},
@@ -185,7 +186,7 @@ const ProposalDetail = () => {
         loadingStatus: LOADING_STATUS.FAILED
       });
     });
-  }, [proposalId]);
+  }, [isALLSettle, proposalId, logStatus]);
 
   const {
     createAt,
@@ -206,9 +207,13 @@ const ProposalDetail = () => {
     leftInfo
   } = info.proposal;
 
+  const {
+    leftOrgInfo = {}
+  } = info.organization;
+
   const send = async action => {
     if (proposalType === proposalTypes.REFERENDUM) {
-      setVisible(true);
+      setVisible(action);
     } else {
       await sendTransaction(wallet, getContractAddress(proposalType), action, proposalId);
     }
@@ -283,11 +288,11 @@ const ProposalDetail = () => {
                 <Row gutter={48}>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Application Submitted:</span>
-                    <span className="text-ellipsis">{createAt}</span>
+                    <span className="text-ellipsis">{moment(createAt).format('YYYY/MM/DD HH:mm:ss')}</span>
                   </Col>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Proposal Expires:</span>
-                    <span className="text-ellipsis">{expiredTime}</span>
+                    <span className="text-ellipsis">{moment(expiredTime).format('YYYY/MM/DD HH:mm:ss')}</span>
                   </Col>
                   <Col span={12} className="detail-flex">
                     <span className="sub-title gap-right">Proposer:</span>
@@ -324,7 +329,7 @@ const ProposalDetail = () => {
                   status === proposalStatus.RELEASED ? (
                     <Col span={12} className="detail-flex">
                       <span className="sub-title gap-right">Proposal Released:</span>
-                      <span className="text-ellipsis">{releasedTime}</span>
+                      <span className="text-ellipsis">{moment(releasedTime).format('YYYY/MM/DD HH:mm:ss')}</span>
                     </Col>
                   ) : null
                 }
@@ -375,7 +380,7 @@ const ProposalDetail = () => {
                     status={status}
                     currentWallet={currentWallet}
                     wallet={wallet}
-                    symbol={info.organization.leftOrgInfo.tokenSymbol || 'ELF'}
+                    symbol={leftOrgInfo.tokenSymbol || 'ELF'}
                   />
                 </TabPane>
               </Tabs>
@@ -385,9 +390,12 @@ const ProposalDetail = () => {
                     aelf={aelf}
                     proposalType={proposalType}
                     {...info.proposal}
+                    action={visible}
+                    tokenSymbol={leftOrgInfo.tokenSymbol || 'ELF'}
                     onCancel={handleConfirm}
                     onConfirm={handleConfirm}
                     wallet={wallet}
+                    visible={!!visible}
                   />
                 ) : null
               }

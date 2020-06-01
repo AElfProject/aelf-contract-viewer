@@ -38,11 +38,12 @@ const VoteData = props => {
   } = props;
   const [canThisUserVote, setCanThisVote] = useState(false);
   useEffect(() => {
+    console.log(status, votedStatus, canVote);
     setCanThisVote((
       status === proposalStatus.PENDING
       || status === proposalStatus.APPROVED
     ) && votedStatus === 'none' && canVote);
-  }, [status, votedStatus, expiredTime]);
+  }, [status, votedStatus, expiredTime, canVote]);
   return (
     <Card
       title="Voting Data"

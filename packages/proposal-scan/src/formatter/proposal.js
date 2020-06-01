@@ -252,8 +252,10 @@ async function proposalVotedReducer(transactionList) {
     const {
       Logs = []
     } = item;
-    let proposalIdArr = [];
-    (Logs || []).forEach(log => {
+    if (Logs.length > 1) {
+      console.log(Logs);
+    }
+    let proposalIdArr = (Logs || []).reduce((ids, log) => {
       const {
         Name,
         Address
@@ -273,9 +275,10 @@ async function proposalVotedReducer(transactionList) {
         const { contract } = config.contracts[proposalType.toLowerCase()];
         const logResults = contract.deserializeLog(Logs, Address === config.contracts.referendum.address
           ? 'ReferendumReceiptCreated' : 'ReceiptCreated');
-        proposalIdArr = [...proposalIdArr, logResults.map(v => v.proposalId)];
+        return [...ids, ...logResults.map(v => v.proposalId)];
       }
-    });
+      return ids;
+    }, []);
     const result = {
       ...acc
     };
@@ -307,6 +310,12 @@ const ACTION_COUNTS_MAP = {
   Abstain: 'abstentions'
 };
 
+const ACTION_COUNTS_NAME_MAP = {
+  Approve: 'approvalCount',
+  Reject: 'rejectionCount',
+  Abstain: 'abstentionCount'
+};
+
 async function proposalVotedFormatter(transaction) {
   const {
     Logs = [],
@@ -333,6 +342,7 @@ async function proposalVotedFormatter(transaction) {
     }
     const { contract } = config.contracts[proposalType.toLowerCase()];
     const proposalInfo = await contract.GetProposal.call(proposalId);
+    amount = !proposalInfo ? amount : proposalInfo[`${ACTION_COUNTS_NAME_MAP[receiptType]}`];
     const isExist = await ProposalList.isExist(proposalId);
     if (!isExist) {
       return false;
@@ -343,6 +353,7 @@ async function proposalVotedFormatter(transaction) {
     }
     const result = {
       update: {
+        isIncrement: !proposalInfo,
         proposalId,
         action: ACTION_COUNTS_MAP[receiptType],
         amount,
@@ -370,37 +381,42 @@ async function proposalVotedInsert(transaction) {
   if (formattedData.length === 0) {
     return false;
   }
-  return sequelize.transaction(t => Promise.all(formattedData.map(item => {
+  return sequelize.transaction(t => Promise.all(formattedData.map(async item => {
     const {
       update,
       vote
     } = item;
     const {
+      isIncrement,
       proposalId,
       action,
       amount,
       status
     } = update;
-    return Promise.all([
-      Votes.findOrCreate({
-        where: {
-          voter: vote.voter,
-          proposalId: vote.proposalId
-        },
-        defaults: vote,
-        transaction: t
-      }),
-      ProposalList.update({
+    const [, created] = await Votes.findOrCreate({
+      where: {
+        voter: vote.voter,
+        proposalId: vote.proposalId
+      },
+      defaults: {
+        ...vote,
+        amount: vote.proposalType !== proposalTypes.REFERENDUM ? 1 : amount
+      },
+      transaction: t
+    });
+    if (created) {
+      return ProposalList.update({
         status,
         // watch out increment
-        [action]: Sequelize.literal(`${action} + ${amount}`)
+        [action]: isIncrement ? Sequelize.literal(`${action} + ${amount}`) : amount
       }, {
         where: {
           proposalId
         },
         transaction: t
-      })
-    ]);
+      });
+    }
+    return created;
   })));
 }
 

@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 import React from 'react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import {
   Descriptions
@@ -25,7 +26,7 @@ const ListItem = props => {
         <DescriptionsItem label="author">{author}</DescriptionsItem>
         <DescriptionsItem label="is system contract">{isSystemContract ? 'true' : 'false'}</DescriptionsItem>
         <DescriptionsItem label="serial number">{serial}</DescriptionsItem>
-        <DescriptionsItem label="last updated at">{updateTime}</DescriptionsItem>
+        <DescriptionsItem label="last updated at">{moment(updateTime).format('YYYY/MM/DD HH:mm:ss')}</DescriptionsItem>
       </Descriptions>
     </a>
   );

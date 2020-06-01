@@ -165,7 +165,7 @@ const VoteChart = props => {
         <Col span={6}>
           <div className="proposal-vote-desc text-center">
             <div className="text-ellipsis" title="Approved Votes">Approved Votes</div>
-            <div>
+            <div className="text-ellipsis" title={`${approvals}(${votesData[proposalActions.APPROVE].rate})`}>
               <span className="sub-title gap-right-small">{approvals}</span>
               <span>({votesData[proposalActions.APPROVE].rate})</span>
             </div>
@@ -174,7 +174,7 @@ const VoteChart = props => {
         <Col span={6}>
           <div className="proposal-vote-desc text-center">
             <div className="text-ellipsis" title="Rejected Votes">Rejected Votes</div>
-            <div>
+            <div className="text-ellipsis" title={`${rejections}(${votesData[proposalActions.REJECT].rate})`}>
               <span className="sub-title gap-right-small">{rejections}</span>
               <span>({votesData[proposalActions.REJECT].rate})</span>
             </div>
@@ -183,7 +183,7 @@ const VoteChart = props => {
         <Col span={6}>
           <div className="proposal-vote-desc text-center">
             <div className="text-ellipsis" title="Abstained Votes">Abstained Votes</div>
-            <div>
+            <div className="text-ellipsis" title={`${abstentions}(${votesData[proposalActions.ABSTAIN].rate})`}>
               <span className="sub-title gap-right-small">{abstentions}</span>
               <span>({votesData[proposalActions.ABSTAIN].rate})</span>
             </div>
@@ -192,7 +192,7 @@ const VoteChart = props => {
         <Col span={6}>
           <div className="proposal-vote-desc text-center">
             <div className="text-ellipsis" title="Total Votes">Total Votes</div>
-            <div>
+            <div className="text-ellipsis" title={`${approvals + rejections + abstentions}(${votesData.Total.rate})`}>
               <span className="sub-title gap-right-small">{approvals + rejections + abstentions}</span>
               <span>({votesData.Total.rate})</span>
             </div>
