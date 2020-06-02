@@ -8,6 +8,16 @@ import { endsWith, startsWith } from 'lodash';
 import config from './config';
 import { request } from './request';
 
+const { ellipticEc } = AElf.wallet;
+
+export function getPublicKeyFromObject(publicKey) {
+  try {
+    return ellipticEc.keyFromPublic(publicKey).getPublic('hex');
+  } catch (e) {
+    return '';
+  }
+}
+
 export async function innerHeight(minHeight = 400, time = 0, timeout = 500, maxTime = 10) {
   const currentTime = time + 1;
   if (currentTime > maxTime) {

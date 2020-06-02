@@ -2,6 +2,9 @@
  * @file NightElfCheck
  * @author zhouminghui
  */
+import {
+  getPublicKeyFromObject
+} from '../../../common/utils';
 import contants from './constants';
 
 const {
@@ -76,7 +79,7 @@ export default class Extension {
             }
             this.currentWallet = {
               ...detail,
-              publicKey: `04${detail.publicKey.x}${detail.publicKey.y}`
+              publicKey: getPublicKeyFromObject(detail.publicKey)
             };
             resolve(this.currentWallet);
           } else {
