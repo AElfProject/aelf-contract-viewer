@@ -38,6 +38,13 @@ const getTxListRules = {
   }
 };
 
+const getTokenInfoRules = {
+  symbol: {
+    required: true,
+    type: 'string'
+  }
+};
+
 class TokensController extends Controller {
   async getList() {
     const { ctx, app } = this;
@@ -83,6 +90,28 @@ class TokensController extends Controller {
       this.sendBody({
         list,
         total
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async getTokenInfo() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(getTokenInfoRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        symbol
+      } = ctx.request.query;
+      const tokenInfo = await app.model.Tokens.getTokenInfo(symbol);
+      const balanceInfo = await app.model.Balance.getSymbolCount(symbol);
+      this.sendBody({
+        ...(tokenInfo || {}),
+        ...balanceInfo
       });
     } catch (e) {
       this.error(e);

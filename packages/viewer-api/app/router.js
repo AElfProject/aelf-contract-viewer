@@ -43,4 +43,5 @@ module.exports = app => {
   router.get('/api/viewer/eventList', controller.events.getList);
   router.get('/api/viewer/transferList', controller.transfer.getList);
   router.get('/api/viewer/tokenTxList', controller.tokens.getTransactionList);
+  router.get('/api/viewer/tokenInfo', controller.tokens.getTokenInfo());
 };

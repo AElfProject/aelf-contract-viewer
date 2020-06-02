@@ -88,12 +88,21 @@ class Tokens extends Model {
     }));
   }
 
-  static getTokenInfo(symbol) {
-    return Tokens.findOne({
+  static async getTokenInfo(symbol) {
+    let result = await Tokens.findOne({
       where: {
         symbol
       }
     });
+    if (!result) {
+      return {};
+    }
+    result = result.toJSON();
+    return {
+      ...result,
+      totalSupply: new Decimal(result.totalSupply).dividedBy(`1e${result.decimals}`).toString(),
+      supply: new Decimal(result.supply).dividedBy(`1e${result.decimals}`).toString()
+    };
   }
 
   static async getTokenDecimal(symbol) {
@@ -132,7 +141,15 @@ class Tokens extends Model {
         }
       }
     });
-    const list = result.rows.map(v => v.toJSON());
+    const list = result.rows.map((v, index) => {
+      const item = v.toJSON();
+      return {
+        ...item,
+        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString(),
+        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals}`).toString(),
+        ...tokenSymbols[index]
+      };
+    });
     return {
       total,
       list

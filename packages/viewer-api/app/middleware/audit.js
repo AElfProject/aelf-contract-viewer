@@ -45,6 +45,7 @@ function verify(msg, publicKey, signature = '') {
   };
   try {
     const result = keyPair.verify(msg, signatureObj);
+    console.log(result);
     return result;
   } catch (e) {
     return false;

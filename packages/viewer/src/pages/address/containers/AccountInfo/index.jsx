@@ -2,14 +2,17 @@
  * @file account info
  * @author
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Layout,
   Tabs,
   Typography
 } from 'antd';
-import { useParams } from 'react-router-dom';
-import TransactionList from '../../components/TransactionList';
+import {
+  useParams,
+  useHistory
+} from 'react-router-dom';
+import OldTransactionList from '../../components/OldTransactionList';
 import DetailHeader from '../../../../components/DetailHeader';
 import TokenList from '../../components/TokenList';
 import config from '../../../../common/config';
@@ -19,16 +22,18 @@ import {
 } from '../../../../common/utils';
 import '../../../../common/index.less';
 import Bread from '../../components/Bread';
+import { Contracts } from '../../common/context';
+import TransferList from '../../components/TransferList';
 
 const { Paragraph } = Typography;
 const {
   Content
 } = Layout;
 
-async function getHeaderColumns(address) {
+async function getHeaderColumns(address, symbol) {
   const balances = await getBalances(address);
-  let elfBalances = balances.filter(v => v.symbol === 'ELF');
-  const balancesWithoutELF = balances.filter(v => v.symbol !== 'ELF').sort((a, b) => b.balance - a.balance);
+  let elfBalances = balances.filter(v => v.symbol === symbol);
+  const balancesWithoutELF = balances.filter(v => v.symbol !== symbol).sort((a, b) => b.balance - a.balance);
   elfBalances = elfBalances.length === 0 ? 0 : elfBalances[0].balance;
   return [
     {
@@ -37,9 +42,9 @@ async function getHeaderColumns(address) {
       desc: (<Paragraph copyable>{`ELF_${address}_${config.viewer.chainId}`}</Paragraph>)
     },
     {
-      tip: 'ELF Balance',
+      tip: `${symbol} Balance`,
       name: 'Balance',
-      desc: `${elfBalances} ELF`
+      desc: `${elfBalances} ${symbol}`
     },
     {
       tip: 'Tokens owned',
@@ -56,17 +61,25 @@ const {
 } = Tabs;
 
 const AccountInfo = () => {
-  const { address } = useParams();
+  const routerParams = useParams();
+  const { symbol = 'ELF', address } = routerParams;
   const [columns, setColumns] = useState([]);
+  const history = useHistory();
+  const contracts = useContext(Contracts);
   useEffect(() => {
-    getHeaderColumns(address).then(res => {
+    if (contracts[address]) {
+      history.replace(`/contract/${address}`);
+    }
+  }, [contracts]);
+  useEffect(() => {
+    getHeaderColumns(address, symbol).then(res => {
       setColumns(res);
       sendHeight(500);
     }).catch(e => {
       sendHeight(500);
       console.error(e);
     });
-  }, [address]);
+  }, [address, symbol]);
   return (
     <Layout>
       <Content>
@@ -74,11 +87,14 @@ const AccountInfo = () => {
           <Bread title="Account" subTitle={`ELF_${address}_${config.viewer.chainId}`} />
           <DetailHeader columns={columns} />
           <Tabs>
-            <TabPane tab="Transaction" key="transaction">
-              <TransactionList
-                api={config.API_PATH.GET_TRANSACTION_BY_ADDRESS}
+            <TabPane tab="Transactions" key="transactions">
+              <OldTransactionList
                 owner={address}
+                api={config.API_PATH.GET_TRANSACTION_BY_ADDRESS}
               />
+            </TabPane>
+            <TabPane tab="Transfers" key="transfers">
+              <TransferList owner={address} api={config.API_PATH.GET_TRANSFER_LIST} />
             </TabPane>
           </Tabs>
         </div>

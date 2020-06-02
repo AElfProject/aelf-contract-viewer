@@ -9,3 +9,5 @@ const globalConfig = {
 };
 
 export const GlobalContext = React.createContext(globalConfig);
+
+export const Contracts = React.createContext({});

@@ -9,13 +9,13 @@ import {
   Tabs,
   Typography
 } from 'antd';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Reader from './Reader';
 import {
   GlobalContext
 } from '../../common/context';
-import { detectMobileBrowser, useSearchParams } from '../../common/utils';
-import TransactionList from '../../components/TransactionList';
+import { detectMobileBrowser } from '../../common/utils';
+import OldTransactionList from '../../components/OldTransactionList';
 import DetailHeader from '../../../../components/DetailHeader';
 import TokenList from '../../components/TokenList';
 import config from '../../../../common/config';
@@ -29,6 +29,7 @@ import Dividends from '../../components/Dividends';
 import '../../../../common/index.less';
 import './index.less';
 import Bread from '../../components/Bread';
+import EventList from '../../components/EventList';
 
 const { Paragraph } = Typography;
 const {
@@ -86,7 +87,7 @@ const {
 
 const ContractInfo = () => {
   const { search } = useLocation();
-  const address = useSearchParams(search, 'address');
+  const { address } = useParams(search);
   const [columns, setColumns] = useState([]);
   useEffect(() => {
     getHeaderColumns(address).then(res => {
@@ -106,13 +107,16 @@ const ContractInfo = () => {
             <DetailHeader columns={columns} />
             <Tabs>
               <TabPane tab="Transaction" key="transaction">
-                <TransactionList
-                  api={config.API_PATH.GET_TRANSACTION_BY_ADDRESS}
+                <OldTransactionList
                   owner={address}
+                  api={config.API_PATH.GET_TRANSACTION_BY_ADDRESS}
                 />
               </TabPane>
               <TabPane tab="Contract" key="contract">
                 <Reader />
+              </TabPane>
+              <TabPane tab="Events" key="events">
+                <EventList contractAddress={address} />
               </TabPane>
             </Tabs>
           </div>

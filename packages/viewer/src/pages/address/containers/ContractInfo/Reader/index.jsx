@@ -10,7 +10,7 @@ import React, {
   useContext
 } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
   If,
   Then,
@@ -30,9 +30,6 @@ import moment from 'moment';
 import {
   sendHeight
 } from '../../../../../common/utils';
-import {
-  useSearchParams
-} from '../../../common/utils';
 import FileTree from '../../../components/FileTree';
 import Header from '../../../components/Header';
 import SaveAsZip from '../../../components/Save';
@@ -122,7 +119,7 @@ const StepDescription = props => {
       <div className="description-item">
         <span>Code Hash: </span>
         <Link
-          to={`/contract/info?codeHash=${codeHash}&address=${address}`}
+          to={`/contract/${address}/${codeHash}`}
         >
           {codeHash}
         </Link>
@@ -130,7 +127,7 @@ const StepDescription = props => {
       <div className="description-item">
         <span>Version: </span>
         <Link
-          to={`/contract/info?codeHash=${codeHash}&address=${address}`}
+          to={`/contract/${address}/${codeHash}`}
         >
           {version}
         </Link>
@@ -187,13 +184,14 @@ const fetchingStatusMap = {
 };
 
 const Reader = () => {
-  const location = useLocation();
   const global = useContext(GlobalContext);
   const {
     isMobile = false
   } = global;
-  const address = useSearchParams(location.search, 'address');
-  const codeHash = useSearchParams(location.search, 'codeHash');
+  const {
+    address,
+    codeHash
+  } = useParams();
   const [files, setFiles] = useState([]);
   const [contractInfo, setContractInfo] = useState({});
   const [error, setError] = useState({});

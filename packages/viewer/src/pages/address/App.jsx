@@ -2,7 +2,7 @@
  * @file App container
  * @author atom-yang
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Switch,
   Redirect,
@@ -13,33 +13,53 @@ import ContractInfo from './containers/ContractInfo';
 import ContractList from './containers/ContractList';
 import AccountList from './containers/AccountList';
 import AccountInfo from './containers/AccountInfo';
+import TokenList from './containers/TokenList';
 import {
-  sendMessage
+  sendMessage,
+  getContractNames
 } from '../../common/utils';
+import {
+  Contracts
+} from './common/context';
+
 
 const App = () => {
   const fullPath = useLocation();
+  const [contracts, setContracts] = useState({});
   useEffect(() => {
     sendMessage({
       href: fullPath.href
     });
   }, [fullPath]);
+  useEffect(() => {
+    getContractNames()
+      .then(res => setContracts(res))
+      .catch(err => console.error(err));
+  }, []);
   return (
-    <Switch>
-      <Route exact path="/address">
-        <AccountList />
-      </Route>
-      <Route path="/address/:address">
-        <AccountInfo />
-      </Route>
-      <Route exact path="/contract">
-        <ContractList />
-      </Route>
-      <Route path="/contract/info">
-        <ContractInfo />
-      </Route>
-      <Redirect to="/address" />
-    </Switch>
+    <Contracts.Provider value={contracts}>
+      <Switch>
+        <Route exact path="/address">
+          <AccountList />
+        </Route>
+        <Route path="/address/:address?/:symbol?">
+          <AccountInfo />
+        </Route>
+        <Route exact path="/contract">
+          <ContractList />
+        </Route>
+        <Route path="/contract/:address?/:codeHash?">
+          <ContractInfo />
+        </Route>
+        <Route path="/token">
+          <TokenList />
+        </Route>
+        <Route path="/token/:symbol">
+          <TokenList />
+        </Route>
+        <Redirect to="/address" />
+      </Switch>
+    </Contracts.Provider>
   );
 };
 

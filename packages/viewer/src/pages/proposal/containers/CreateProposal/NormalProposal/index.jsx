@@ -28,8 +28,6 @@ import {
   isInnerType,
   isSpecialParameters,
   formatTimeToNano,
-  getContractMethodList,
-  CONTRACT_INSTANCE_MAP,
   parseJSON,
   commonFilter,
   isSingleStringParameter,
@@ -40,7 +38,11 @@ import { request } from '../../../../../common/request';
 // import ContractParams from '../../../components/ContractParams';
 // import JSONEditor from '../../../components/JSONEditor';
 import './index.less';
-import { validateURL } from '../../../../../common/utils';
+import {
+  validateURL,
+  getContractMethodList,
+  CONTRACT_INSTANCE_MAP
+} from '../../../../../common/utils';
 
 const JSONEditor = lazy(() => import(/* webpackChunkName: "jsonEditor" */ '../../../components/JSONEditor'));
 

@@ -113,28 +113,6 @@ const DEFAUT_RPCSERVER = process.env.NODE_ENV === 'production'
   ? `${window.location.protocol}//${window.location.host}/chain`
   : `${window.location.protocol}//${window.location.host}`;
 
-const contractsInstance = {};
-const contractsNamesMap = {};
-const defaultAElfInstance = new AElf(new AElf.providers.HttpProvider(DEFAUT_RPCSERVER));
-
-export async function getContractInstance(address) {
-  if (!contractsInstance[address]) {
-    contractsInstance[address] = await defaultAElfInstance.chain.contractAt(address, fakeWallet);
-  }
-  return contractsInstance[address];
-}
-
-export async function getContractByName(name) {
-  if (!contractsNamesMap[name]) {
-    const {
-      GenesisContractAddress
-    } = await defaultAElfInstance.getChainStatus();
-    const zeroContract = await getContractInstance(GenesisContractAddress);
-    contractsNamesMap[name] = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(name));
-  }
-  return getContractInstance(contractsNamesMap[name]);
-}
-
 export async function getBalances(address, search = '') {
   try {
     const balances = await request(config.API_PATH.GET_BALANCES_BY_ADDRESS, {
@@ -155,6 +133,23 @@ export async function getBalances(address, search = '') {
         symbol: 'ELF'
       }
     ];
+  }
+}
+
+export async function getTokenAllInfo(symbol) {
+  try {
+    const info = await request(config.API_PATH.GET_TOKEN_INFO, {
+      symbol
+    }, {
+      method: 'GET'
+    });
+    if (Object.keys(info).length === 0) {
+      throw new Error(`not exist token ${symbol}`);
+    }
+    return info;
+  } catch (e) {
+    console.error(e);
+    return {};
   }
 }
 
@@ -181,20 +176,6 @@ export async function getTokenList(search = '') {
     ...acc,
     [v.symbol]: v
   }), {});
-}
-
-export async function getContractDividend(address) {
-  try {
-    const contract = await getContractInstance(address);
-    if (contract.GetProfitsAmount) {
-      const result = await contract.GetProfitsAmount.call();
-      return result || {};
-    }
-    return {};
-  } catch (e) {
-    console.error(e);
-    return {};
-  }
 }
 
 let CONTRACT_NAMES = {};
@@ -225,4 +206,89 @@ export function removeAElfPrefix(name) {
     return name.split('.')[name.split('.').length - 1];
   }
   return name;
+}
+
+export const CONTRACT_INSTANCE_MAP = {};
+
+export async function getContract(aelf, address) {
+  if (!CONTRACT_INSTANCE_MAP[address]) {
+    CONTRACT_INSTANCE_MAP[address] = await aelf.chain.contractAt(address, fakeWallet);
+  }
+  return CONTRACT_INSTANCE_MAP[address];
+}
+
+export async function getContractDividend(address) {
+  try {
+    const contract = await getContract(address);
+    if (contract.GetProfitsAmount) {
+      const result = await contract.GetProfitsAmount.call();
+      return result || {};
+    }
+    return {};
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
+}
+
+export async function getContractMethodList(aelf, address) {
+  if (!CONTRACT_INSTANCE_MAP[address]) {
+    CONTRACT_INSTANCE_MAP[address] = await aelf.chain.contractAt(address, fakeWallet);
+  }
+  const contract = CONTRACT_INSTANCE_MAP[address];
+  return Object.keys(contract)
+    .filter(v => /^[A-Z]/.test(v)).sort();
+}
+
+const contractsNamesMap = {};
+const defaultAElfInstance = new AElf(new AElf.providers.HttpProvider(DEFAUT_RPCSERVER));
+
+export async function getContractByName(name) {
+  if (!contractsNamesMap[name]) {
+    const {
+      GenesisContractAddress
+    } = await defaultAElfInstance.getChainStatus();
+    const zeroContract = await getContract(GenesisContractAddress);
+    contractsNamesMap[name] = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(name));
+  }
+  return getContract(contractsNamesMap[name]);
+}
+
+export async function deserializeLog(log, name, address) {
+  const {
+    Indexed = [],
+    NonIndexed
+  } = log;
+  let dataType;
+  const contract = await getContract(defaultAElfInstance, address);
+  // eslint-disable-next-line no-restricted-syntax
+  for (const service of contract.services) {
+    try {
+      dataType = service.lookupType(name);
+      break;
+    } catch (e) {}
+  }
+  const serializedData = [...(Indexed || [])];
+  if (NonIndexed) {
+    serializedData.push(NonIndexed);
+  }
+  let result = serializedData.reduce((acc, v) => {
+    let deserialize = dataType.decode(Buffer.from(v, 'base64'));
+    deserialize = dataType.toObject(deserialize, {
+      enums: String, // enums as string names
+      longs: String, // longs as strings (requires long.js)
+      bytes: String, // bytes as base64 encoded strings
+      defaults: false, // includes default values
+      arrays: true, // populates empty arrays (repeated fields) even if defaults=false
+      objects: true, // populates empty objects (map fields) even if defaults=false
+      oneofs: true // includes virtual oneof fields set to the present field's name
+    });
+    return {
+      ...acc,
+      ...deserialize
+    };
+  }, {});
+  result = AElf.utils.transform.transform(dataType, result, AElf.utils.transform.OUTPUT_TRANSFORMERS);
+  result = AElf.utils.transform.transformArrayToMap(dataType, result);
+  return result;
 }

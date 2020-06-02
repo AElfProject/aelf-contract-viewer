@@ -22,8 +22,8 @@ function getTableColumns(contractNames, ownerAddress) {
   return [
     {
       title: 'Tx Id',
-      dataIndex: 'tx_id',
-      key: 'tx_id',
+      dataIndex: 'txId',
+      key: 'txId',
       ellipsis: true,
       width: 250,
       render(txId) {
@@ -41,8 +41,8 @@ function getTableColumns(contractNames, ownerAddress) {
     },
     {
       title: 'Block Height',
-      dataIndex: 'block_height',
-      key: 'block_height',
+      dataIndex: 'blockHeight',
+      key: 'blockHeight',
       render(height) {
         return (
           <a
@@ -64,8 +64,8 @@ function getTableColumns(contractNames, ownerAddress) {
     },
     {
       title: 'From',
-      dataIndex: 'address_from',
-      key: 'address_from',
+      dataIndex: 'addressFrom',
+      key: 'addressFrom',
       ellipsis: true,
       render(from) {
         return from === ownerAddress ? from : (
@@ -80,8 +80,8 @@ function getTableColumns(contractNames, ownerAddress) {
     },
     {
       title: 'To',
-      dataIndex: 'address_to',
-      key: 'address_to',
+      dataIndex: 'addressTo',
+      key: 'addressTo',
       ellipsis: true,
       render(to) {
         let text = to;
@@ -90,7 +90,7 @@ function getTableColumns(contractNames, ownerAddress) {
         }
         return to === ownerAddress ? text : (
           <Link
-            to={`/contract/info?address=${to}`}
+            to={`/contract/${to}`}
             title={text}
           >
             {text}
@@ -100,8 +100,8 @@ function getTableColumns(contractNames, ownerAddress) {
     },
     {
       title: 'Tx Fee',
-      dataIndex: 'tx_fee',
-      key: 'tx_fee',
+      dataIndex: 'txFee',
+      key: 'txFee',
       render(fee) {
         return `${fee} ELF`;
       }
@@ -118,18 +118,18 @@ function getTableColumns(contractNames, ownerAddress) {
   ];
 }
 
-function getList(api, params) {
+function getList(api, params, formatter) {
   return axios.get(api, {
     params
   }).then(res => {
     const { data } = res;
     const {
       total = 0,
-      transactions = []
-    } = data;
+      list = []
+    } = formatter(data);
     return {
       total,
-      list: transactions
+      list
     };
   })
     .catch(e => {
@@ -146,10 +146,12 @@ const TransactionList = props => {
     api,
     requestParamsFormatter,
     responseFormatter,
-    owner
+    freezeParams,
+    owner,
+    getColumns
   } = props;
   const [contractNames, setContractNames] = useState({});
-  const columns = useMemo(() => getTableColumns(contractNames, owner), [
+  const columns = useMemo(() => getColumns(contractNames, owner), [
     contractNames,
     owner
   ]);
@@ -159,10 +161,10 @@ const TransactionList = props => {
     total: 0
   });
   const [params, setParams] = useState({
-    limit: 10,
-    page: 1,
-    address: owner,
-    loading: false
+    pageSize: 10,
+    pageNum: 1,
+    loading: false,
+    ...freezeParams
   });
 
   function fetch(apiParams) {
@@ -170,15 +172,12 @@ const TransactionList = props => {
       ...params,
       loading: true
     });
-    getList(api, requestParamsFormatter({
-      ...apiParams,
-      page: apiParams.page - 1
-    }))
+    getList(api, requestParamsFormatter(apiParams), responseFormatter)
       .then(res => {
         const {
           list,
           total
-        } = responseFormatter(res);
+        } = res;
         setResult({
           list,
           total
@@ -202,11 +201,11 @@ const TransactionList = props => {
     getContractNames().then(res => setContractNames(res));
   }, []);
 
-  async function onPageChange(page, limit) {
+  async function onPageChange(pageNum, pageSize) {
     await fetch({
       ...params,
-      page,
-      limit
+      pageNum,
+      pageSize
     });
   }
   return (
@@ -222,8 +221,8 @@ const TransactionList = props => {
         className="float-right gap-top"
         showQuickJumper
         total={result.total}
-        current={params.page}
-        pageSize={params.limit}
+        current={params.pageNum}
+        pageSize={params.pageSize}
         hideOnSinglePage
         showSizeChanger={false}
         onChange={onPageChange}
@@ -237,15 +236,17 @@ TransactionList.propTypes = {
   api: PropTypes.string.isRequired,
   responseFormatter: PropTypes.func,
   requestParamsFormatter: PropTypes.func,
-  owner: PropTypes.string.isRequired
+  owner: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  freezeParams: PropTypes.object.isRequired,
+  getColumns: PropTypes.func
 };
 
 TransactionList.defaultProps = {
-  requestParamsFormatter: params => ({
-    ...params,
-    order: 'DESC'
-  }),
-  responseFormatter: response => response
+  requestParamsFormatter: params => params,
+  responseFormatter: response => response,
+  owner: '',
+  getColumns: getTableColumns
 };
 
 export default TransactionList;

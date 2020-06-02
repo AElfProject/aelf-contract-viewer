@@ -15,10 +15,12 @@ import {
 } from 'antd';
 import {
   getContractAddress,
-  getContract,
   showTransactionResult,
   getTxResult
 } from '../../../common/utils';
+import {
+  getContract
+} from '../../../../../common/utils';
 import constants from '../../../common/constants';
 import './index.less';
 

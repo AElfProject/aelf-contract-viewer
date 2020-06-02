@@ -4,7 +4,7 @@
  */
 import { message } from 'antd';
 import moment from 'moment';
-import constants, { FAKE_WALLET } from './constants';
+import constants from './constants';
 
 const {
   viewer
@@ -164,24 +164,6 @@ export function base64ToHex(base64) {
     result += (hex.length === 2 ? hex : `0${hex}`);
   }
   return result.toUpperCase();
-}
-
-export const CONTRACT_INSTANCE_MAP = {};
-
-export async function getContract(aelf, address) {
-  if (!CONTRACT_INSTANCE_MAP[address]) {
-    CONTRACT_INSTANCE_MAP[address] = await aelf.chain.contractAt(address, FAKE_WALLET);
-  }
-  return CONTRACT_INSTANCE_MAP[address];
-}
-
-export async function getContractMethodList(aelf, address) {
-  if (!CONTRACT_INSTANCE_MAP[address]) {
-    CONTRACT_INSTANCE_MAP[address] = await aelf.chain.contractAt(address, FAKE_WALLET);
-  }
-  const contract = CONTRACT_INSTANCE_MAP[address];
-  return Object.keys(contract)
-    .filter(v => /^[A-Z]/.test(v)).sort();
 }
 
 // eslint-disable-next-line consistent-return

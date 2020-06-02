@@ -153,6 +153,22 @@ class Balance extends Model {
       group: 'symbol'
     });
   }
+
+  static async getSymbolCount(symbol) {
+    const result = await Balance.findOne({
+      attributes: [
+        [fn('COUNT', 1), 'holders'],
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      where: {
+        symbol
+      }
+    });
+    if (!result) {
+      return {};
+    }
+    return result;
+  }
 }
 
 Balance.init(balanceDescription, {

@@ -42,7 +42,7 @@ const ListColumn = [
     width: 120,
     render: (name, record) => (name && +name !== -1 ? (
       <Link
-        to={`/contract/info?address=${record.address}`}
+        to={`/contract/${record.address}`}
         title={name}
       >
         {removeAElfPrefix(name)}
@@ -57,7 +57,7 @@ const ListColumn = [
     width: 320,
     render: address => (
       <Link
-        to={`/contract/info?address=${address}`}
+        to={`/contract/${address}`}
         title={`ELF_${address}_${config.viewer.chainId}`}
       >
         {`ELF_${address}_${config.viewer.chainId}`}

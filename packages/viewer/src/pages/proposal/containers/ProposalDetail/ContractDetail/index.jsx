@@ -22,9 +22,11 @@ import {
 } from '../../../../../common/request';
 import config from '../../../../../common/config';
 import {
-  getContract,
   base64ToHex
 } from '../../../common/utils';
+import {
+  getContract
+} from '../../../../../common/utils';
 
 const {
   viewer
