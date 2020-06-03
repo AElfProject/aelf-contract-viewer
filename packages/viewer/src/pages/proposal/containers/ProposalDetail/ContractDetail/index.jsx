@@ -39,7 +39,8 @@ function getContractName(address) {
 }
 
 function getContractURL(address) {
-  const innerURL = `${window.location.protocol}//${window.location.host}${viewer.viewerUrl}?address=${address}`;
+  // eslint-disable-next-line max-len
+  const innerURL = `${window.location.protocol}//${window.location.host}/viewer/address.html#/contract/info?address=${address}`;
   return `${window.location.protocol}//${window.location.host}/contract?#${encodeURIComponent(innerURL)}`;
 }
 
