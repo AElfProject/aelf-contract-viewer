@@ -13,7 +13,8 @@ const SCAN_TAGS = {
   ORGANIZATION_UPDATED: 'ORGANIZATION_UPDATED',
   PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
   TOKEN_BALANCE_CHANGED: 'TOKEN_BALANCE_CHANGED',
-  TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED'
+  TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED',
+  TOKEN_SUPPLY_CHANGED: 'TOKEN_SUPPLY_CHANGED'
 };
 
 const TOKEN_BALANCE_CHANGED_EVENT = [
@@ -183,6 +184,36 @@ const TOKEN_TRANSFERRED_EVENT = [
   },
 ];
 
+const TOKEN_SUPPLY_CHANGED_EVENT = [
+  {
+    filterText: 'Burned',
+    formatter(eventResult) {
+      const {
+        symbol
+      } = eventResult;
+      return symbol;
+    }
+  },
+  {
+    filterText: 'Issued',
+    formatter(eventResult) {
+      return eventResult.symbol;
+    }
+  },
+  {
+    filterText: 'CrossChainTransferred',
+    formatter(eventResult) {
+      return eventResult.symbol;
+    }
+  },
+  {
+    filterText: 'CrossChainReceived',
+    formatter(eventResult) {
+      return eventResult.symbol;
+    }
+  },
+];
+
 const listeners = [
   {
     checker(bloom) {
@@ -224,16 +255,27 @@ const listeners = [
     },
     tag: SCAN_TAGS.ORGANIZATION_UPDATED
   },
+  // {
+  //   checker(bloom) {
+  //     return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
+  //       const {
+  //         filterText
+  //       } = event;
+  //       return AElf.utils.isEventInBloom(bloom, filterText);
+  //     }).filter(v => v === true).length > 0;
+  //   },
+  //   tag: SCAN_TAGS.TOKEN_BALANCE_CHANGED
+  // },
   {
     checker(bloom) {
-      return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
+      return TOKEN_SUPPLY_CHANGED_EVENT.map(event => {
         const {
           filterText
         } = event;
         return AElf.utils.isEventInBloom(bloom, filterText);
       }).filter(v => v === true).length > 0;
     },
-    tag: SCAN_TAGS.TOKEN_BALANCE_CHANGED
+    tag: SCAN_TAGS.TOKEN_SUPPLY_CHANGED
   },
   {
     checker(bloom) {
@@ -264,5 +306,6 @@ module.exports = {
   SCAN_TAGS,
   listeners,
   TOKEN_BALANCE_CHANGED_EVENT,
-  TOKEN_TRANSFERRED_EVENT
+  TOKEN_TRANSFERRED_EVENT,
+  TOKEN_SUPPLY_CHANGED_EVENT
 };

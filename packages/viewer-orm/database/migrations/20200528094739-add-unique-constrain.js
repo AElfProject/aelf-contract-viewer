@@ -5,24 +5,8 @@ module.exports = {
       type: 'unique',
       name: 'tx_proposal'
     });
-    await queryInterface.addIndex(
-      'balance',
-      {
-        unique: true,
-        fields: [
-          {
-            attribute: 'owner'
-          },
-          {
-            attribute: 'symbol'
-          }
-        ],
-        name: 'owner_symbol'
-      }
-    );
   },
   down: async queryInterface => {
     await queryInterface.removeConstraint('votes', 'tx_proposal');
-    await queryInterface.removeIndex('balance', 'owner_symbol');
   }
 };

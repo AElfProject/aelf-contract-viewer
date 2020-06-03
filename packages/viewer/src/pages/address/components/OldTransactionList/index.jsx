@@ -15,8 +15,7 @@ function formatParams(params) {
   };
 }
 
-function formatResponse(res) {
-  const { data } = res;
+function formatResponse(data) {
   const {
     total = 0,
     transactions = []
@@ -40,7 +39,7 @@ const OldTransactionList = props => {
     owner,
     api
   } = props;
-  const freezeParams = useState({
+  const [freezeParams] = useState({
     address: owner
   });
   return (
@@ -50,6 +49,7 @@ const OldTransactionList = props => {
       api={api}
       responseFormatter={formatResponse}
       requestParamsFormatter={formatParams}
+      rowKey="txId"
     />
   );
 };

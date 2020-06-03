@@ -49,7 +49,7 @@ function getListColumn(preTotal) {
       dataIndex: 'balance',
       key: 'balance',
       render(balance, record) {
-        return `${balance} ${record.symbol}`;
+        return `${Number(balance).toLocaleString()} ${record.symbol}`;
       }
     },
     {

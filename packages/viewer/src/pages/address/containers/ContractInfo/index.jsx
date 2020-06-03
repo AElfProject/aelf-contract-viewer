@@ -30,6 +30,7 @@ import '../../../../common/index.less';
 import './index.less';
 import Bread from '../../components/Bread';
 import EventList from '../../components/EventList';
+import TransferList from '../../components/TransferList';
 
 const { Paragraph } = Typography;
 const {
@@ -85,6 +86,16 @@ const {
   TabPane
 } = Tabs;
 
+const contractBread = [
+  {
+    title: 'Contract List',
+    path: '/contract'
+  },
+  {
+    title: 'Contract'
+  }
+];
+
 const ContractInfo = () => {
   const { search } = useLocation();
   const { address } = useParams(search);
@@ -103,13 +114,23 @@ const ContractInfo = () => {
       <Layout>
         <Content>
           <div className="contract-viewer">
-            <Bread title="Contract" subTitle={`ELF_${address}_${config.viewer.chainId}`} />
+            <Bread
+              title="Contract"
+              subTitle={`ELF_${address}_${config.viewer.chainId}`}
+              breads={contractBread}
+            />
             <DetailHeader columns={columns} />
             <Tabs>
-              <TabPane tab="Transaction" key="transaction">
+              <TabPane tab="Transactions" key="transactions">
                 <OldTransactionList
                   owner={address}
                   api={config.API_PATH.GET_TRANSACTION_BY_ADDRESS}
+                />
+              </TabPane>
+              <TabPane tab="Transfers" key="transfers">
+                <TransferList
+                  owner={address}
+                  api={config.API_PATH.GET_TRANSFER_LIST}
                 />
               </TabPane>
               <TabPane tab="Contract" key="contract">

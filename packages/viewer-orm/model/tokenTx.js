@@ -55,7 +55,7 @@ class TokenTx extends Model {
     let txs = await Transactions.getTransactionsByIds(ids);
     txs = txs.reduce((acc, v) => ({
       ...acc,
-      [v.txId]: v
+      [v.txId]: v.toJSON()
     }), {});
     list = list.map(item => ({
       ...item,

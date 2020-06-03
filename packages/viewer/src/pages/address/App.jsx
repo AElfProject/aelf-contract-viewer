@@ -14,6 +14,7 @@ import ContractList from './containers/ContractList';
 import AccountList from './containers/AccountList';
 import AccountInfo from './containers/AccountInfo';
 import TokenList from './containers/TokenList';
+import TokenInfo from './containers/TokenInfo';
 import {
   sendMessage,
   getContractNames
@@ -51,11 +52,11 @@ const App = () => {
         <Route path="/contract/:address?/:codeHash?">
           <ContractInfo />
         </Route>
-        <Route path="/token">
+        <Route exact path="/token">
           <TokenList />
         </Route>
         <Route path="/token/:symbol">
-          <TokenList />
+          <TokenInfo />
         </Route>
         <Redirect to="/address" />
       </Switch>

@@ -44,7 +44,7 @@ async function getHeaderColumns(address, symbol) {
     {
       tip: `${symbol} Balance`,
       name: 'Balance',
-      desc: `${elfBalances} ${symbol}`
+      desc: `${Number(elfBalances).toLocaleString()} ${symbol}`
     },
     {
       tip: 'Tokens owned',
@@ -59,6 +59,16 @@ async function getHeaderColumns(address, symbol) {
 const {
   TabPane
 } = Tabs;
+
+const accountBread = [
+  {
+    title: 'Account List',
+    path: '/address'
+  },
+  {
+    title: 'Account'
+  }
+];
 
 const AccountInfo = () => {
   const routerParams = useParams();
@@ -84,7 +94,11 @@ const AccountInfo = () => {
     <Layout>
       <Content>
         <div className="main-container">
-          <Bread title="Account" subTitle={`ELF_${address}_${config.viewer.chainId}`} />
+          <Bread
+            title="Account"
+            subTitle={`ELF_${address}_${config.viewer.chainId}`}
+            breads={accountBread}
+          />
           <DetailHeader columns={columns} />
           <Tabs>
             <TabPane tab="Transactions" key="transactions">
@@ -94,7 +108,10 @@ const AccountInfo = () => {
               />
             </TabPane>
             <TabPane tab="Transfers" key="transfers">
-              <TransferList owner={address} api={config.API_PATH.GET_TRANSFER_LIST} />
+              <TransferList
+                owner={address}
+                api={config.API_PATH.GET_TRANSFER_LIST}
+              />
             </TabPane>
           </Tabs>
         </div>

@@ -100,8 +100,8 @@ class Tokens extends Model {
     result = result.toJSON();
     return {
       ...result,
-      totalSupply: new Decimal(result.totalSupply).dividedBy(`1e${result.decimals}`).toString(),
-      supply: new Decimal(result.supply).dividedBy(`1e${result.decimals}`).toString()
+      totalSupply: new Decimal(result.totalSupply).dividedBy(`1e${result.decimals}`).toNumber(),
+      supply: new Decimal(result.supply).dividedBy(`1e${result.decimals}`).toNumber()
     };
   }
 
@@ -128,10 +128,55 @@ class Tokens extends Model {
     });
   }
 
-  static async getAllToken(pageNum, pageSize) {
+  static async getAllToken(pageNum, pageSize, search) {
+    if (search) {
+      const result = await Tokens.findAndCountAll({
+        where: {
+          symbol: {
+            [Op.substring]: search
+          }
+        },
+        limit: +pageSize,
+        offset: (pageNum - 1) * pageSize
+      });
+      const total = result.count;
+      let list = result.rows.map(v => v.toJSON());
+      if (total === 0) {
+        return {
+          total,
+          list
+        };
+      }
+      list = list.reduce((acc, v) => ({
+        ...acc,
+        [v.symbol]: v
+      }), {});
+      const symbols = Object.keys(list);
+      let tokenCount = await Balance.getCountBySymbols(symbols);
+      tokenCount = tokenCount.map(v => v.toJSON());
+      tokenCount = tokenCount.sort((a, b) => b.holders - a.holders);
+      return {
+        total,
+        list: tokenCount.map(t => {
+          const tokenInfo = list[t.symbol] || {};
+          return {
+            ...t,
+            ...tokenInfo,
+            totalSupply: new Decimal(tokenInfo.totalSupply).dividedBy(`1e${tokenInfo.decimals || 8}`)
+              .toNumber()
+              .toLocaleString(),
+            supply: new Decimal(tokenInfo.supply).dividedBy(`1e${tokenInfo.decimals || 8}`)
+              .toNumber()
+              .toLocaleString()
+
+          };
+        })
+      };
+    }
     const offset = (pageNum - 1) * pageSize;
     let tokenCount = await Balance.getTokenCount();
     const total = tokenCount.length;
+    tokenCount = tokenCount.map(v => v.toJSON());
     tokenCount = tokenCount.sort((a, b) => b.holders - a.holders);
     const tokenSymbols = tokenCount.slice(offset, offset + pageSize);
     const result = await Tokens.findAll({
@@ -141,12 +186,12 @@ class Tokens extends Model {
         }
       }
     });
-    const list = result.rows.map((v, index) => {
+    const list = result.map((v, index) => {
       const item = v.toJSON();
       return {
         ...item,
-        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString(),
-        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals}`).toString(),
+        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toNumber().toLocaleString(),
+        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals}`).toNumber().toLocaleString(),
         ...tokenSymbols[index]
       };
     });

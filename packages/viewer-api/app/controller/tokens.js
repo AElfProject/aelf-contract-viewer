@@ -55,12 +55,13 @@ class TokensController extends Controller {
       }
       const {
         pageSize = 10,
-        pageNum
+        pageNum,
+        search = ''
       } = ctx.request.query;
       const {
         list,
         total
-      } = await app.model.Tokens.getAllToken(+pageNum, +pageSize);
+      } = await app.model.Tokens.getAllToken(+pageNum, +pageSize, search);
       this.sendBody({
         list,
         total

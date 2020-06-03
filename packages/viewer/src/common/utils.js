@@ -123,6 +123,8 @@ const DEFAUT_RPCSERVER = process.env.NODE_ENV === 'production'
   ? `${window.location.protocol}//${window.location.host}/chain`
   : `${window.location.protocol}//${window.location.host}`;
 
+const defaultAElfInstance = new AElf(new AElf.providers.HttpProvider(DEFAUT_RPCSERVER));
+
 export async function getBalances(address, search = '') {
   try {
     const balances = await request(config.API_PATH.GET_BALANCES_BY_ADDRESS, {
@@ -229,7 +231,7 @@ export async function getContract(aelf, address) {
 
 export async function getContractDividend(address) {
   try {
-    const contract = await getContract(address);
+    const contract = await getContract(defaultAElfInstance, address);
     if (contract.GetProfitsAmount) {
       const result = await contract.GetProfitsAmount.call();
       return result || {};
@@ -251,17 +253,16 @@ export async function getContractMethodList(aelf, address) {
 }
 
 const contractsNamesMap = {};
-const defaultAElfInstance = new AElf(new AElf.providers.HttpProvider(DEFAUT_RPCSERVER));
 
 export async function getContractByName(name) {
   if (!contractsNamesMap[name]) {
     const {
       GenesisContractAddress
     } = await defaultAElfInstance.getChainStatus();
-    const zeroContract = await getContract(GenesisContractAddress);
+    const zeroContract = await getContract(defaultAElfInstance, GenesisContractAddress);
     contractsNamesMap[name] = await zeroContract.GetContractAddressByName.call(AElf.utils.sha256(name));
   }
-  return getContract(contractsNamesMap[name]);
+  return getContract(defaultAElfInstance, contractsNamesMap[name]);
 }
 
 export async function deserializeLog(log, name, address) {

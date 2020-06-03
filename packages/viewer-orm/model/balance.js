@@ -6,14 +6,13 @@ const Sequelize = require('sequelize');
 const {
   formatTimeWithZone
 } = require('../common/utils');
-const { commonModelOptions } = require('../common/viewer');
+const { scanModelOptions } = require('../common/scan');
 
 const {
   Model,
   BIGINT,
   STRING,
   DECIMAL,
-  DATE,
   NOW,
   Op,
   fn,
@@ -48,9 +47,10 @@ const balanceDescription = {
     defaultValue: 0
   },
   updatedAt: {
-    type: DATE,
+    type: STRING(64),
     allowNull: false,
     defaultValue: NOW,
+    field: 'updated_at',
     get() {
       const time = this.getDataValue('updatedAt');
       try {
@@ -87,6 +87,22 @@ class Balance extends Model {
       total,
       list
     };
+  }
+
+  static async getCountBySymbols(symbols) {
+    return Balance.findAll({
+      attributes: [
+        'symbol',
+        [fn('COUNT', col('symbol')), 'holders'],
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      where: {
+        symbol: {
+          [Op.in]: symbols
+        }
+      },
+      group: 'symbol'
+    });
   }
 
   static async getBalanceByOwner(owner, search = '') {
@@ -167,12 +183,12 @@ class Balance extends Model {
     if (!result) {
       return {};
     }
-    return result;
+    return result.toJSON();
   }
 }
 
 Balance.init(balanceDescription, {
-  ...commonModelOptions,
+  ...scanModelOptions,
   tableName: 'balance'
 });
 

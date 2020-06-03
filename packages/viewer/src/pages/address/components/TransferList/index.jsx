@@ -16,7 +16,7 @@ function getColumns(contractNames, ownerAddress) {
       dataIndex: 'txId',
       key: 'txId',
       ellipsis: true,
-      width: 250,
+      width: 200,
       render(txId) {
         return (
           <a
@@ -34,6 +34,8 @@ function getColumns(contractNames, ownerAddress) {
       title: 'Block Height',
       dataIndex: 'blockHeight',
       key: 'blockHeight',
+      width: 80,
+      ellipsis: true,
       render(height) {
         return (
           <a
@@ -48,21 +50,21 @@ function getColumns(contractNames, ownerAddress) {
     },
     {
       title: 'Method',
-      width: 100,
+      width: 150,
       dataIndex: 'method',
       key: 'method',
       ellipsis: true
     },
     {
       title: 'Event',
-      width: 100,
+      width: 150,
       dataIndex: 'action',
       key: 'action',
       ellipsis: true
     },
     {
       title: 'Symbol',
-      width: 50,
+      width: 100,
       dataIndex: 'symbol',
       key: 'symbol',
       ellipsis: true
@@ -85,11 +87,11 @@ function getColumns(contractNames, ownerAddress) {
     },
     {
       title: 'To',
-      dataIndex: 'addressTo',
-      key: 'addressTo',
+      dataIndex: 'to',
+      key: 'to',
       ellipsis: true,
       render(to) {
-        return to === ownerAddress ? to : (
+        return to === ownerAddress ? `ELF_${to}_${config.viewer.chainId}` : (
           <Link
             to={`/address/${to}`}
             title={`ELF_${to}_${config.viewer.chainId}`}
@@ -133,7 +135,7 @@ const TransferList = props => {
     owner,
     api
   } = props;
-  const freezeParams = useState({
+  const [freezeParams] = useState({
     address: owner
   });
   return (
@@ -142,6 +144,7 @@ const TransferList = props => {
       freezeParams={freezeParams}
       api={api}
       getColumns={getColumns}
+      rowKey="id"
     />
   );
 };

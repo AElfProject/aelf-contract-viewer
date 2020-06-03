@@ -46,22 +46,22 @@ async function getHeaderColumns(symbol) {
     {
       tip: 'Total Supply',
       name: 'Total Supply',
-      desc: totalSupply
+      desc: `${Number(totalSupply).toLocaleString()} ${symbol}`
     },
     {
       tip: 'Circulating Supply',
       name: 'Circulating Supply',
-      desc: `${supply} ${symbol}`
+      desc: `${Number(supply).toLocaleString()} ${symbol}`
     },
     {
       tip: 'Holders',
       name: 'Holders',
-      desc: holders
+      desc: Number(holders).toLocaleString()
     },
     {
       tip: 'Transfers',
       name: 'Transfers',
-      desc: transfers
+      desc: Number(transfers).toLocaleString()
     }
   ];
 }
@@ -70,7 +70,17 @@ const {
   TabPane
 } = Tabs;
 
-const AccountInfo = () => {
+const tokenBreads = [
+  {
+    title: 'Token List',
+    path: '/token'
+  },
+  {
+    title: 'Token'
+  }
+];
+
+const TokenInfo = () => {
   const freezeParams = useParams();
   const {
     symbol = 'ELF'
@@ -89,13 +99,18 @@ const AccountInfo = () => {
     <Layout>
       <Content>
         <div className="main-container">
-          <Bread title="Token" subTitle={symbol} />
+          <Bread
+            title="Token"
+            subTitle={symbol}
+            breads={tokenBreads}
+          />
           <DetailHeader columns={columns} />
           <Tabs>
             <TabPane tab="Transaction" key="transaction">
               <TransactionList
                 api={config.API_PATH.GET_TOKENS_TRANSACTION}
                 freezeParams={freezeParams}
+                rowKey="txId"
               />
             </TabPane>
             <TabPane tab="Holder" key="holders">
@@ -108,4 +123,4 @@ const AccountInfo = () => {
   );
 };
 
-export default React.memo(AccountInfo);
+export default React.memo(TokenInfo);

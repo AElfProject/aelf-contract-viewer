@@ -5,12 +5,17 @@
 import React, { useState } from 'react';
 import {
   Button,
-  message
+  message,
+  Input
 } from 'antd';
 import PropTypes from 'prop-types';
 import {
   deserializeLog
 } from '../../../../common/utils';
+
+const {
+  TextArea
+} = Input;
 
 const EventItem = props => {
   const {
@@ -42,18 +47,18 @@ const EventItem = props => {
   }
   return (
     <div className="event-item">
-      <textarea
+      <TextArea
         readOnly
+        rows="6"
         spellCheck={false}
-        className="event-item-text-area"
-      >
-        {JSON.stringify(result, null, 2)}
-      </textarea>
+        value={JSON.stringify(result, null, 2)}
+        className="event-item-text-area gap-bottom"
+      />
       <Button
         onClick={decode}
         loading={loading}
       >
-        {hasDecoded ? 'Decode' : 'Encode'}
+        {hasDecoded ? 'Encode' : 'Decode'}
       </Button>
     </div>
   );

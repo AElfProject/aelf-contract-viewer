@@ -6,7 +6,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   message,
   Pagination,
-  Table
+  Table,
+  Input
 } from 'antd';
 import {
   Link
@@ -19,6 +20,7 @@ import {
   sendHeight,
   sendMessage,
 } from '../../../../common/utils';
+import Bread from '../../components/Bread';
 
 function getListColumn(preTotal) {
   return [
@@ -78,6 +80,10 @@ const fetchingStatusMap = {
   SUCCESS: 'success'
 };
 
+const {
+  Search
+} = Input;
+
 const TokenList = () => {
   const fullPath = useLocation();
   useEffect(() => {
@@ -122,6 +128,15 @@ const TokenList = () => {
     });
   };
 
+  const onSearch = value => {
+    const newPagination = {
+      ...pagination,
+      pageNum: 1,
+      search: (value || '').trim()
+    };
+    getList(newPagination);
+  };
+
   useEffect(() => {
     getList(pagination);
   }, []);
@@ -137,12 +152,22 @@ const TokenList = () => {
 
   return (
     <div className="account-list main-container">
+      <Bread title="Token List" />
+      <div className="contract-list-search gap-bottom">
+        <h2>&nbsp;</h2>
+        <Search
+          className="contract-list-search-input"
+          placeholder="Input token symbol"
+          size="large"
+          onSearch={onSearch}
+        />
+      </div>
       <div className="account-list-content">
         <Table
           dataSource={list}
           columns={columns}
           loading={fetchingStatus === fetchingStatusMap.FETCHING}
-          rowKey="owner"
+          rowKey="symbol"
           pagination={false}
         />
       </div>

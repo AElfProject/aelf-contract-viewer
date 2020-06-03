@@ -53,13 +53,11 @@ class AccountController extends Controller {
         list,
         total
       } = await app.model.Balance.getOwnerBySymbol(symbol, pageNum, pageSize);
-      let tokenInfo = await app.model.Tokens.getTokenInfo(symbol);
-      tokenInfo = tokenInfo.toJSON();
+      const tokenInfo = await app.model.Tokens.getTokenInfo(symbol);
       const {
-        totalSupply = '100000000000000000',
-        decimals = 8
+        totalSupply = '1000000000'
       } = tokenInfo;
-      const totalNum = new Decimal(totalSupply).dividedBy(`1e${decimals}`);
+      const totalNum = new Decimal(totalSupply);
       this.sendBody({
         list: list.map(item => ({
           ...item,

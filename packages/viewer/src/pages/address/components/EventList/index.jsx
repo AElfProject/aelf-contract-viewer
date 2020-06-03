@@ -19,14 +19,14 @@ const columns = [
     title: 'TxId',
     dataIndex: 'txId',
     key: 'txId',
-    width: 80,
+    width: 120,
     ellipsis: true
   },
   {
     title: 'Method',
     dataIndex: 'name',
     key: 'name',
-    width: 40,
+    width: 160,
     ellipsis: true
   },
   {
@@ -109,7 +109,7 @@ const EventList = props => {
         dataSource={list}
         columns={columns}
         loading={fetchingStatus === fetchingStatusMap.FETCHING}
-        rowKey="owner"
+        rowKey="id"
         pagination={false}
       />
       <div className="account-list-pagination gap-top float-right">

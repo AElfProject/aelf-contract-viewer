@@ -38,7 +38,7 @@ const TokenList = props => {
               {b.symbol}
             </span>
             <span className="float-right">
-              {b.balance}
+              {Number(b.balance).toLocaleString()}
             </span>
           </Option>
         ))

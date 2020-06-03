@@ -101,7 +101,9 @@ class Transactions extends Model {
         'time',
         'method',
         'txFee',
-        'blockHeight'
+        'blockHeight',
+        'addressFrom',
+        'addressTo'
       ],
       where: {
         txId: {

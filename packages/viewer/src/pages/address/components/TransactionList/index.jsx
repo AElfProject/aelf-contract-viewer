@@ -84,7 +84,7 @@ function getTableColumns(contractNames, ownerAddress) {
       key: 'addressTo',
       ellipsis: true,
       render(to) {
-        let text = to;
+        let text = `ELF_${to}_${config.viewer.chainId}`;
         if (contractNames[to] && contractNames[to].contractName) {
           text = removeAElfPrefix(contractNames[to].contractName);
         }
@@ -148,7 +148,8 @@ const TransactionList = props => {
     responseFormatter,
     freezeParams,
     owner,
-    getColumns
+    getColumns,
+    ...rest
   } = props;
   const [contractNames, setContractNames] = useState({});
   const columns = useMemo(() => getColumns(contractNames, owner), [
@@ -211,10 +212,10 @@ const TransactionList = props => {
   return (
     <div className="transaction-list">
       <Table
+        {...rest}
         dataSource={result.list}
         columns={columns}
         loading={params.loading}
-        rowKey="tx_id"
         pagination={false}
       />
       <Pagination
@@ -244,7 +245,7 @@ TransactionList.propTypes = {
 
 TransactionList.defaultProps = {
   requestParamsFormatter: params => params,
-  responseFormatter: response => response,
+  responseFormatter: response => response.data,
   owner: '',
   getColumns: getTableColumns
 };

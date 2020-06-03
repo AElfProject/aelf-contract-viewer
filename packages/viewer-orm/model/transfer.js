@@ -72,8 +72,8 @@ class Transfer extends Model {
       ],
       where: {
         [Op.or]: {
-          addressFrom: address,
-          addressTo: address
+          from: address,
+          to: address
         }
       },
       limit: +pageSize,
@@ -85,7 +85,7 @@ class Transfer extends Model {
     let txs = await Transactions.getTransactionsByIds(ids);
     txs = txs.reduce((acc, v) => ({
       ...acc,
-      [v.txId]: v
+      [v.txId]: v.toJSON()
     }), {});
     list = list.map(item => ({
       ...item,

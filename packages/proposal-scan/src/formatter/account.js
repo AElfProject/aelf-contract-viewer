@@ -23,7 +23,8 @@ const {
 } = require('../utils');
 const {
   TOKEN_BALANCE_CHANGED_EVENT,
-  TOKEN_TRANSFERRED_EVENT
+  TOKEN_TRANSFERRED_EVENT,
+  TOKEN_SUPPLY_CHANGED_EVENT
 } = require('../config/constants');
 const config = require('../config');
 
@@ -56,7 +57,9 @@ async function getBalances(paramsArr, maxQuery = 3) {
   return results;
 }
 
-async function getTokenInfo(symbols, maxQuery = 3) {
+const TOKEN_INFO = {};
+
+async function getTokenInfo(symbols, type, maxQuery = 3) {
   let results = [];
   for (let i = 0; i < symbols.length; i += maxQuery) {
     results = [
@@ -65,13 +68,18 @@ async function getTokenInfo(symbols, maxQuery = 3) {
       ...(await Promise.all(symbols.slice(i, i + maxQuery).map(async v => {
         let result;
         try {
-          result = await config
-            .contracts
-            .token
-            .contract
-            .GetTokenInfo.call({
-              symbol: v
-            });
+          if (type === QUERY_TYPE.LOOP || !TOKEN_INFO[v]) {
+            result = await config
+              .contracts
+              .token
+              .contract
+              .GetTokenInfo.call({
+                symbol: v
+              });
+            TOKEN_INFO[v] = result;
+          } else {
+            result = TOKEN_INFO[v];
+          }
         } catch (e) {
           result = {
             symbol: v,
@@ -122,15 +130,8 @@ async function calculateBalances(symbol, balance) {
   return new Decimal(balance).dividedBy(`1e${decimal || 8}`).toString();
 }
 
-const TOKEN_SUPPLY_CHANGED_EVENTS = [
-  'Issued',
-  'Burned',
-  'CrossChainTransferred',
-  'CrossChainReceived'
-];
-
-async function changeSupply(symbols) {
-  const tokenInfo = await getTokenInfo(symbols);
+async function changeSupply(symbols, type) {
+  const tokenInfo = await getTokenInfo(symbols, type);
   return Promise.all(tokenInfo.map(v => Tokens.updateTokenSupply(v.symbol, v.supply)));
 }
 
@@ -144,10 +145,10 @@ async function tokenBalanceChangedFormatter(transaction, type) {
   addressSymbols = addressSymbols
     .reduce((acc, v) => [...acc, ...v], [])
     .reduce((acc, v) => [...acc, ...v], []);
-  const supplyChanged = addressSymbols.filter(v => TOKEN_SUPPLY_CHANGED_EVENTS.includes(v.action));
-  if (supplyChanged.length > 0) {
-    await changeSupply(supplyChanged.map(v => v.symbol));
-  }
+  // const supplyChanged = addressSymbols.filter(v => TOKEN_SUPPLY_CHANGED_EVENTS.includes(v.action));
+  // if (supplyChanged.length > 0) {
+  //   await changeSupply(supplyChanged.map(v => v.symbol));
+  // }
   addressSymbols = lodash.uniq(addressSymbols.map(v => `${v.owner}_${v.symbol}`));
   const balancesFromCache = addressSymbols
     .filter(v => type !== QUERY_TYPE.LOOP && BALANCES_NOT_IN_LOOP[v] !== undefined)
@@ -228,7 +229,14 @@ async function transferredInsert(transaction, type) {
   return transferredInserter(formattedData);
 }
 
+async function tokenSupplyChangedInsert(transaction, type) {
+  let list = await deserializeTransferredLogs(transaction, TOKEN_SUPPLY_CHANGED_EVENT);
+  list = lodash.uniq(list.reduce((acc, v) => [...acc, ...v], []));
+  await changeSupply(list, type);
+}
+
 module.exports = {
   tokenBalanceChangedInsert,
+  tokenSupplyChangedInsert,
   transferredInsert
 };
