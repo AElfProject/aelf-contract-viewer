@@ -265,6 +265,13 @@ export async function getContractByName(name) {
   return getContract(defaultAElfInstance, contractsNamesMap[name]);
 }
 
+function decodeBase64(str) {
+  const { util } = AElf.pbjs;
+  const buffer = util.newBuffer(util.base64.length(str));
+  util.base64.decode(str, buffer, 0);
+  return buffer;
+}
+
 export async function deserializeLog(log, name, address) {
   const {
     Indexed = [],
@@ -284,7 +291,7 @@ export async function deserializeLog(log, name, address) {
     serializedData.push(NonIndexed);
   }
   let result = serializedData.reduce((acc, v) => {
-    let deserialize = dataType.decode(Buffer.from(v, 'base64'));
+    let deserialize = dataType.decode(decodeBase64(v));
     deserialize = dataType.toObject(deserialize, {
       enums: String, // enums as string names
       longs: String, // longs as strings (requires long.js)

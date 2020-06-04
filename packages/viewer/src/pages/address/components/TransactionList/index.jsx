@@ -40,7 +40,7 @@ function getTableColumns(contractNames, ownerAddress) {
       }
     },
     {
-      title: 'Block Height',
+      title: 'Height',
       dataIndex: 'blockHeight',
       key: 'blockHeight',
       render(height) {
@@ -103,7 +103,7 @@ function getTableColumns(contractNames, ownerAddress) {
       dataIndex: 'txFee',
       key: 'txFee',
       render(fee) {
-        return `${fee} ELF`;
+        return `${Number(fee).toFixed(2)} ELF`;
       }
     },
     {

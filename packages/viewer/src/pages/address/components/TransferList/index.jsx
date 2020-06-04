@@ -16,7 +16,7 @@ function getColumns(contractNames, ownerAddress) {
       dataIndex: 'txId',
       key: 'txId',
       ellipsis: true,
-      width: 200,
+      width: 150,
       render(txId) {
         return (
           <a
@@ -31,7 +31,7 @@ function getColumns(contractNames, ownerAddress) {
       }
     },
     {
-      title: 'Block Height',
+      title: 'Height',
       dataIndex: 'blockHeight',
       key: 'blockHeight',
       width: 80,
@@ -50,14 +50,14 @@ function getColumns(contractNames, ownerAddress) {
     },
     {
       title: 'Method',
-      width: 150,
+      width: 120,
       dataIndex: 'method',
       key: 'method',
       ellipsis: true
     },
     {
       title: 'Event',
-      width: 150,
+      width: 130,
       dataIndex: 'action',
       key: 'action',
       ellipsis: true
@@ -105,9 +105,8 @@ function getColumns(contractNames, ownerAddress) {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      ellipsis: true,
       render(amount, record) {
-        return `${amount} ${record.symbol}`;
+        return `${Number(amount).toFixed(4)} ${record.symbol}`;
       }
     },
     {
@@ -115,7 +114,7 @@ function getColumns(contractNames, ownerAddress) {
       dataIndex: 'txFee',
       key: 'txFee',
       render(fee) {
-        return `${fee} ELF`;
+        return `${Number(fee).toFixed(2)} ELF`;
       }
     },
     {
