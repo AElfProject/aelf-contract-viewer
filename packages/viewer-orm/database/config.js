@@ -11,7 +11,8 @@ module.exports = {
     username: developmentConfig.sql.user,
     dialect: 'mysql',
     define: {
-      timestamp: false
+      timestamp: false,
+      charset: 'utf8mb4'
     }
   },
   production: {
@@ -19,7 +20,8 @@ module.exports = {
     username: prodConfig.sql.user,
     dialect: 'mysql',
     define: {
-      timestamp: false
+      timestamp: false,
+      charset: 'utf8mb4'
     }
   }
 };
