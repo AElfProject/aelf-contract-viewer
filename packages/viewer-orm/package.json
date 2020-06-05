@@ -7,8 +7,8 @@
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
-    "create-db": "cross-env NODE_ENV=production sequelize db:create",
-    "create-db:dev": "cross-env NODE_ENV=development sequelize db:create",
+    "create-db": "cross-env NODE_ENV=production sequelize db:create --charset=utf8mb4",
+    "create-db:dev": "cross-env NODE_ENV=development sequelize db:create --charset=utf8mb4",
     "generate": "cross-env NODE_ENV=production sequelize migration:generate",
     "generate:dev": "cross-env NODE_ENV=development sequelize migration:generate",
     "migrate": "cross-env NODE_ENV=production sequelize db:migrate",
