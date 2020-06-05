@@ -76,7 +76,7 @@ function getContractAddress(contracts) {
     systemAddressNameMap,
     controller: {
       organizationAddress: codeController.ownerAddress,
-      contractAddress: codeController.ownerAddress
+      contractAddress: codeController.contractAddress
     }
   };
 }
