@@ -27,7 +27,8 @@ config = {
       supportBigNumbers: true
     },
     define: {
-      timestamp: false
+      timestamp: false,
+      charset: 'utf8mb4'
     }
   }
 };
