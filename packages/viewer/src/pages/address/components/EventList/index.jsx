@@ -20,7 +20,19 @@ const columns = [
     dataIndex: 'txId',
     key: 'txId',
     width: 120,
-    ellipsis: true
+    ellipsis: true,
+    render(txId) {
+      return (
+        <a
+          title={txId}
+          href={`${config.viewer.txUrl}/${txId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {txId}
+        </a>
+      );
+    }
   },
   {
     title: 'Method',

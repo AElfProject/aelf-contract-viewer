@@ -68,7 +68,7 @@ function getTableColumns(contractNames, ownerAddress) {
       key: 'addressFrom',
       ellipsis: true,
       render(from) {
-        return from === ownerAddress ? from : (
+        return from === ownerAddress ? `ELF_${from}_${config.viewer.chainId}` : (
           <Link
             to={`/address/${from}`}
             title={`ELF_${from}_${config.viewer.chainId}`}
@@ -198,9 +198,12 @@ const TransactionList = props => {
   }
 
   useEffect(() => {
-    fetch(params);
+    fetch({
+      ...params,
+      ...freezeParams
+    });
     getContractNames().then(res => setContractNames(res));
-  }, []);
+  }, [freezeParams, api, owner]);
 
   async function onPageChange(pageNum, pageSize) {
     await fetch({

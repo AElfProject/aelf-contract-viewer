@@ -106,14 +106,14 @@ const TokenInfo = () => {
           />
           <DetailHeader columns={columns} />
           <Tabs>
-            <TabPane tab="Transaction" key="transaction">
+            <TabPane tab="Transactions" key="transaction">
               <TransactionList
                 api={config.API_PATH.GET_TOKENS_TRANSACTION}
                 freezeParams={freezeParams}
                 rowKey="txId"
               />
             </TabPane>
-            <TabPane tab="Holder" key="holders">
+            <TabPane tab="Holders" key="holders">
               <HolderList symbol={symbol} />
             </TabPane>
           </Tabs>

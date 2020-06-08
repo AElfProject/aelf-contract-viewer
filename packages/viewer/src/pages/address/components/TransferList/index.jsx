@@ -2,7 +2,7 @@
  * @file old transaction list from old api
  * @author atom-yang
  */
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
@@ -75,7 +75,7 @@ function getColumns(contractNames, ownerAddress) {
       key: 'to',
       ellipsis: true,
       render(from) {
-        return from === ownerAddress ? from : (
+        return from === ownerAddress ? `ELF_${from}_${config.viewer.chainId}` : (
           <Link
             to={`/address/${from}`}
             title={`ELF_${from}_${config.viewer.chainId}`}
@@ -134,9 +134,9 @@ const TransferList = props => {
     owner,
     api
   } = props;
-  const [freezeParams] = useState({
+  const freezeParams = useMemo(() => ({
     address: owner
-  });
+  }), [owner]);
   return (
     <TransactionList
       owner={owner}

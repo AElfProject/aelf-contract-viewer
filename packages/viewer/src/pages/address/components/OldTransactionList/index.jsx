@@ -2,7 +2,7 @@
  * @file old transaction list from old api
  * @author atom-yang
  */
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import TransactionList from '../TransactionList';
 
@@ -39,9 +39,9 @@ const OldTransactionList = props => {
     owner,
     api
   } = props;
-  const [freezeParams] = useState({
+  const freezeParams = useMemo(() => ({
     address: owner
-  });
+  }), [owner]);
   return (
     <TransactionList
       owner={owner}
