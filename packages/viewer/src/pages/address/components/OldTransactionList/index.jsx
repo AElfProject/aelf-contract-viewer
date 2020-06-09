@@ -28,7 +28,7 @@ function formatResponse(data) {
       method: item.method,
       addressFrom: item.address_from,
       addressTo: item.address_to,
-      txFee: item.tx_fee,
+      txFee: JSON.parse(item.tx_fee),
       time: item.time
     }))
   };

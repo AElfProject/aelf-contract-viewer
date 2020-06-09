@@ -17,6 +17,7 @@ import {
 import config from '../../../../common/config';
 import { getContractNames, removeAElfPrefix, sendHeight } from '../../../../common/utils';
 import Total from '../../../../components/Total';
+import Dividends from '../Dividends';
 
 function getTableColumns(contractNames, ownerAddress) {
   return [
@@ -103,7 +104,7 @@ function getTableColumns(contractNames, ownerAddress) {
       dataIndex: 'txFee',
       key: 'txFee',
       render(fee) {
-        return `${Number(fee).toFixed(2)} ELF`;
+        return <Dividends dividends={fee} />;
       }
     },
     {

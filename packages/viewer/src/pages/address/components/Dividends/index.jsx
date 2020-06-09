@@ -18,10 +18,13 @@ import {
 
 const Dividends = props => {
   const {
-    dividends
+    dividends,
+    defaultSymbol
   } = props;
   const keys = Object.keys(dividends);
-  const defaultKey = dividends.ELF !== undefined ? 'ELF' : keys[0] || 'ELF';
+  // eslint-disable-next-line no-nested-ternary
+  const defaultKey = defaultSymbol !== undefined
+    ? defaultSymbol : (dividends.ELF !== undefined ? 'ELF' : keys[0] || 'ELF');
   return (
     <If condition={keys.length > 1}>
       <Then>
@@ -56,7 +59,12 @@ const Dividends = props => {
 
 Dividends.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
-  dividends: PropTypes.object.isRequired
+  dividends: PropTypes.object.isRequired,
+  defaultSymbol: PropTypes.string
 };
 
-export default Dividends;
+Dividends.defaultProps = {
+  defaultSymbol: 'ELF'
+};
+
+export default React.memo(Dividends);

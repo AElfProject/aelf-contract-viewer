@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TransactionList from '../TransactionList';
 import config from '../../../../common/config';
+import Dividends from '../Dividends';
 
 function getColumns(contractNames, ownerAddress) {
   return [
@@ -114,7 +115,7 @@ function getColumns(contractNames, ownerAddress) {
       dataIndex: 'txFee',
       key: 'txFee',
       render(fee) {
-        return `${Number(fee).toFixed(2)} ELF`;
+        return <Dividends dividends={fee} />;
       }
     },
     {

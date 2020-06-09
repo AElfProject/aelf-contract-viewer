@@ -7,7 +7,6 @@ const { scanModelOptions } = require('../common/scan');
 
 const {
   Model,
-  DECIMAL,
   BIGINT,
   STRING,
   TEXT,
@@ -73,10 +72,18 @@ const transactionsDescription = {
     field: 'quantity'
   },
   txFee: {
-    type: DECIMAL(64, 8),
+    type: STRING(255),
     allowNull: false,
     field: 'tx_fee',
-    defaultValue: 0
+    defaultValue: '{}',
+    get() {
+      const data = this.getDataValue('txFee');
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        return data;
+      }
+    }
   },
   resources: {
     type: STRING(255)
