@@ -23,7 +23,7 @@ import Total from '../../../../components/Total';
 import constants, { LOADING_STATUS, LOG_STATUS } from '../../common/constants';
 import Proposal from './Proposal';
 import { getProposals } from '../../actions/proposalList';
-import ApproveTokenModal from './ApproveTokenModal';
+import ApproveTokenModal from '../../components/ApproveTokenModal';
 import './index.less';
 import {
   getContractAddress,
@@ -158,6 +158,7 @@ const ProposalList = () => {
       await sendTransaction(wallet, getContractAddress(params.proposalType), action, proposalInfo.proposalId);
     }
     setProposalInfo({
+      ...proposalInfo,
       visible: false
     });
   }
@@ -285,11 +286,11 @@ const ProposalList = () => {
         proposalInfo.visible ? (
           <ApproveTokenModal
             aelf={aelf}
-            proposalType={params.proposalType}
             {...proposalInfo}
             onCancel={handleConfirm}
             onConfirm={handleConfirm}
             wallet={wallet}
+            owner={currentWallet.address}
           />
         ) : null
       }

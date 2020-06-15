@@ -50,7 +50,7 @@ import {
   sendTransaction,
   getSignParams
 } from '../../common/utils';
-import ApproveTokenModal from '../ProposalList/ApproveTokenModal';
+import ApproveTokenModal from '../../components/ApproveTokenModal';
 import { LOG_IN_ACTIONS } from '../../actions/common';
 import { sendHeight, validateURL } from '../../../../common/utils';
 
@@ -388,13 +388,14 @@ const ProposalDetail = () => {
                 visible ? (
                   <ApproveTokenModal
                     aelf={aelf}
-                    proposalType={proposalType}
                     {...info.proposal}
                     action={visible}
                     tokenSymbol={leftOrgInfo.tokenSymbol || 'ELF'}
                     onCancel={handleConfirm}
                     onConfirm={handleConfirm}
                     wallet={wallet}
+                    proposalId={proposalId}
+                    owner={currentWallet.address}
                     visible={!!visible}
                   />
                 ) : null
