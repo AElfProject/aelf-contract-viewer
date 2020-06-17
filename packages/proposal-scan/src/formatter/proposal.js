@@ -252,9 +252,6 @@ async function proposalVotedReducer(transactionList) {
     const {
       Logs = []
     } = item;
-    if (Logs.length > 1) {
-      console.log(Logs);
-    }
     let proposalIdArr = (Logs || []).reduce((ids, log) => {
       const {
         Name,

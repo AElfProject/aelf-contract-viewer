@@ -205,10 +205,12 @@ async function organizationUpdatedInsert(transaction) {
       }), {});
     }
 
-    if (name === 'OrganizationWhiteListChanged') {
+    if (name === 'OrganizationWhiteListChanged' && proposalType !== config.constants.proposalTypes.PARLIAMENT) {
       const {
-        proposerWhiteList
-      } = leftOrgInfo;
+        proposerWhiteList = {
+          proposers: []
+        }
+      } = deserializeLogResult;
       const proposers = proposerWhiteList.proposers.map(v => ({
         orgAddress,
         proposer: v,
