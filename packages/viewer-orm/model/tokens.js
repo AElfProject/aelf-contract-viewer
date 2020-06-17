@@ -168,7 +168,6 @@ class Tokens extends Model {
             supply: new Decimal(tokenInfo.supply).dividedBy(`1e${tokenInfo.decimals || 8}`)
               .toNumber()
               .toLocaleString()
-
           };
         })
       };
@@ -179,20 +178,27 @@ class Tokens extends Model {
     tokenCount = tokenCount.map(v => v.toJSON());
     tokenCount = tokenCount.sort((a, b) => b.holders - a.holders);
     const tokenSymbols = tokenCount.slice(offset, offset + pageSize);
-    const result = await Tokens.findAll({
+    let result = await Tokens.findAll({
       where: {
         symbol: {
           [Op.in]: tokenSymbols.map(v => v.symbol)
         }
       }
     });
-    const list = result.map((v, index) => {
-      const item = v.toJSON();
+    result = result.reduce((acc, v) => ({
+      ...acc,
+      [v.symbol]: v.toJSON()
+    }), {});
+    const list = tokenSymbols.map(t => {
+      const {
+        symbol
+      } = t;
+      const info = result[symbol];
       return {
-        ...item,
-        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toNumber().toLocaleString(),
-        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals}`).toNumber().toLocaleString(),
-        ...tokenSymbols[index]
+        ...info,
+        totalSupply: new Decimal(info.totalSupply).dividedBy(`1e${info.decimals}`).toNumber().toLocaleString(),
+        supply: new Decimal(info.supply).dividedBy(`1e${info.decimals}`).toNumber().toLocaleString(),
+        ...t
       };
     });
     return {
