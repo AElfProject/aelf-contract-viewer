@@ -73,7 +73,7 @@ const listColumn = [
     dataIndex: 'voter',
     key: 'voter',
     ellipsis: true,
-    width: 400,
+    width: 300,
     render: voter => (
       <a
         href={`${viewer.addressUrl}/${voter}`}
@@ -89,7 +89,7 @@ const listColumn = [
     dataIndex: 'txId',
     key: 'txId',
     ellipsis: true,
-    width: 400,
+    width: 300,
     render: txId => (
       <a
         href={`${viewer.txUrl}/${txId}`}

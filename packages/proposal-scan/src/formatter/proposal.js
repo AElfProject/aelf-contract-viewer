@@ -342,7 +342,7 @@ async function proposalVotedFormatter(transaction) {
     }
     const { contract } = config.contracts[proposalType.toLowerCase()];
     const proposalInfo = await contract.GetProposal.call(proposalId);
-    amount = !proposalInfo ? amount : proposalInfo[`${ACTION_COUNTS_NAME_MAP[receiptType]}`];
+    let increment = !proposalInfo ? amount : proposalInfo[`${ACTION_COUNTS_NAME_MAP[receiptType]}`];
     const isExist = await ProposalList.isExist(proposalId);
     if (!isExist) {
       return false;
@@ -350,13 +350,14 @@ async function proposalVotedFormatter(transaction) {
     if (proposalType === proposalTypes.REFERENDUM) {
       const decimal = await Tokens.getTokenDecimal(symbol);
       amount = new Decimal(amount).dividedBy(`1e${decimal}`).toString();
+      increment = new Decimal(increment).dividedBy(`1e${decimal}`).toString();
     }
     const result = {
       update: {
         isIncrement: !proposalInfo,
         proposalId,
         action: ACTION_COUNTS_MAP[receiptType],
-        amount,
+        amount: increment,
         status: (proposalInfo && proposalInfo.toBeReleased)
           ? proposalStatus.APPROVED
           : proposalStatus.PENDING
@@ -400,7 +401,7 @@ async function proposalVotedInsert(transaction) {
       },
       defaults: {
         ...vote,
-        amount: vote.proposalType !== proposalTypes.REFERENDUM ? 1 : amount
+        amount: vote.proposalType !== proposalTypes.REFERENDUM ? 1 : vote.amount
       },
       transaction: t
     });
