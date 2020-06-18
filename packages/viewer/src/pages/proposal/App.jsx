@@ -92,7 +92,7 @@ const App = () => {
       href: fullPath.href
     });
     // sendHeight(500);
-  }, [fullPath]);
+  }, [fullPath.href]);
 
   useEffect(() => {
     walletInstance.isExist.then(result => {

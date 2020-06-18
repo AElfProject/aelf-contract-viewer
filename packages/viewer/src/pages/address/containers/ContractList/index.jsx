@@ -15,7 +15,6 @@ import {
 import {
   Link
 } from 'react-router-dom';
-import { useLocation } from 'react-use';
 import { request } from '../../../../common/request';
 import { API_PATH } from '../../common/constants';
 import config from '../../../../common/config';
@@ -23,7 +22,6 @@ import Total from '../../../../components/Total';
 import './index.less';
 import {
   removePrefixOrSuffix,
-  sendMessage,
   removeAElfPrefix,
   sendHeight
 } from '../../../../common/utils';
@@ -112,12 +110,6 @@ const fetchingStatusMap = {
 };
 
 const ContractList = () => {
-  const fullPath = useLocation();
-  useEffect(() => {
-    sendMessage({
-      href: fullPath.href
-    });
-  }, [fullPath]);
   const [list, setList] = useState([]);
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [pagination, setPagination] = useState({

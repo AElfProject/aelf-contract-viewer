@@ -12,13 +12,11 @@ import {
 import {
   Link
 } from 'react-router-dom';
-import { useLocation } from 'react-use';
 import { request } from '../../../../common/request';
 import config from '../../../../common/config';
 import Total from '../../../../components/Total';
 import {
-  sendHeight,
-  sendMessage,
+  sendHeight
 } from '../../../../common/utils';
 import Bread from '../../components/Bread';
 
@@ -85,12 +83,6 @@ const {
 } = Input;
 
 const TokenList = () => {
-  const fullPath = useLocation();
-  useEffect(() => {
-    sendMessage({
-      href: fullPath.href
-    });
-  }, [fullPath]);
   const [list, setList] = useState([]);
   const [fetchingStatus, setFetchingStatus] = useState(fetchingStatusMap.FETCHING);
   const [pagination, setPagination] = useState({

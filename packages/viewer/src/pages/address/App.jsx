@@ -31,7 +31,7 @@ const App = () => {
     sendMessage({
       href: fullPath.href
     });
-  }, [fullPath]);
+  }, [fullPath.href]);
   useEffect(() => {
     getContractNames()
       .then(res => setContracts(res))
