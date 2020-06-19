@@ -452,12 +452,15 @@ async function proposalReleasedInsert(transaction) {
 function isProposalClaimed(transaction) {
   const {
     Transaction,
+    Status
   } = transaction;
   const {
     To,
     MethodName
   } = Transaction;
-  return To === config.contracts.referendum.address && MethodName === 'ReclaimVoteToken';
+  return (Status || '').toUpperCase() === 'MINED'
+    && To === config.contracts.referendum.address
+    && MethodName === 'ReclaimVoteToken';
 }
 
 function proposalClaimedFormatter(transaction) {
@@ -473,8 +476,12 @@ function proposalClaimedFormatter(transaction) {
 function proposalClaimedInsert(transaction) {
   const {
     TransactionId,
+    Transaction,
     time
   } = transaction;
+  const {
+    From
+  } = Transaction;
   const proposalId = proposalClaimedFormatter(transaction);
   return Votes.update({
     claimed: true,
@@ -482,7 +489,8 @@ function proposalClaimedInsert(transaction) {
     claimedTime: time
   }, {
     where: {
-      proposalId
+      proposalId,
+      voter: From
     }
   });
 }
