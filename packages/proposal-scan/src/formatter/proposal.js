@@ -290,14 +290,12 @@ async function proposalVotedReducer(transactionList) {
     return result;
   }, {});
   const proposalIds = Object.keys(proposalIdsMap);
-  console.log('proposalIds', proposalIds);
   if (proposalIds.length === 0) {
     return [];
   }
   const existIds = await ProposalList.getExistProposalIds(proposalIds);
   const txIndexes = lodash.uniq(existIds.reduce((acc, key) => [...acc, ...proposalIdsMap[key]], []));
   txIndexes.sort((pre, next) => pre - next);
-  console.log('tx indexes', txIndexes);
   return txIndexes.map(index => transactionList[index]);
 }
 
@@ -367,7 +365,7 @@ async function proposalVotedFormatter(transaction) {
         symbol,
         action: receiptType,
         proposalType,
-        time: formatTimestamp(time)
+        time: formatTimestamp(time).utcOffset(0).format()
       }
     };
     return result;
@@ -397,8 +395,7 @@ async function proposalVotedInsert(transaction) {
         proposalId: vote.proposalId
       },
       defaults: {
-        ...vote,
-        amount: vote.proposalType !== proposalTypes.REFERENDUM ? 1 : vote.amount
+        ...vote
       },
       transaction: t
     });

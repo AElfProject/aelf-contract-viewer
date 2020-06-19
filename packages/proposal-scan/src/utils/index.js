@@ -107,15 +107,14 @@ function parseParams(params) {
 }
 
 function formatTimestamp(timestamp) {
-  let time = moment(timestamp);
-  if (time.isValid()) {
-    return time;
+  if (moment.isMoment(timestamp)) {
+    return timestamp;
   }
   const {
     seconds,
     nanos = 0
   } = timestamp;
-  time = seconds * 1000 + (nanos || 0) / 1000;
+  const time = seconds * 1000 + (nanos || 0) / 1000000;
   return moment(time);
 }
 
