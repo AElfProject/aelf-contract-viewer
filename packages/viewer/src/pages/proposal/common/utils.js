@@ -138,7 +138,7 @@ export function getParams(inputType) {
 export function formatTimeToNano(time) {
   return {
     seconds: moment(time).unix(),
-    nanos: moment(time).milliseconds() * 1000
+    nanos: moment(time).milliseconds() * 1000000
   };
 }
 

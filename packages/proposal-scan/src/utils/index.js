@@ -107,6 +107,9 @@ function parseParams(params) {
 }
 
 function formatTimestamp(timestamp) {
+  if (typeof timestamp === 'string') {
+    return moment(timestamp);
+  }
   if (moment.isMoment(timestamp)) {
     return timestamp;
   }

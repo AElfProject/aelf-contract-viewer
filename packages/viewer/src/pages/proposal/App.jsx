@@ -91,7 +91,6 @@ const App = () => {
     sendMessage({
       href: fullPath.href
     });
-    // sendHeight(500);
   }, [fullPath.href]);
 
   useEffect(() => {
