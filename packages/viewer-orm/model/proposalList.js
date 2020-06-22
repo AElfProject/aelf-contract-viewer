@@ -19,7 +19,8 @@ const {
   NOW,
   TEXT,
   Op,
-  BOOLEAN
+  BOOLEAN,
+  DECIMAL
 } = Sequelize;
 
 const {
@@ -103,17 +104,17 @@ const proposalListDescription = {
   },
   // 除以token的decimals
   approvals: {
-    type: BIGINT,
+    type: DECIMAL(64, 8),
     allowNull: false,
     defaultValue: 0
   },
   rejections: {
-    type: BIGINT,
+    type: DECIMAL(64, 8),
     allowNull: false,
     defaultValue: 0
   },
   abstentions: {
-    type: BIGINT,
+    type: DECIMAL(64, 8),
     allowNull: false,
     defaultValue: 0
   },

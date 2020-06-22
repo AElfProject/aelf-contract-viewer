@@ -103,22 +103,18 @@ const ProposalList = () => {
   });
 
   const onSearch = async value => {
-    if (value && value.trim().length > 0) {
-      await fetchList({
-        ...params,
-        pageNum: 1,
-        search: removePrefixOrSuffix((value || '').trim())
-      });
-    }
-  };
-
-  const handleStatusChange = value => {
-    fetchList({
+    await fetchList({
       ...params,
       pageNum: 1,
-      status: value
+      search: removePrefixOrSuffix((value || '').trim())
     });
   };
+
+  const handleStatusChange = value => fetchList({
+    ...params,
+    pageNum: 1,
+    status: value
+  });
 
   const handleContractFilter = e => {
     fetchList({
