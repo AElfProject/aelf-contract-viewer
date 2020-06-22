@@ -252,7 +252,7 @@ const LIST_TABS = {
 };
 
 const REFERENDUM_TOKEN_COLUMN_ITEM = {
-  title: 'Token Amount',
+  title: 'Amount',
   dataIndex: 'amount',
   key: 'amount',
   render(text, record) {

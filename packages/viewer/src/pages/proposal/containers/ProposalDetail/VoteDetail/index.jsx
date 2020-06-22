@@ -127,12 +127,12 @@ referendumListColumn.splice(
   2,
   0,
   {
-    title: 'Token Symbol',
+    title: 'Symbol',
     dataIndex: 'symbol',
     key: 'symbol'
   },
   {
-    title: 'Token Amount',
+    title: 'Amount',
     dataIndex: 'amount',
     key: 'amount'
   }

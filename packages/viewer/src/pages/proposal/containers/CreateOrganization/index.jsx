@@ -64,7 +64,7 @@ async function validateAddressList(rule, value) {
   if (value && value.length > 0) {
     const inValid = value.split(',').filter(v => {
       try {
-        AElf.utils.base58.decode(v);
+        AElf.utils.decodeAddressRep(v);
         return false;
       } catch (e) {
         return true;
