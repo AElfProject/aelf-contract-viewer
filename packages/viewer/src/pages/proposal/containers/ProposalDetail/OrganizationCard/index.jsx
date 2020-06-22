@@ -57,16 +57,22 @@ const OrganizationCard = props => {
       <Row gutter={16}>
         <Col span={12}>
           <>
-            <div className="gap-bottom-small">
+            <div
+              className="gap-bottom-small text-ellipsis"
+              title={`${thresholdValue[proposalActions.APPROVE].num}(${thresholdValue[proposalActions.APPROVE].rate})`}
+            >
               <span className="sub-title gap-right-small">
                 Minimal Approval Threshold:
               </span>
-              <span>
+              <span className="text-ell">
                 {thresholdValue[proposalActions.APPROVE].num}
                 ({thresholdValue[proposalActions.APPROVE].rate})
               </span>
             </div>
-            <div className="gap-bottom-small">
+            <div
+              className="gap-bottom-small text-ellipsis"
+              title={`${thresholdValue[proposalActions.REJECT].num}(${thresholdValue[proposalActions.REJECT].rate})`}
+            >
               <span className="sub-title gap-right-small">
                 Maximal Rejection Threshold:
               </span>
@@ -75,7 +81,10 @@ const OrganizationCard = props => {
                 ({thresholdValue[proposalActions.REJECT].rate})
               </span>
             </div>
-            <div className="gap-bottom-small">
+            <div
+              className="gap-bottom-small text-ellipsis"
+              title={`${thresholdValue[proposalActions.ABSTAIN].num}(${thresholdValue[proposalActions.ABSTAIN].rate})`}
+            >
               <span className="sub-title gap-right-small">
                 Maximal Abstention Threshold:
               </span>
@@ -84,7 +93,10 @@ const OrganizationCard = props => {
                 ({thresholdValue[proposalActions.ABSTAIN].rate})
               </span>
             </div>
-            <div className="gap-bottom-small">
+            <div
+              className="gap-bottom-small text-ellipsis"
+              title={`${thresholdValue.Total.num}(${thresholdValue.Total.rate})`}
+            >
               <span className="sub-title gap-right-small">
                 Minimal Vote Threshold:
               </span>

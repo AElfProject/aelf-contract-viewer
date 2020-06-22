@@ -48,8 +48,8 @@ Title.propTypes = {
   proposalType: PropTypes.oneOf(Object.values(proposalTypes)).isRequired
 };
 
-function getRate(number) {
-  return roundTo(number * 100, 2);
+function getRate(number, precision = 2) {
+  return roundTo(number * 100, precision);
 }
 
 export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpCount = 1) {
@@ -74,32 +74,32 @@ export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpC
     coef = bpCount / abstractVoteTotal;
     total = abstractVoteTotal;
   } else {
-    precision = 2;
+    precision = 8;
     total = minimalVoteThreshold;
   }
   const result = {
     [proposalActions.APPROVE]: {
       value: minimalApprovalThreshold,
       maxValue: total,
-      num: roundTo.up(minimalApprovalThreshold * coef, precision),
+      num: getRate(minimalApprovalThreshold * coef, precision),
       rate: `${getRate(minimalApprovalThreshold / total)}%`
     },
     [proposalActions.REJECT]: {
       value: maximalRejectionThreshold,
       maxValue: total,
-      num: roundTo.up(maximalRejectionThreshold * coef, precision),
+      num: getRate(maximalRejectionThreshold * coef, precision),
       rate: `${getRate(maximalRejectionThreshold / total)}%`
     },
     [proposalActions.ABSTAIN]: {
       value: maximalAbstentionThreshold,
       maxValue: total,
-      num: roundTo.up(maximalAbstentionThreshold * coef, precision),
+      num: getRate(maximalAbstentionThreshold * coef, precision),
       rate: `${getRate(maximalAbstentionThreshold / total)}%`
     },
     Total: {
       value: minimalVoteThreshold,
       maxValue: total,
-      num: roundTo.up(minimalVoteThreshold * coef, precision),
+      num: getRate(minimalVoteThreshold * coef, precision),
       rate: `${getRate(minimalVoteThreshold / total)}%`
     }
   };

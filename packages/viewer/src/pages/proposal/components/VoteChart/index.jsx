@@ -15,8 +15,8 @@ const {
   proposalTypes
 } = constants;
 
-function getRate(number) {
-  return roundTo(number * 100, 2);
+function getRate(number, decimal = 2) {
+  return roundTo(number * 100, decimal);
 }
 
 function getCircleValues(proposalType, {
