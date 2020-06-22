@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const moment = require('moment');
+const Decimal = require('decimal.js');
 const Sequelize = require('sequelize');
 const {
   formatTimeWithZone
@@ -110,7 +111,7 @@ const proposalListDescription = {
     get() {
       const count = this.getDataValue('approvals');
       try {
-        return Number(count);
+        return new Decimal(count).toNumber();
       } catch (e) {
         return count;
       }
@@ -123,7 +124,7 @@ const proposalListDescription = {
     get() {
       const count = this.getDataValue('rejections');
       try {
-        return Number(count);
+        return new Decimal(count).toNumber();
       } catch (e) {
         return count;
       }
@@ -136,7 +137,7 @@ const proposalListDescription = {
     get() {
       const count = this.getDataValue('abstentions');
       try {
-        return Number(count);
+        return new Decimal(count).toNumber();
       } catch (e) {
         return count;
       }

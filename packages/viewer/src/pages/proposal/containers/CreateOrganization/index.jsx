@@ -2,7 +2,7 @@
  * @file create organization
  * @author atom-yang
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AElf from 'aelf-sdk';
 import Decimal from 'decimal.js';
 import {
@@ -236,24 +236,28 @@ const tailFormItemLayout = {
   }
 };
 
-const INPUT_PROPS_MAP = {
-  [proposalTypes.PARLIAMENT]: {
-    formatter: value => `${value}%`,
-    min: 0,
-    max: 100,
-    precision: 2
-  },
-  [proposalTypes.ASSOCIATION]: {
-    formatter: value => value,
-    min: 0,
-    precision: 0
-  },
-  [proposalTypes.REFERENDUM]: {
-    formatter: value => value,
-    min: 0,
-    precision: 4
-  },
-};
+function getInputPropsMap(proposalType, tokenSymbol, tokenList) {
+  let tokenDecimal = (tokenList || []).filter(t => t.symbol === tokenSymbol);
+  tokenDecimal = tokenDecimal.length === 0 ? 8 : tokenDecimal[0].decimals;
+  return {
+    [proposalTypes.PARLIAMENT]: {
+      formatter: value => `${value}%`,
+      min: 0,
+      max: 100,
+      precision: 2
+    },
+    [proposalTypes.ASSOCIATION]: {
+      formatter: value => value,
+      min: 0,
+      precision: 0
+    },
+    [proposalTypes.REFERENDUM]: {
+      formatter: value => value,
+      min: 0,
+      precision: tokenDecimal
+    }
+  }[proposalType];
+}
 
 const ABSTRACT_TOTAL = 100;
 
@@ -400,6 +404,12 @@ const CreateOrganization = () => {
     });
   }
 
+  const INPUT_PROPS_MAP = useMemo(() => getInputPropsMap(
+    formData.proposalType || proposalTypes.PARLIAMENT,
+    formData.tokenSymbol,
+    tokenList
+  ), [formData.proposalType, formData.tokenSymbol, tokenList]);
+
   return (
     <div className="create-organization">
       <div className="create-organization-header">
@@ -490,7 +500,7 @@ const CreateOrganization = () => {
           {...FIELDS_MAP.minimalApprovalThreshold}
         >
           <InputNumber
-            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+            {...INPUT_PROPS_MAP}
           />
         </FormItem>
         <FormItem
@@ -499,7 +509,7 @@ const CreateOrganization = () => {
           {...FIELDS_MAP.maximalRejectionThreshold}
         >
           <InputNumber
-            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+            {...INPUT_PROPS_MAP}
           />
         </FormItem>
         <FormItem
@@ -508,7 +518,7 @@ const CreateOrganization = () => {
           {...FIELDS_MAP.maximalAbstentionThreshold}
         >
           <InputNumber
-            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+            {...INPUT_PROPS_MAP}
           />
         </FormItem>
         <FormItem
@@ -517,7 +527,7 @@ const CreateOrganization = () => {
           {...FIELDS_MAP.minimalVoteThreshold}
         >
           <InputNumber
-            {...INPUT_PROPS_MAP[formData.proposalType || proposalTypes.PARLIAMENT]}
+            {...INPUT_PROPS_MAP}
           />
         </FormItem>
         <FormItem {...tailFormItemLayout}>
