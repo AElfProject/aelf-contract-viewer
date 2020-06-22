@@ -89,18 +89,13 @@ class Balance extends Model {
     };
   }
 
-  static async getCountBySymbols(symbols) {
+  static async getCountBySymbols() {
     return Balance.findAll({
       attributes: [
         'symbol',
         [fn('COUNT', col('symbol')), 'holders'],
         [fn('SUM', col('count')), 'transfers']
       ],
-      where: {
-        symbol: {
-          [Op.in]: symbols
-        }
-      },
       group: 'symbol'
     });
   }
