@@ -86,13 +86,11 @@ const OrganizationList = () => {
   });
 
   const onSearch = value => {
-    if (value && value.trim().length > 0) {
-      fetchList({
-        ...params,
-        pageNum: 1,
-        search: removePrefixOrSuffix(value.trim())
-      });
-    }
+    fetchList({
+      ...params,
+      pageNum: 1,
+      search: removePrefixOrSuffix(value.trim())
+    });
   };
 
   const handleTabChange = key => {

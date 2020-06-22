@@ -81,25 +81,25 @@ export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpC
     [proposalActions.APPROVE]: {
       value: minimalApprovalThreshold,
       maxValue: total,
-      num: getRate(minimalApprovalThreshold * coef, precision),
+      num: roundTo(minimalApprovalThreshold * coef, precision),
       rate: `${getRate(minimalApprovalThreshold / total)}%`
     },
     [proposalActions.REJECT]: {
       value: maximalRejectionThreshold,
       maxValue: total,
-      num: getRate(maximalRejectionThreshold * coef, precision),
+      num: roundTo(maximalRejectionThreshold * coef, precision),
       rate: `${getRate(maximalRejectionThreshold / total)}%`
     },
     [proposalActions.ABSTAIN]: {
       value: maximalAbstentionThreshold,
       maxValue: total,
-      num: getRate(maximalAbstentionThreshold * coef, precision),
+      num: roundTo(maximalAbstentionThreshold * coef, precision),
       rate: `${getRate(maximalAbstentionThreshold / total)}%`
     },
     Total: {
       value: minimalVoteThreshold,
       maxValue: total,
-      num: getRate(minimalVoteThreshold * coef, precision),
+      num: roundTo(minimalVoteThreshold * coef, precision),
       rate: `${getRate(minimalVoteThreshold / total)}%`
     }
   };
@@ -221,6 +221,7 @@ const Organization = props => {
     releaseThreshold,
     leftOrgInfo
   ]);
+  console.log('votesData', votesData);
   const leftOrg = useMemo(() => getOrganizationLeftInfo(proposalType, leftOrgInfo, bpList, parliamentProposerList), [
     leftOrgInfo,
     bpList,
