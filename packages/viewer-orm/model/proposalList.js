@@ -106,17 +106,41 @@ const proposalListDescription = {
   approvals: {
     type: DECIMAL(64, 8),
     allowNull: false,
-    defaultValue: 0
+    defaultValue: 0,
+    get() {
+      const count = this.getDataValue('approvals');
+      try {
+        return Number(count);
+      } catch (e) {
+        return count;
+      }
+    }
   },
   rejections: {
     type: DECIMAL(64, 8),
     allowNull: false,
-    defaultValue: 0
+    defaultValue: 0,
+    get() {
+      const count = this.getDataValue('rejections');
+      try {
+        return Number(count);
+      } catch (e) {
+        return count;
+      }
+    }
   },
   abstentions: {
     type: DECIMAL(64, 8),
     allowNull: false,
-    defaultValue: 0
+    defaultValue: 0,
+    get() {
+      const count = this.getDataValue('abstentions');
+      try {
+        return Number(count);
+      } catch (e) {
+        return count;
+      }
+    }
   },
   leftInfo: {
     type: TEXT('long'),
