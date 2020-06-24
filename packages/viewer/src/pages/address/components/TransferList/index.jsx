@@ -4,11 +4,11 @@
  */
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TransactionList from '../TransactionList';
 import config from '../../../../common/config';
 import Dividends from '../Dividends';
+import AddressLink from '../AddressLink';
 
 function getColumns(contractNames, ownerAddress) {
   return [
@@ -77,12 +77,7 @@ function getColumns(contractNames, ownerAddress) {
       ellipsis: true,
       render(from) {
         return from === ownerAddress ? `ELF_${from}_${config.viewer.chainId}` : (
-          <Link
-            to={`/address/${from}`}
-            title={`ELF_${from}_${config.viewer.chainId}`}
-          >
-            {`ELF_${from}_${config.viewer.chainId}`}
-          </Link>
+          <AddressLink address={from} />
         );
       }
     },
@@ -93,12 +88,7 @@ function getColumns(contractNames, ownerAddress) {
       ellipsis: true,
       render(to) {
         return to === ownerAddress ? `ELF_${to}_${config.viewer.chainId}` : (
-          <Link
-            to={`/address/${to}`}
-            title={`ELF_${to}_${config.viewer.chainId}`}
-          >
-            {`ELF_${to}_${config.viewer.chainId}`}
-          </Link>
+          <AddressLink address={to} />
         );
       }
     },

@@ -9,17 +9,14 @@ import {
   Then
 } from 'react-if';
 import {
-  Link
-} from 'react-router-dom';
-import {
   Tag,
   Divider
 } from 'antd';
 import {
   LinkIcon
 } from '../../common/Icon';
-import config from '../../../../common/config';
 import './index.less';
+import AddressLink from '../AddressLink';
 
 const Header = props => {
   const {
@@ -43,12 +40,7 @@ const Header = props => {
             <div className="contract-viewer-header-desc-item">
               <div className="gap-right">Author:</div>
               <div>
-                <Link
-                  to={`/address/${author}`}
-                >
-                  {`ELF_${author}_${config.viewer.chainId}`}
-                  <LinkIcon />
-                </Link>
+                <AddressLink address={author} suffix={<LinkIcon />} />
               </div>
             </div>
           </Then>

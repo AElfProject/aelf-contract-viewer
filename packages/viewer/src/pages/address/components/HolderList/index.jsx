@@ -8,9 +8,6 @@ import {
   Pagination,
   Table
 } from 'antd';
-import {
-  Link
-} from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { request } from '../../../../common/request';
 import config from '../../../../common/config';
@@ -18,6 +15,7 @@ import Total from '../../../../components/Total';
 import {
   sendHeight
 } from '../../../../common/utils';
+import AddressLink from '../AddressLink';
 
 function getListColumn(preTotal) {
   return [
@@ -36,12 +34,7 @@ function getListColumn(preTotal) {
       key: 'owner',
       ellipsis: true,
       render: address => (
-        <Link
-          to={`/address/${address}`}
-          title={`ELF_${address}_${config.viewer.chainId}`}
-        >
-          {`ELF_${address}_${config.viewer.chainId}`}
-        </Link>
+        <AddressLink address={address} />
       )
     },
     {

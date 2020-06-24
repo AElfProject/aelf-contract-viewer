@@ -42,6 +42,7 @@ import {
   LinkIcon,
   CodeIcon
 } from '../../../common/Icon';
+import AddressLink from '../../../components/AddressLink';
 
 const Viewer = lazy(() => import(/* webpackChunkName: "viewer" */ '../../../components/Viewer'));
 
@@ -110,11 +111,7 @@ const StepDescription = props => {
     <>
       <div className="description-item">
         <span>Author: </span>
-        <Link
-          to={`/address/${author}`}
-        >
-          {`ELF_${author}_${config.viewer.chainId}`}
-        </Link>
+        <AddressLink address={author} />
       </div>
       <div className="description-item">
         <span>Code Hash: </span>

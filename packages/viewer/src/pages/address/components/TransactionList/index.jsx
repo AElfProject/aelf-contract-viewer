@@ -18,6 +18,7 @@ import config from '../../../../common/config';
 import { getContractNames, removeAElfPrefix, sendHeight } from '../../../../common/utils';
 import Total from '../../../../components/Total';
 import Dividends from '../Dividends';
+import AddressLink from '../AddressLink';
 
 function getTableColumns(contractNames, ownerAddress) {
   return [
@@ -70,12 +71,7 @@ function getTableColumns(contractNames, ownerAddress) {
       ellipsis: true,
       render(from) {
         return from === ownerAddress ? `ELF_${from}_${config.viewer.chainId}` : (
-          <Link
-            to={`/address/${from}`}
-            title={`ELF_${from}_${config.viewer.chainId}`}
-          >
-            {`ELF_${from}_${config.viewer.chainId}`}
-          </Link>
+          <AddressLink address={from} />
         );
       }
     },
