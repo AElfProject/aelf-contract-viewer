@@ -37,7 +37,10 @@ module.exports = app => {
     TokenTx
   };
   if (process.env.NODE_ENV === 'production') {
-    Sentry.init(app.config.sentry);
+    Sentry.init({
+      ...app.config.sentry,
+      release: `viewer-api@${process.env.npm_package_version}`
+    });
     app.Sentry = Sentry;
     app.on('error', (err, ctx) => {
       Sentry.withScope(scope => {

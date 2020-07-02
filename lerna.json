@@ -4,8 +4,9 @@
   ],
   "version": "0.1.0",
   "command": {
-    "publish": {
+    "version": {
       "message": "chore(release): %v"
     }
-  }
+  },
+  "npmClient": "yarn"
 }
