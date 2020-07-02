@@ -16,4 +16,4 @@ yarn workspace <package-name> run <script-name>
 
 ## lerna
 
-We use `lerna` to update versions of packages. For every deploying, you need to run `lerna version` to update packages' versions.
+We use `lerna` to update versions of packages. For every deploying, you need to run `lerna version  --conventional-commits` to update packages' versions.
