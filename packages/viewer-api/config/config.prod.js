@@ -24,7 +24,7 @@ module.exports = appInfo => {
   };
   config.proxy = true;
   config.sentry = {
-    dsn: ''
+    dsn: 'https://e1d73b8ad26d4a6d94d4126eb37d86c1@o414245.ingest.sentry.io/5303398'
   };
   return {
     ...config,
