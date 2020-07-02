@@ -1,6 +1,6 @@
 {
   "name": "viewer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Contract viewer frontend",
   "author": "atom-young <atom.yang@aelf.io>",
   "homepage": "",
@@ -36,8 +36,8 @@
     "react-dom": "^16.11.0",
     "react-i18next": "^11.1.0",
     "react-if": "^3.4.3",
-    "react-router-dom": "^5.1.2",
     "react-redux": "^7.2.0",
+    "react-router-dom": "^5.1.2",
     "react-use": "^13.3.0",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",

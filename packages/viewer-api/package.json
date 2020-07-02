@@ -1,6 +1,6 @@
 {
   "name": "viewer-api",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "API services",
   "author": "atom-young <atom.yang@aelf.io>",
   "homepage": "",
@@ -20,12 +20,12 @@
     "@sentry/node": "^5.19.0",
     "axios": "^0.19.0",
     "egg": "^2.25.0",
+    "egg-connector-remote": "^2.0.2",
     "egg-scripts": "^2.11.1",
     "egg-swagger": "^1.2.2",
-    "egg-connector-remote": "^2.0.2",
     "egg-validate": "^2.0.2",
     "lodash": "^4.17.15",
-    "viewer-orm": "^0.0.0"
+    "viewer-orm": "^0.1.0"
   },
   "devDependencies": {
     "autod": "^3.1.0",
