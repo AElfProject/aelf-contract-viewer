@@ -38,6 +38,11 @@ const tokensDescription = {
     allowNull: false,
     field: 'chain_id'
   },
+  issueChainId: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'issue_chain_id'
+  },
   txId: {
     type: STRING(64),
     allowNull: false,
