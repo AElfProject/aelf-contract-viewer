@@ -2,6 +2,7 @@
  * @file app
  * @author atom-yang
  */
+const Sentry = require('@sentry/node');
 const { Files } = require('viewer-orm/model/files');
 const { Contracts } = require('viewer-orm/model/contracts');
 const { Code } = require('viewer-orm/model/code');
@@ -35,4 +36,14 @@ module.exports = app => {
     Events,
     TokenTx
   };
+  if (process.env.NODE_ENV === 'production') {
+    Sentry.init(app.config.sentry);
+    app.Sentry = Sentry;
+    app.on('error', (err, ctx) => {
+      Sentry.withScope(scope => {
+        scope.addEventProcessor(event => Sentry.Handlers.parseRequest(event, ctx.request));
+        Sentry.captureException(err);
+      });
+    });
+  }
 };

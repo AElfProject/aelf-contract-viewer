@@ -16,6 +16,18 @@ class BaseController extends Controller {
   }
 
   error(err) {
+    const {
+      app
+    } = this.ctx;
+    const {
+      Sentry
+    } = app;
+    if (Sentry) {
+      Sentry.withScope(scope => {
+        scope.addEventProcessor(event => Sentry.Handlers.parseRequest(event, this.ctx.request));
+        Sentry.captureException(err);
+      });
+    }
     const errors = Array.isArray(err) ? err : [ err.toString() ];
     this.ctx.body = {
       msg: err.message || errors[0].message,

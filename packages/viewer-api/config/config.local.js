@@ -31,6 +31,10 @@ module.exports = appInfo => {
   //   enableGoogleFont: false,
   // };
 
+  config.sentry = {
+    dsn: ''
+  };
+
   return {
     ...config,
     constants: {

@@ -23,6 +23,9 @@ module.exports = appInfo => {
     convert: true
   };
   config.proxy = true;
+  config.sentry = {
+    dsn: ''
+  };
   return {
     ...config,
     constants: {
