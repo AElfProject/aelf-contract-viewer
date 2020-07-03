@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const Sentry = require('@sentry/node');
+const AElf = require('aelf-sdk');
 const { Files } = require('viewer-orm/model/files');
 const { Contracts } = require('viewer-orm/model/contracts');
 const { Code } = require('viewer-orm/model/code');
@@ -18,7 +19,7 @@ const { Transfer } = require('viewer-orm/model/transfer');
 const { Events } = require('viewer-orm/model/events');
 const { TokenTx } = require('viewer-orm/model/tokenTx');
 
-module.exports = app => {
+module.exports = async app => {
   app.cache = {};
   app.model = {
     Files,
@@ -37,9 +38,17 @@ module.exports = app => {
     TokenTx
   };
   if (process.env.NODE_ENV === 'production') {
+    const aelf = new AElf(new AElf.providers.HttpProvider(app.config.constants.endpoint));
+    const {
+      ChainId
+    } = await aelf.chain.getChainStatus();
     Sentry.init({
       ...app.config.sentry,
       release: `viewer-api@${process.env.npm_package_version}`
+    });
+    Sentry.configureScope(scope => {
+      scope.setTag('chainId', ChainId);
+      scope.setExtra('chainId', ChainId);
     });
     app.Sentry = Sentry;
     app.on('error', (err, ctx) => {
