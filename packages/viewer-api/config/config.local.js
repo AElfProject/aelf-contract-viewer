@@ -31,6 +31,17 @@ module.exports = appInfo => {
   //   enableGoogleFont: false,
   // };
 
+  config.onerror = {
+    all(err, ctx) {
+      const { app } = ctx;
+      const { Sentry } = app;
+      Sentry.withScope(scope => {
+        scope.addEventProcessor(event => Sentry.Handlers.parseRequest(event, ctx.request));
+        Sentry.captureException(err);
+      });
+    }
+  };
+
   config.sentry = {
     dsn: ''
   };

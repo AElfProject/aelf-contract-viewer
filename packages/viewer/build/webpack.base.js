@@ -108,7 +108,8 @@ const baseConfig = {
     new CopyWebpackPlugin(copies),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.LOCALE': JSON.stringify(process.env.LOCALE || 'zh')
+      'process.env.LOCALE': JSON.stringify(process.env.LOCALE || 'zh'),
+      'PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version)
     }),
     new MonacoWebpackPlugin({
       languages: ['xml', 'csharp', 'json'],

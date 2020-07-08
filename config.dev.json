@@ -1,17 +1,17 @@
 {
   "sql": {
-    "host": "60.205.250.171",
+    "host": "127.0.0.1",
     "port": "3306",
     "user": "root",
-    "password": "root",
+    "password": "password",
     "database": "aelf_viewer",
     "connectionLimit": 25
   },
   "scanSql": {
-    "host": "60.205.250.171",
+    "host": "127.0.0.1",
     "port": "3306",
     "user": "root",
-    "password": "root",
+    "password": "password",
     "database": "aelf_main_chain",
     "connectionLimit": 25
   },
@@ -24,7 +24,7 @@
     "interval": 20000,
     "proposalInterval": 4000,
     "concurrentQueryLimit": 5,
-    "host": "http://60.205.249.78:8000",
+    "host": "http://127.0.0.1:8000",
     "buffer": 100,
     "maxInsert": 20
   },

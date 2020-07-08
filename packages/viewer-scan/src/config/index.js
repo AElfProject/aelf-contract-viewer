@@ -10,7 +10,8 @@ function getContractAddress(contracts) {
   const wallet = AElf.wallet.getWalletByPrivateKey(config.wallet.privateKey);
   const aelf = new AElf(new AElf.providers.HttpProvider(config.scan.host));
   const {
-    GenesisContractAddress
+    GenesisContractAddress,
+    ChainId
   } = aelf.chain.getChainStatus({
     sync: true
   });
@@ -71,6 +72,7 @@ function getContractAddress(contracts) {
   return {
     aelf,
     wallet,
+    chainId: ChainId,
     chainInitTime: Time,
     contracts: contractAddress,
     systemAddressNameMap,

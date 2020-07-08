@@ -8,9 +8,11 @@
   ],
   "scripts": {
     "commit": "git-cz",
-    "version": "lerna version  --conventional-commits"
+    "version": "lerna version --conventional-commits"
   },
   "dependencies": {
+    "@sentry/apm": "^5.19.0",
+    "@sentry/node": "^5.19.0",
     "aelf-block-scan": "^0.4.1",
     "aelf-sdk": "^3.2.32",
     "decimal.js": "^10.2.0",

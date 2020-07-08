@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const AElf = require('aelf-sdk');
+const Sentry = require('@sentry/node');
 const {
   ScanCursor
 } = require('viewer-orm/model/scanCursor');
@@ -29,6 +30,16 @@ process.on('unhandledRejection', err => {
 
 
 async function init() {
+  if (process.env.NODE_ENV === 'production') {
+    Sentry.init({
+      dsn: 'https://5770ada7a7c448ab9b037f6994fd4a28@o414245.ingest.sentry.io/5318658',
+      release: `proposal-scan@${process.env.npm_package_version}`
+    });
+    Sentry.configureScope(scope => {
+      scope.setTag('chainId', config.chainId);
+      scope.setExtra('chainId', config.chainId);
+    });
+  }
   const lastId = await ScanCursor.getLastId(config.scannerName);
   if (lastId === false) {
     await ScanCursor.insertIncId(0, config.scannerName);
@@ -57,6 +68,10 @@ async function init() {
     console.log('start loop');
     await dbScanner.init();
   } catch (err) {
+    Sentry.withScope(scope => {
+      scope.addEventProcessor(event => event);
+      Sentry.captureException(err);
+    });
     console.error(`root catch ${err.toString()}`);
     cleanup();
   }
