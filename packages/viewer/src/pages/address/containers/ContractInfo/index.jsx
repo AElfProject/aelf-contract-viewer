@@ -25,7 +25,6 @@ import {
   getTokenList,
   sendHeight
 } from '../../../../common/utils';
-import Dividends from '../../components/Dividends';
 import '../../../../common/index.less';
 import './index.less';
 import Bread from '../../components/Bread';
@@ -64,13 +63,6 @@ async function getHeaderColumns(address) {
       tip: 'ELF Balance',
       name: 'Balance',
       desc: `${elfBalances} ELF`
-    },
-    {
-      tip: 'Contract Dividends',
-      name: 'Dividends',
-      desc: (
-        <Dividends dividends={dividends} />
-      )
     },
     {
       tip: 'Tokens owned',

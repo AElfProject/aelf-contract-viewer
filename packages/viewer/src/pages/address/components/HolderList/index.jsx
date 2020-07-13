@@ -38,19 +38,6 @@ function getListColumn(preTotal) {
       )
     },
     {
-      title: 'Balance',
-      dataIndex: 'balance',
-      key: 'balance',
-      render(balance, record) {
-        return `${Number(balance).toLocaleString()} ${record.symbol}`;
-      }
-    },
-    {
-      title: 'Percentage',
-      dataIndex: 'percentage',
-      key: 'percentage'
-    },
-    {
       title: 'Transfers',
       dataIndex: 'count',
       key: 'count'
