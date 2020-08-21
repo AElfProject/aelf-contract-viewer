@@ -27,11 +27,9 @@ import ApproveTokenModal from '../../components/ApproveTokenModal';
 import './index.less';
 import {
   getContractAddress,
-  sendTransaction,
-  getSignParams
+  sendTransaction
 } from '../../common/utils';
 import { removePrefixOrSuffix, sendHeight } from '../../../../common/utils';
-import { LOG_IN_ACTIONS } from '../../actions/common';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -54,7 +52,6 @@ const ProposalList = () => {
     params,
     total,
     list,
-    isAudit,
     status: loadingStatus
   } = proposalList;
   const {
@@ -73,19 +70,17 @@ const ProposalList = () => {
   }, [list]);
 
   const fetchList = async param => {
-    let signedParams = {};
+    let newParams = {
+      ...param
+    };
+    delete newParams.address;
     if (logStatus === LOG_STATUS.LOGGED) {
-      signedParams = await getSignParams(wallet, currentWallet);
-      if (Object.keys(signedParams).length === 0) {
-        dispatch({
-          type: LOG_IN_ACTIONS.LOG_IN_FAILED
-        });
-      }
+      newParams = {
+        ...newParams,
+        address: currentWallet.address
+      };
     }
-    dispatch(getProposals({
-      ...param,
-      ...signedParams
-    }));
+    dispatch(getProposals(newParams));
   };
   useEffect(() => {
     if (isALLSettle === true) {
@@ -240,7 +235,6 @@ const ProposalList = () => {
                   <Col span={12} key={item.proposalId}>
                     <Proposal
                       bpCount={bpCount}
-                      isAudit={isAudit}
                       {...item}
                       logStatus={logStatus}
                       currentAccount={currentWallet.address}

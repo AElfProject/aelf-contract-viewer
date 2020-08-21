@@ -23,8 +23,7 @@ import {
   Typography
 } from 'antd';
 import {
-  useSelector,
-  useDispatch
+  useSelector
 } from 'react-redux';
 import {
   ACTIONS_ICON_MAP
@@ -47,11 +46,9 @@ import config from '../../../../common/config';
 import './index.less';
 import {
   getContractAddress,
-  sendTransaction,
-  getSignParams
+  sendTransaction
 } from '../../common/utils';
 import ApproveTokenModal from '../../components/ApproveTokenModal';
-import { LOG_IN_ACTIONS } from '../../actions/common';
 import { sendHeight, validateURL } from '../../../../common/utils';
 
 const {
@@ -70,18 +67,9 @@ const {
   proposalStatus
 } = constants;
 
-async function getData(proposalId, wallet, currentWallet, logStatus, dispatch) {
-  let signedParams = {};
-  if (logStatus === LOG_STATUS.LOGGED) {
-    signedParams = await getSignParams(wallet, currentWallet);
-    if (Object.keys(signedParams).length === 0) {
-      dispatch({
-        type: LOG_IN_ACTIONS.LOG_IN_FAILED
-      });
-    }
-  }
+async function getData(currentWallet, proposalId) {
   return request(API_PATH.GET_PROPOSAL_INFO, {
-    ...signedParams,
+    address: currentWallet.address,
     proposalId
   }, { method: 'GET' });
 }
@@ -147,7 +135,6 @@ const ProposalDetail = () => {
     proposalId = ''
   } = useParams();
   const history = useHistory();
-  const dispatch = useDispatch();
   const common = useSelector(state => state.common);
   const [visible, setVisible] = useState(false);
   const {
@@ -169,7 +156,7 @@ const ProposalDetail = () => {
     return <Redirect to="/proposals" />;
   }
   useEffect(() => {
-    getData(proposalId, wallet, currentWallet, logStatus, dispatch).then(result => {
+    getData(currentWallet, proposalId).then(result => {
       setInfo({
         ...info,
         bpList: result.bpList,

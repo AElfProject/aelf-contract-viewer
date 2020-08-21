@@ -30,7 +30,6 @@ import constants, {
 } from '../../../common/constants';
 import {
   getContractAddress,
-  getSignParams,
   sendTransaction
 } from '../../../common/utils';
 import './index.less';
@@ -56,15 +55,10 @@ function getList(params) {
   return request(API_PATH.GET_VOTED_LIST, params, { method: 'GET' });
 }
 
-async function getPersonalVote(params, wallet, currentWallet) {
-  const signedParams = await getSignParams(wallet, currentWallet);
-  if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.GET_PERSONAL_VOTED_LIST, {
-      ...signedParams,
-      ...params
-    }, { method: 'GET' });
-  }
-  throw new Error('get signature failed!');
+async function getPersonalVote(params) {
+  return request(API_PATH.GET_PERSONAL_VOTED_LIST, {
+    ...params
+  }, { method: 'GET' });
 }
 
 const listColumn = [
@@ -204,8 +198,9 @@ const VoteDetail = props => {
   useEffect(() => {
     if (logStatus === LOG_STATUS.LOGGED && proposalType === proposalTypes.REFERENDUM) {
       getPersonalVote({
-        proposalId
-      }, wallet, currentWallet)
+        proposalId,
+        address: currentWallet.address
+      })
         .then(votes => {
           const left = votes.reduce((acc, v) => (v.claimed ? acc : acc.add(new Decimal(v.amount))), new Decimal(0));
           setPersonVote({

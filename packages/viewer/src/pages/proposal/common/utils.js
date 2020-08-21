@@ -63,9 +63,6 @@ export const showTransactionResult = result => {
     message.info(`Transaction ID: ${result.result.TransactionId}`, 10);
     return result;
   }
-  if (result && +result.error === 400001) {
-    throw new Error('Cancel send transaction');
-  }
   throw new Error((result.errorMessage || {}).message || 'Send transaction failed');
 };
 

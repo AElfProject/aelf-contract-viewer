@@ -147,13 +147,12 @@ class ProposalsController extends Controller {
       if (errors) {
         throw errors;
       }
-      const { isAudit } = ctx;
       const {
         address,
         proposalId
       } = ctx.request.query;
       let proposal = await app.model.ProposalList.getProposalById(proposalId);
-      if (Object.keys(proposal) === 0) {
+      if (Object.keys(proposal).length === 0) {
         throw new Error('not exist');
       }
       const {
@@ -162,7 +161,7 @@ class ProposalsController extends Controller {
       } = proposal;
       const organization = await app.model.Organizations.getOrganizationByAddress(orgAddress);
       /* eslint-disable no-case-declarations */
-      if (isAudit) {
+      if (address) {
         switch (proposalType) {
           case proposalTypes.PARLIAMENT:
             // 议会形式
@@ -254,7 +253,6 @@ class ProposalsController extends Controller {
       if (errors) {
         throw errors;
       }
-      const { isAudit } = ctx;
       const {
         address,
         search,
@@ -297,7 +295,7 @@ class ProposalsController extends Controller {
       }, {});
       const { BPList = [] } = app.cache;
       /* eslint-disable no-case-declarations */
-      if (isAudit) {
+      if (address) {
         switch (proposalType) {
           case proposalTypes.PARLIAMENT:
             // 议会形式
@@ -391,7 +389,6 @@ class ProposalsController extends Controller {
         });
       }
       this.sendBody({
-        isAudit,
         list: list.map(v => getActualProposalStatus(v, proposalStatus)),
         bpCount: BPList.length,
         total

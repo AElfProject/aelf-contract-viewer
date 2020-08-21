@@ -22,12 +22,12 @@ module.exports = app => {
   router.get('/api/viewer/accountList', controller.account.getAccountListBySymbol);
   router.get('/api/viewer/balances', controller.account.getBalancesByAddress);
 
-  router.get('/api/proposal/list', audit, controller.proposals.getList);
+  router.get('/api/proposal/list', controller.proposals.getList);
   router.get('/api/proposal/appliedList', controller.proposals.appliedProposal);
-  router.get('/api/proposal/proposalInfo', audit, controller.proposals.getProposalById);
+  router.get('/api/proposal/proposalInfo', controller.proposals.getProposalById);
   router.get('/api/proposal/tokenList', controller.proposals.getTokenList);
 
-  router.get('/api/proposal/checkContractName', audit, controller.proposals.checkContractName);
+  router.get('/api/proposal/checkContractName', controller.proposals.checkContractName);
   router.post('/api/proposal/addContractName', audit, controller.proposals.addContractName);
 
   router.get('/api/proposal/auditOrganizations', controller.organizations.getAuditList);

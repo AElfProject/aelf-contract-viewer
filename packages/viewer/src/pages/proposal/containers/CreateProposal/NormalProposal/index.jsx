@@ -24,7 +24,6 @@ import {
 } from 'antd';
 import PropTypes from 'prop-types';
 import {
-  getSignParams,
   isInnerType,
   isSpecialParameters,
   formatTimeToNano,
@@ -181,10 +180,9 @@ const contractFilter = (input, _, list) => list
   .filter(({ contractName, address }) => contractName.indexOf(input) > -1 || address.indexOf(input) > -1).length > 0;
 
 
-async function getOrganizationBySearch(wallet, currentWallet, proposalType, search = '') {
-  const signedParams = await getSignParams(wallet, currentWallet);
+async function getOrganizationBySearch(currentWallet, proposalType, search = '') {
   return request(API_PATH.GET_AUDIT_ORGANIZATIONS, {
-    ...signedParams,
+    address: currentWallet.address,
     search,
     proposalType
   }, { method: 'GET' });
@@ -335,7 +333,6 @@ const NormalProposal = props => {
     orgAddress,
     contractAddress,
     submit,
-    wallet,
     currentWallet
   } = props;
   const [form] = Form.useForm();
@@ -406,7 +403,7 @@ const NormalProposal = props => {
         contractAddress: false,
         orgAddress: true
       });
-      list = await getOrganizationBySearch(wallet, currentWallet, type);
+      list = await getOrganizationBySearch(currentWallet, type);
       list = list || [];
     } catch (e) {
       message.error(e.message || 'Querying contract address list failed!');
@@ -435,7 +432,7 @@ const NormalProposal = props => {
     });
     if (isModify === true) {
       handleContractAddressChange(contractAddress);
-      getOrganizationBySearch(wallet, currentWallet, proposalType).then(res => {
+      getOrganizationBySearch(currentWallet, proposalType).then(res => {
         setOrganizationList(res);
       });
     }
