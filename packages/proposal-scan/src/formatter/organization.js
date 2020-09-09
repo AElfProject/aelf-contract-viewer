@@ -3,6 +3,7 @@
  * @author atom-yang
  */
 const Decimal = require('decimal.js');
+const lodash = require('lodash');
 const {
   Proposers
 } = require('viewer-orm/model/proposers');
@@ -173,7 +174,6 @@ async function organizationUpdatedInsert(transaction) {
   } = transaction;
   const logResults = [
     ...(await deserializeLogs(Logs, 'OrganizationWhiteListChanged')),
-    ...(await deserializeLogs(Logs, 'OrganizationMemberChanged')),
     ...(await deserializeLogs(Logs, 'OrganizationThresholdChanged'))
   ];
   return sequelize.transaction(t => Promise.all(logResults.map(async log => {
@@ -241,41 +241,6 @@ async function organizationUpdatedInsert(transaction) {
         })
       ]);
     }
-    if (name === 'OrganizationMemberChanged') {
-      const {
-        organizationMemberList = {}
-      } = leftOrgInfo;
-      const {
-        organizationMembers = []
-      } = organizationMemberList;
-      const members = (organizationMembers || []).map(v => ({
-        member: v,
-        orgAddress
-      }));
-      // 不可在事务中删除
-      await Members.destroy({
-        where: {
-          orgAddress
-        }
-      });
-      return Promise.all([
-        Organizations.update({
-          orgHash,
-          releaseThreshold,
-          leftOrgInfo,
-          updatedAt: time
-        }, {
-          where: {
-            orgAddress
-          },
-          transaction: t
-        }),
-        Members.bulkCreate(members, {
-          transaction: t,
-          updateOnDuplicate: Object.keys(Members.tableAttributes).filter(v => v !== 'id')
-        })
-      ]);
-    }
     return Organizations.update({
       orgHash,
       releaseThreshold,
@@ -290,8 +255,94 @@ async function organizationUpdatedInsert(transaction) {
   })));
 }
 
+async function organizationMemberChangedFormatter(transaction) {
+  const {
+    Logs = [],
+    time
+  } = transaction;
+  const [
+    memberAdded,
+    memberRemoved,
+    memberChanged
+  ] = await Promise.all([
+    deserializeLogs(Logs, 'MemberAdded'),
+    deserializeLogs(Logs, 'MemberRemoved'),
+    deserializeLogs(Logs, 'MemberChanged'),
+  ]);
+  const list = lodash.uniq([
+    ...memberAdded,
+    ...memberRemoved,
+    ...memberChanged
+  ].map(log => {
+    const {
+      contractAddress,
+      deserializeLogResult
+    } = log;
+    const {
+      organizationAddress
+    } = deserializeLogResult;
+    const proposalType = config.constants.addressProposalTypesMap[contractAddress];
+    return `${proposalType}_${organizationAddress}`;
+  }));
+  return Promise.all(list.map(async item => {
+    const [proposalType, orgAddress] = item.split('_');
+    const { contract } = config.contracts[proposalType.toLowerCase()];
+    return {
+      ...(await contract.GetOrganization.call(orgAddress)),
+      time
+    };
+  }));
+}
+
+async function organizationMemberChangedInserter(transaction) {
+  const formattedData = await organizationMemberChangedFormatter(transaction);
+  return sequelize.transaction(t => Promise.all(formattedData.map(async orgInfo => {
+    const {
+      organizationAddress: orgAddress,
+      organizationHash: orgHash,
+      proposalReleaseThreshold: releaseThreshold,
+      time,
+      ...leftOrgInfo
+    } = orgInfo;
+    const {
+      organizationMemberList = {}
+    } = leftOrgInfo;
+    const {
+      organizationMembers = []
+    } = organizationMemberList;
+    const members = (organizationMembers || []).map(v => ({
+      member: v,
+      orgAddress
+    }));
+    // 不可在事务中删除
+    await Members.destroy({
+      where: {
+        orgAddress
+      }
+    });
+    return Promise.all([
+      Organizations.update({
+        orgHash,
+        releaseThreshold,
+        leftOrgInfo,
+        updatedAt: time
+      }, {
+        where: {
+          orgAddress
+        },
+        transaction: t
+      }),
+      Members.bulkCreate(members, {
+        transaction: t,
+        updateOnDuplicate: Object.keys(Members.tableAttributes).filter(v => v !== 'id')
+      })
+    ]);
+  })));
+}
+
 module.exports = {
   organizationCreatedInsert,
   organizationUpdatedInsert,
-  organizationCreatedInserter
+  organizationCreatedInserter,
+  organizationMemberChangedInserter
 };

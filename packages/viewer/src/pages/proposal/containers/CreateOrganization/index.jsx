@@ -6,7 +6,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import AElf from 'aelf-sdk';
 import Decimal from 'decimal.js';
 import {
-  Link
+  Link,
+  useHistory
 } from 'react-router-dom';
 import ReactIf from 'react-if';
 import {
@@ -31,10 +32,13 @@ import { request } from '../../../../common/request';
 import {
   commonFilter,
   getContractAddress,
-  showTransactionResult
+  showTransactionResult,
+  rand16Num
 } from '../../common/utils';
 import {
-  getTokenList
+  getTokenList,
+  getContract,
+  sleep
 } from '../../../../common/utils';
 import './index.less';
 
@@ -350,12 +354,14 @@ const FORM_INITIAL = {
 };
 
 const CreateOrganization = () => {
+  const history = useHistory();
   const [form] = Form.useForm();
   const {
     validateFields
   } = form;
   const common = useSelector(state => state.common);
   const {
+    aelf,
     wallet,
     currentWallet
   } = common;
@@ -382,13 +388,24 @@ const CreateOrganization = () => {
     try {
       const formValue = await validateFields();
       setIsLoading(true);
-      const param = getContractParams(formValue, tokenList);
+      let param = getContractParams(formValue, tokenList);
+      const contract = await getContract(aelf, getContractAddress(formValue.proposalType));
+      const orgAddress = await contract.CalculateOrganizationAddress.call(param);
+      const isOrgExist = await contract.ValidateOrganizationExist.call(orgAddress);
+      if (isOrgExist) {
+        param = {
+          ...param,
+          creationToken: rand16Num(64)
+        };
+      }
       const result = await wallet.invoke({
         contractAddress: getContractAddress(formValue.proposalType),
         param,
         contractMethod: 'CreateOrganization'
       });
       showTransactionResult(result);
+      await sleep(2000);
+      history.push('/organizations');
     } catch (e) {
       console.error(e);
       message.error((e.errorMessage || {}).message || e.message || 'Please input the required form field');

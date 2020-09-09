@@ -118,7 +118,8 @@ async function proposalCreatedFormatter(transaction) {
       contractAddress
     } = item;
     const {
-      proposalId
+      proposalId,
+      organizationAddress
     } = deserializeLogResult;
     const proposalType = addressProposalTypesMap[contractAddress];
     // proposal已经被释放的情况下，无法查询到提案的相关信息
@@ -126,6 +127,7 @@ async function proposalCreatedFormatter(transaction) {
       createTxId: TransactionId,
       createAt: time,
       proposalId,
+      orgAddress: organizationAddress,
       createdBy: USER_CREATED_METHODS.includes(MethodName) ? 'USER' : 'SYSTEM_CONTRACT',
       isContractDeployed: contractRelatedMethods.includes(MethodName),
       proposalType
@@ -171,7 +173,6 @@ async function proposalCreatedFormatter(transaction) {
           ...proposalInfo,
           contractMethodName,
           params,
-          organizationAddress: config.controller[MethodName].ownerAddress,
           toAddress: To,
           expiredTime: proposalInfo.expiredTime || moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
         };
@@ -191,7 +192,6 @@ async function proposalCreatedFormatter(transaction) {
           ...proposalInfo,
           contractMethodName: address && address.length > 0 ? 'UpdateSmartContract' : 'DeploySmartContract',
           params: contractParams,
-          organizationAddress: config.controller.ProposeContractCodeCheck.ownerAddress,
           toAddress: config.contracts.zero.address,
           expiredTime: proposalInfo.expiredTime || moment(time).add(SYSTEM_PROPOSAL_EXPIRATION_TIME, 'second')
         };
@@ -207,7 +207,6 @@ async function proposalCreatedFormatter(transaction) {
       toAddress,
       params: contractParams,
       expiredTime,
-      organizationAddress,
       proposer,
       toBeReleased,
       ...leftInfo
@@ -223,7 +222,6 @@ async function proposalCreatedFormatter(transaction) {
     }, {});
     result = {
       ...result,
-      orgAddress: organizationAddress,
       proposer,
       contractAddress: toAddress,
       contractMethod,

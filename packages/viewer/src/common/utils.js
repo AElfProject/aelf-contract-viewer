@@ -310,3 +310,9 @@ export async function deserializeLog(log, name, address) {
   result = AElf.utils.transform.transformArrayToMap(dataType, result);
   return result;
 }
+
+export function sleep(timeout = 1000) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(), timeout);
+  });
+}

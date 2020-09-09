@@ -11,6 +11,7 @@ const SCAN_TAGS = {
   PROPOSAL_VOTED: 'PROPOSAL_VOTED',
   PROPOSAL_RELEASED: 'PROPOSAL_RELEASED',
   ORGANIZATION_UPDATED: 'ORGANIZATION_UPDATED',
+  ORGANIZATION_MEMBER_CHANGED: 'ORGANIZATION_MEMBER_CHANGED',
   PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
   TOKEN_BALANCE_CHANGED: 'TOKEN_BALANCE_CHANGED',
   TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED',
@@ -250,10 +251,20 @@ const listeners = [
   {
     checker(bloom) {
       return AElf.utils.isEventInBloom(bloom, 'OrganizationWhiteListChanged')
-        || AElf.utils.isEventInBloom(bloom, 'OrganizationMemberChanged')
+        || AElf.utils.isEventInBloom(bloom, 'MemberAdded')
+        || AElf.utils.isEventInBloom(bloom, 'MemberRemoved')
+        || AElf.utils.isEventInBloom(bloom, 'MemberChanged')
         || AElf.utils.isEventInBloom(bloom, 'OrganizationThresholdChanged');
     },
     tag: SCAN_TAGS.ORGANIZATION_UPDATED
+  },
+  {
+    checker(bloom) {
+      return AElf.utils.isEventInBloom(bloom, 'MemberAdded')
+        || AElf.utils.isEventInBloom(bloom, 'MemberRemoved')
+        || AElf.utils.isEventInBloom(bloom, 'MemberChanged');
+    },
+    tag: SCAN_TAGS.ORGANIZATION_MEMBER_CHANGED
   },
   // {
   //   checker(bloom) {

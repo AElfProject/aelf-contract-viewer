@@ -26,7 +26,8 @@ const {
 } = require('../formatter/account');
 const {
   organizationCreatedInsert,
-  organizationUpdatedInsert
+  organizationUpdatedInsert,
+  organizationMemberChangedInserter
 } = require('../formatter/organization');
 const {
   SCAN_TAGS
@@ -63,6 +64,11 @@ const INSERT_PHASE = [
     tag: SCAN_TAGS.ORGANIZATION_UPDATED,
     // filter: isOrganizationUpdated,
     insert: organizationUpdatedInsert
+  },
+  {
+    desc: 'organization member changed',
+    tag: SCAN_TAGS.ORGANIZATION_MEMBER_CHANGED,
+    insert: organizationMemberChangedInserter
   },
   // {
   //   desc: 'token balance changed',
