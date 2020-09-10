@@ -449,6 +449,7 @@ class ProposalsController extends Controller {
       if (isExist) {
         throw new Error('contract name has been taken');
       } else {
+        this.sendBody({});
         getTxResult(txId).then(res => {
           if (res.Status === 'MINED') {
             const {
@@ -472,7 +473,6 @@ class ProposalsController extends Controller {
         }).catch(err => {
           console.log(err);
         });
-        this.sendBody({});
       }
     } catch (e) {
       this.error(e);

@@ -118,7 +118,7 @@ const CreateProposal = () => {
       }
     } catch (e) {
       console.error(e);
-      message.error((e.errorMessage || {}).message || e.message || 'Error happened');
+      message.error((e.errorMessage || {}).message || e.message || e.msg || 'Error happened');
     } finally {
       setContractResult({
         ...contract,
