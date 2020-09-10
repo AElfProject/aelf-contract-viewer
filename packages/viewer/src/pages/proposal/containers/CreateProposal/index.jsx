@@ -92,7 +92,7 @@ const CreateProposal = () => {
     let params = {};
     if (action === 'ProposeNewContract') {
       params = {
-        category: '30',
+        category: '0',
         code: file
       };
     } else {

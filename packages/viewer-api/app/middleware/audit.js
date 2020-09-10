@@ -55,23 +55,27 @@ function verify(msg, publicKey, signature = '') {
 module.exports = options => {
   return async function audit(ctx, next) {
     // const isLocal = ctx.app.config.env === 'local';
+    const { method } = ctx.request;
+    const key = method.toUpperCase() === 'GET' ? 'query' : 'body';
+    const params = ctx.request[key];
     const {
       address,
       signature,
       pubKey,
       timestamp
-    } = ctx.request.query;
+    } = params;
+    console.log(address, signature);
     if (address && signature) {
       try {
         ctx.app.validator.validate(auditRules, {
           address,
           signature,
           pubKey,
-          timestamp
+          timestamp: String(timestamp)
         });
         Object.entries(auditRules).forEach(([ key, rule ]) => {
           if (rule.validator) {
-            rule.validator(ctx.request.query[key]);
+            rule.validator(params[key]);
           }
           return true;
         });

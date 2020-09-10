@@ -6,11 +6,10 @@ const AElf = require('aelf-sdk');
 const moment = require('moment');
 
 let zero = null;
-let wallet = null;
+const wallet = AElf.wallet.createNewWallet();
 let aelf = null;
 async function getContract(endpoint, name) {
-  if (!wallet) {
-    wallet = AElf.wallet.createNewWallet();
+  if (!zero || !aelf) {
     aelf = new AElf(new AElf.providers.HttpProvider(endpoint));
     const status = await aelf.chain.getChainStatus();
     zero = status.GenesisContractAddress;
