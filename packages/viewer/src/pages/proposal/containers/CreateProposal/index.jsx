@@ -29,12 +29,20 @@ const {
   TabPane
 } = Tabs;
 
+function getCsrfToken() {
+  return document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+}
+
 async function addContractName(wallet, currentWallet, params) {
   const signedParams = await getSignParams(wallet, currentWallet);
   if (Object.keys(signedParams).length > 0) {
     return request(API_PATH.ADD_CONTRACT_NAME, {
       ...params,
       ...signedParams,
+    }, {
+      headers: {
+        'x-csrf-token': getCsrfToken()
+      }
     });
   }
   throw new Error('get signature failed');
