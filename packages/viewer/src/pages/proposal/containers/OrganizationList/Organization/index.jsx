@@ -81,7 +81,7 @@ export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpC
     [proposalActions.APPROVE]: {
       value: minimalApprovalThreshold,
       maxValue: total,
-      num: roundTo(minimalApprovalThreshold * coef, precision),
+      num: roundTo.up(minimalApprovalThreshold * coef, precision),
       rate: `${getRate(minimalApprovalThreshold / total)}%`
     },
     [proposalActions.REJECT]: {
