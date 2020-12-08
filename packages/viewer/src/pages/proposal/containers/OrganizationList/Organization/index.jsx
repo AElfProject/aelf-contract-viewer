@@ -99,7 +99,7 @@ export function getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpC
     Total: {
       value: minimalVoteThreshold,
       maxValue: total,
-      num: roundTo(minimalVoteThreshold * coef, precision),
+      num: roundTo.up(minimalVoteThreshold * coef, precision),
       rate: `${getRate(minimalVoteThreshold / total)}%`
     }
   };
