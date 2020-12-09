@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/AElfProject/aelf-contract-viewer/compare/v0.1.0...v0.2.0) (2020-12-09)
+
+
+### Bug Fixes
+
+* 🐛 remove extra event ([1c67aa6](https://github.com/AElfProject/aelf-contract-viewer/commit/1c67aa673ddc30de7e78d0d31935b0546032fb59))
+
+
+
+
+
 # 0.1.0 (2020-07-02)
 
 

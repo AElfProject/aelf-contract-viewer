@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/AElfProject/aelf-contract-viewer/compare/v0.1.0...v0.2.0) (2020-12-09)
+
+
+### Features
+
+* 🎸 add sentry ([6165de1](https://github.com/AElfProject/aelf-contract-viewer/commit/6165de172bda3991e3bc2f7680add12953f6eea7))
+* 🎸 refactoring for chain updating ([0cc70db](https://github.com/AElfProject/aelf-contract-viewer/commit/0cc70dbf606b26bdd7b86a96709ba7a31f81608b))
+
+
+
+
+
 # 0.1.0 (2020-07-02)
 
 

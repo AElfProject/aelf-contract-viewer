@@ -1,6 +1,6 @@
 {
   "name": "viewer-scan",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scanner of viewer",
   "author": "atom-young <atom.yang@aelf.io>",
   "homepage": "",
@@ -17,6 +17,6 @@
     "axios": "^0.19.0",
     "lodash": "^4.17.15",
     "pm2": "^4.1.2",
-    "viewer-orm": "^0.1.0"
+    "viewer-orm": "^0.2.0"
   }
 }

@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/AElfProject/aelf-contract-viewer/compare/v0.1.0...v0.2.0) (2020-12-09)
+
+
+### Bug Fixes
+
+* 🐛 ceil minimal approving ([49cea40](https://github.com/AElfProject/aelf-contract-viewer/commit/49cea4079b5ec92fd59cd378a76f9a004ba4bbda))
+* 🐛 ceil total vote ([699e40c](https://github.com/AElfProject/aelf-contract-viewer/commit/699e40cbe38a70729fef743075abc4fba932ac11))
+* 🐛 fix add contract name ([ad33627](https://github.com/AElfProject/aelf-contract-viewer/commit/ad33627e0720ba07b2a44932d8b520a58661a228))
+* 🐛 fix api output ([f02c8cd](https://github.com/AElfProject/aelf-contract-viewer/commit/f02c8cdf86b04b15bf87fb30d4658bb8a16555d6))
+* 🐛 fix contract deploy ([4b6a568](https://github.com/AElfProject/aelf-contract-viewer/commit/4b6a568aec12e2c6dbb2d8165f07aef3129be415))
+* 🐛 remove extra event ([1c67aa6](https://github.com/AElfProject/aelf-contract-viewer/commit/1c67aa673ddc30de7e78d0d31935b0546032fb59))
+
+
+### Features
+
+* 🎸 add chain id extra data for sentry ([662b590](https://github.com/AElfProject/aelf-contract-viewer/commit/662b590064287a8d59b4adfd4e9c0b2bd9545adc))
+* 🎸 add sentry ([6165de1](https://github.com/AElfProject/aelf-contract-viewer/commit/6165de172bda3991e3bc2f7680add12953f6eea7))
+* 🎸 refactoring for chain updating ([0cc70db](https://github.com/AElfProject/aelf-contract-viewer/commit/0cc70dbf606b26bdd7b86a96709ba7a31f81608b))
+
+
+
+
+
 # 0.1.0 (2020-07-02)
 
 
