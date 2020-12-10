@@ -168,6 +168,20 @@ async function proposalCreatedFormatter(transaction) {
             contractMethodName,
             parsedParams.contractInput
           ));
+        } else if (MethodName === 'RequestSideChainCreation') {
+          const parsedParams = parseParams(Params);
+          if (proposalInfo.params && proposalInfoFromChain) {
+            params = JSON.stringify(await deserializeContract(
+              config.contracts.parliament.address,
+              contractMethodName,
+              proposalInfo.params
+            ));
+          } else {
+            params = JSON.stringify({
+              proposer: From,
+              sideChainCreationRequest: parsedParams
+            });
+          }
         }
         proposalInfo = {
           ...proposalInfo,
