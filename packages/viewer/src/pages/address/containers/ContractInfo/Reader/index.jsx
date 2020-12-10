@@ -236,7 +236,7 @@ const Reader = () => {
           files: resFiles
         } = data;
         if (!resFiles) {
-          throw new Error('Pleasing waiting for contract decompile');
+          throw new Error('Please wait for contract decompiling');
         }
         const {
           result,
