@@ -35,7 +35,7 @@ async function getProto(address) {
 async function deserializeContract(address, name, input) {
   const proto = await getProto(address);
   const dataType = proto.lookupType(name);
-  return dataType.toObject(dataType.decode(Buffer.from(input, 'base64')), {
+  let result = dataType.toObject(dataType.decode(Buffer.from(input, 'base64')), {
     enums: String, // enums as string names
     longs: String, // longs as strings (requires long.js)
     bytes: String, // bytes as base64 encoded strings
@@ -44,6 +44,9 @@ async function deserializeContract(address, name, input) {
     objects: true, // populates empty objects (map fields) even if defaults=false
     oneofs: true // includes virtual oneof fields set to the present field's name
   });
+  result = AElf.utils.transform.transform(dataType, result, AElf.utils.transform.OUTPUT_TRANSFORMERS);
+  result = AElf.utils.transform.transformArrayToMap(dataType, result);
+  return result;
 }
 
 async function deserializeLogs(logs = [], logName) {
