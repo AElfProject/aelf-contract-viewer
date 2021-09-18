@@ -6,8 +6,12 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
   Layout,
   Tabs,
-  Typography
+  Typography,
+  Modal,
+  Tooltip
 } from 'antd';
+import QRCode from 'qrcode.react';
+import { QrcodeOutlined } from '@ant-design/icons';
 import {
   useParams,
   useHistory
@@ -24,6 +28,7 @@ import '../../../../common/index.less';
 import Bread from '../../components/Bread';
 import { Contracts } from '../../common/context';
 import TransferList from '../../components/TransferList';
+import './index.less';
 
 const { Paragraph } = Typography;
 const {
@@ -39,7 +44,31 @@ async function getHeaderColumns(address, symbol) {
     {
       tip: 'Account Address',
       name: 'Account',
-      desc: (<Paragraph copyable>{`ELF_${address}_${config.viewer.chainId}`}</Paragraph>)
+      desc: (
+        <div className="address-container">
+          <Paragraph copyable>{`ELF_${address}_${config.viewer.chainId}`}</Paragraph>
+          &nbsp;
+          <Tooltip title="QRCode">
+            <QrcodeOutlined
+              className="address-qrcode main-color"
+              onClick={() => {
+                Modal.info({
+                  title: `ELF_${address}_${config.viewer.chainId}`,
+                  content: (
+                    <QRCode
+                      value={`ELF_${address}_${config.viewer.chainId}`}
+                      style={{
+                        height: 'auto',
+                        width: 'auto'
+                      }}
+                    />
+                  ),
+                  onOk() {},
+                });
+              }}
+            />
+          </Tooltip>
+        </div>)
     },
     {
       tip: `${symbol} Balance`,
