@@ -53,6 +53,8 @@ async function getHeaderColumns(address, symbol) {
               className="address-qrcode main-color"
               onClick={() => {
                 Modal.info({
+                  mask: false,
+                  maskClosable: true,
                   title: `ELF_${address}_${config.viewer.chainId}`,
                   content: (
                     <QRCode
