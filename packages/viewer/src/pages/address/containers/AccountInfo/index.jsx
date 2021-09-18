@@ -60,8 +60,8 @@ async function getHeaderColumns(address, symbol) {
                     <QRCode
                       value={`ELF_${address}_${config.viewer.chainId}`}
                       style={{
-                        height: 'auto',
-                        width: 'auto'
+                        height: '90%',
+                        width: '90%'
                       }}
                     />
                   ),
