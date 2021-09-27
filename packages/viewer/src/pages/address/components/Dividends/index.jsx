@@ -21,6 +21,10 @@ const Dividends = props => {
     dividends,
     defaultSymbol
   } = props;
+  if (!dividends) {
+    return (<div>-</div>);
+  }
+  // console.log('dividends:', dividends);
   const keys = Object.keys(dividends);
   // eslint-disable-next-line no-nested-ternary
   const defaultKey = defaultSymbol !== undefined
