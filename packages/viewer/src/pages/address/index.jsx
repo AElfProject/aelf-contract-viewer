@@ -12,7 +12,9 @@ import { render } from 'react-dom';
 import App from './App';
 import config from '../../common/config';
 import '../../common/index.less';
+import { redirectPageToIframeMode } from '../../common/utils';
 
+redirectPageToIframeMode();
 moment.locale('en-us');
 
 if (process.env.NODE_ENV === 'production') {

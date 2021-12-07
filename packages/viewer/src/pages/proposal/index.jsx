@@ -15,7 +15,9 @@ import { store } from './store';
 import '../../common/index.less';
 import './index.less';
 import config from '../../common/config';
+import { redirectPageToIframeMode } from '../../common/utils';
 
+redirectPageToIframeMode();
 moment.locale('en-us');
 
 if (process.env.NODE_ENV === 'production') {
