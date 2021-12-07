@@ -7,8 +7,44 @@ import debounce from 'lodash.debounce';
 import { endsWith, startsWith } from 'lodash';
 import config from './config';
 import { request } from './request';
+import constants from '../pages/proposal/common/constants';
 
 const { ellipticEc } = AElf.wallet;
+
+const { proposalStatus } = constants;
+const bpRecord = [
+  [1640849100000, 17], // 2021.12.30 15 -> 17BP
+  [1640244300000, 15], // 2021.12.23 13 -> 15BP
+  [1639639500000, 13], // 2021.12.16 11 -> 13BP
+  [1639034700000, 11], // 2021.12.02 9 -> 11BP
+  [1638429900000, 9], // 2021.12.02 7 -> 9BP
+  [1637825100000, 7], // 2021.11.25 5 -> 7BP
+];
+
+function getBpRecordTime(time) {
+  if (process.env.NODE_ENV !== 'production') {
+    return 5;
+  }
+  for (let i = 0, len = bpRecord.length; i < len; i++) {
+    if (bpRecord[i][0] < time) {
+      return bpRecord[i][1];
+    }
+  }
+  return 5;
+}
+export function getBPCount(status, createAt, expiredAt, releasedAt) {
+  const currentTime = new Date().getTime();
+  const expiredTime = new Date(expiredAt).getTime();
+  const releasedTime = new Date(releasedAt).getTime();
+
+  if (status === proposalStatus.RELEASED) {
+    return getBpRecordTime(releasedTime);
+  }
+  if (status === proposalStatus.Expired) {
+    return getBpRecordTime(expiredTime);
+  }
+  return getBpRecordTime(currentTime);
+}
 
 export function redirectPageToIframeMode() {
   console.log('RELOAD_ENV', process.env.RELOAD_ENV, process.env.NODE_ENV);

@@ -24,6 +24,7 @@ const {
 const OrganizationCard = props => {
   const {
     proposalType,
+    bpCount,
     releaseThreshold,
     leftOrgInfo,
     orgAddress,
@@ -31,7 +32,9 @@ const OrganizationCard = props => {
     parliamentProposerList,
     className
   } = props;
-  const thresholdValue = useMemo(() => getCircleValues(proposalType, releaseThreshold, leftOrgInfo, bpList.length), [
+  const thresholdValue = useMemo(() => getCircleValues(
+    proposalType, releaseThreshold, leftOrgInfo, bpCount || bpList.length
+  ), [
     proposalType,
     releaseThreshold,
     leftOrgInfo,

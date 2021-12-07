@@ -25,6 +25,7 @@ import constants, {
 } from '../../../common/constants';
 import './index.less';
 import VoteChart from '../../../components/VoteChart';
+import { getBPCount } from '../../../../../common/utils';
 
 const {
   proposalTypes,
@@ -81,6 +82,8 @@ const Proposal = props => {
     proposalType,
     proposalId,
     expiredTime,
+    createAt,
+    releasedTime,
     contractAddress,
     contractMethod,
     proposer,
@@ -159,7 +162,7 @@ const Proposal = props => {
           approvals={approvals}
           rejections={rejections}
           abstentions={abstentions}
-          bpCount={bpCount}
+          bpCount={getBPCount(status, createAt, expiredTime, releasedTime) || bpCount}
           organizationInfo={organizationInfo}
         />
         <Divider />
@@ -213,6 +216,7 @@ export const proposalPropTypes = {
   createdBy: PropTypes.oneOf(['USER', 'SYSTEM_CONTRACT']).isRequired,
   releasedTxId: PropTypes.string.isRequired,
   releasedTime: PropTypes.string.isRequired,
+  createAt: PropTypes.string.isRequired,
   status: PropTypes.oneOf(Object.values(proposalStatus)).isRequired,
   approvals: PropTypes.oneOfType([
     PropTypes.number,

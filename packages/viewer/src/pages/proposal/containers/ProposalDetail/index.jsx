@@ -49,7 +49,7 @@ import {
   sendTransaction
 } from '../../common/utils';
 import ApproveTokenModal from '../../components/ApproveTokenModal';
-import { sendHeight, validateURL } from '../../../../common/utils';
+import { getBPCount, sendHeight, validateURL } from '../../../../common/utils';
 
 const {
   viewer
@@ -336,7 +336,7 @@ const ProposalDetail = () => {
                       abstentions={abstentions}
                       canVote={canVote}
                       votedStatus={votedStatus}
-                      bpCount={info.bpList.length}
+                      bpCount={getBPCount(status, createAt, expiredTime, releasedTime) || info.bpList.length}
                       handleApprove={handleApprove}
                       handleReject={handleReject}
                       handleAbstain={handleAbstain}
@@ -345,6 +345,7 @@ const ProposalDetail = () => {
                     <OrganizationCard
                       className="gap-top-large"
                       bpList={info.bpList}
+                      bpCount={getBPCount(status, createAt, expiredTime, releasedTime) || info.bpList.length}
                       parliamentProposerList={info.parliamentProposerList}
                       {...info.organization}
                     />
