@@ -40,7 +40,7 @@ export function getBPCount(status, createAt, expiredAt, releasedAt) {
   if (status === proposalStatus.RELEASED) {
     return getBpRecordTime(releasedTime);
   }
-  if (status === proposalStatus.Expired) {
+  if (status === proposalStatus.EXPIRED) {
     return getBpRecordTime(expiredTime);
   }
   return getBpRecordTime(currentTime);
