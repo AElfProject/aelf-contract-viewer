@@ -90,6 +90,7 @@ const LIST_TABS = {
         title: 'Status',
         dataIndex: 'status',
         key: 'status',
+        width: 100,
         render: text => (
           <Tag color={STATUS_COLOR_MAP[text]}>
             {text}
@@ -100,6 +101,7 @@ const LIST_TABS = {
         title: 'Application Time',
         dataIndex: 'createAt',
         key: 'createAt',
+        width: 200,
         render(text) {
           return moment(text).format('YYYY/MM/DD HH:mm:ss');
         }
@@ -146,6 +148,7 @@ const LIST_TABS = {
         title: 'Update Time',
         dataIndex: 'updatedAt',
         key: 'updatedAt',
+        width: 200,
         render(text) {
           return moment(text).format('YYYY/MM/DD HH:mm:ss');
         }
@@ -191,7 +194,8 @@ const LIST_TABS = {
       {
         title: 'Update Time',
         dataIndex: 'updatedAt',
-        key: 'updatedAt'
+        key: 'updatedAt',
+        width: 200,
       }
     ],
     rowKey: 'orgAddress'
@@ -213,6 +217,7 @@ const LIST_TABS = {
         title: 'Type',
         dataIndex: 'action',
         key: 'action',
+        width: 120,
         render(text) {
           return (
             <Tag color={ACTIONS_COLOR_MAP[text]}>
@@ -242,6 +247,7 @@ const LIST_TABS = {
         title: 'Time',
         dataIndex: 'time',
         key: 'time',
+        width: 200,
         render(time) {
           return moment(time).format('YYYY/MM/DD HH:mm:ss');
         }
@@ -422,7 +428,7 @@ const MyProposal = () => {
         />
       </Tabs>
       <Row gutter={16} className="my-proposal-list gap-top">
-        <Col span={6}>
+        <Col sm={6} xs={24}>
           <div className="my-proposal-list-menu">
             <Menu
               onClick={handleMenuChange}
@@ -462,7 +468,7 @@ const MyProposal = () => {
             </Menu>
           </div>
         </Col>
-        <Col span={18}>
+        <Col sm={18} xs={24}>
           <List
             pageNum={params.pageNum}
             pageSize={params.pageSize}

@@ -50,7 +50,7 @@ const VoteData = props => {
       className="vote-data"
     >
       <Row type="flex">
-        <Col span={14}>
+        <Col sm={14} xs={24}>
           <VoteChart
             proposalType={proposalType}
             approvals={approvals}
@@ -60,7 +60,7 @@ const VoteData = props => {
             organizationInfo={organization}
           />
         </Col>
-        <Col span={8} offset={2} className="vote-data-button">
+        <Col sm={8} offset={2} xs={{ span: 24, offset: 0 }} className="vote-data-button">
           <div>
             <Button
               disabled={!canThisUserVote}

@@ -55,12 +55,12 @@ export const rand16Num = (len = 0) => {
 };
 
 export const showTransactionResult = result => {
-  if (result && +result.error === 0) {
+  if (result && +result.error === 0 || !result.error) {
     message.info(
       'The transaction is in progress. Please query the transaction ID',
       10
     );
-    message.info(`Transaction ID: ${result.result.TransactionId}`, 10);
+    message.info(`Transaction ID: ${result.TransactionId || result.result.TransactionId}`, 10);
     return result;
   }
   throw new Error((result.errorMessage || {}).message || 'Send transaction failed');

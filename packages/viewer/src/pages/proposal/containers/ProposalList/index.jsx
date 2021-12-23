@@ -232,7 +232,7 @@ const ProposalList = () => {
             <Spin spinning={loadingStatus === LOADING_STATUS.LOADING}>
               <Row type="flex" gutter={16}>
                 {list.map(item => (
-                  <Col span={12} key={item.proposalId}>
+                  <Col xs={24} sm={12} key={item.proposalId}>
                     <Proposal
                       bpCount={bpCount}
                       {...item}

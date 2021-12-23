@@ -58,7 +58,7 @@ const OrganizationCard = props => {
         <span>{orgAddress}</span>
       </div>
       <Row gutter={16}>
-        <Col span={12}>
+        <Col sm={12} xs={24}>
           <>
             <div
               className="gap-bottom-small text-ellipsis"
@@ -110,7 +110,7 @@ const OrganizationCard = props => {
             </div>
           </>
         </Col>
-        <Col span={12}>
+        <Col sm={12} xs={24}>
           {leftInfo}
         </Col>
       </Row>

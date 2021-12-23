@@ -159,7 +159,7 @@ const OrganizationList = () => {
             <Spin spinning={loadingStatus === LOADING_STATUS.LOADING}>
               <Row gutter={16}>
                 {list.map(item => (
-                  <Col span={12} key={item.orgAddress}>
+                  <Col sm={12} xs={24} key={item.orgAddress}>
                     <Organization
                       {...item}
                       bpList={bpList}
