@@ -262,6 +262,7 @@ const VoteDetail = props => {
               columns={personListColumn}
               rowKey="txId"
               pagination={false}
+              scroll={{ x: 980 }}
             />
           </div>
         </Then>
