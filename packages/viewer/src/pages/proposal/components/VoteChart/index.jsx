@@ -139,7 +139,7 @@ const VoteChart = props => {
               {...votesData[proposalActions.APPROVE]}
             />
           </Col>
-          <Col span={8} offset={2}>
+          <Col span={8} offset={4}>
             <Circle
               className="proposal-vote-chart-circle"
               isInProgress
@@ -181,7 +181,7 @@ const VoteChart = props => {
               {...votesData[proposalActions.ABSTAIN]}
             />
           </Col>
-          <Col span={8} offset={2}>
+          <Col span={8} offset={4}>
             <Circle
               className="proposal-vote-chart-circle"
               isInProgress={proposalType !== proposalTypes.REFERENDUM}
