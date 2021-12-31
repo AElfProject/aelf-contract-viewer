@@ -61,3 +61,32 @@ div#app {
     color: rgba(0,0,0,.65);
   }
 }
+
+@media screen and (max-width: 576px) {
+  .proposal {
+    background-color: #f8f9fa;
+    &-container {
+      background-color: #ffffff;
+      margin-top: 15px;
+      padding: 10px 30px 72px;
+      .card-list-desc-item {
+        display: block;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        .sub-title {
+          margin-right: 5px;
+        }
+        span:nth-child(2) {
+          flex: 2;
+          overflow: hidden;
+          .ant-select {
+            width: 100%;
+          }
+        }
+      }
+    }
+    .tab-link {
+      color: rgba(0,0,0,.65);
+    }
+  }
+}

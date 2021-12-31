@@ -35,6 +35,7 @@ import ProposalDetail from './containers/ProposalDetail';
 import MyProposal from './containers/MyProposal';
 import Rules from './components/Rules';
 import {
+  isPhoneCheck,
   sendMessage
 } from '../../common/utils';
 
@@ -127,8 +128,10 @@ const App = () => {
               placement="bottom"
             >
               <span className="gap-right-small">
-                <ExclamationCircleOutlined className="gap-right-small main-color" />
-                Proposal Rules
+                <ExclamationCircleOutlined
+                  className={isPhoneCheck() ? 'main-color' : 'gap-right-small main-color'}
+                />
+                {isPhoneCheck() ? ' Rule' : 'Proposal Rules'}
               </span>
             </Popover>
             <LogButton isExist={!!isExist} />

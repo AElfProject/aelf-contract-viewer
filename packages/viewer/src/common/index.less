@@ -65,6 +65,26 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+@media screen and (max-width: 576px) {
+  .text-ellipsis {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+  }
+
+  .proposal-detail {
+    .gap-bottom-large, .gap-bottom-small {
+      span {
+        display: block;
+      }
+    }
+    .gap-bottom-small .card-list-desc-item {
+      display: block;
+    }
+  }
+
+}
 
 .text-center {
   text-align: center;

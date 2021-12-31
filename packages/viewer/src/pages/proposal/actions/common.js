@@ -49,7 +49,15 @@ export const logIn = () => async dispatch => {
     payload: {}
   });
   try {
+    const timer = setTimeout(() => {
+      // message.warn('Login Timeout');
+      dispatch({
+        type: LOG_IN_ACTIONS.LOG_IN_FAILED,
+        payload: {}
+      });
+    }, 8000);
     const detail = await walletInstance.login();
+    clearTimeout(timer);
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_SUCCESS,
       payload: {

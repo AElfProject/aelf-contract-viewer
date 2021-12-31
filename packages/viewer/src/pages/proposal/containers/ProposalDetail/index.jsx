@@ -49,7 +49,9 @@ import {
   sendTransaction
 } from '../../common/utils';
 import ApproveTokenModal from '../../components/ApproveTokenModal';
-import { getBPCount, sendHeight, validateURL } from '../../../../common/utils';
+import {
+  getBPCount, isPhoneCheck, sendHeight, validateURL
+} from '../../../../common/utils';
 
 const {
   viewer
@@ -265,7 +267,9 @@ const ProposalDetail = () => {
               )}
               />
               <Divider className="proposal-detail-header-divider" />
-              <Title level={3} ellipsis>Proposal ID: {proposalId}</Title>
+              {isPhoneCheck()
+                ? <Title level={4}>Proposal ID: {proposalId}</Title>
+                : <Title level={3} ellipsis>Proposal ID: {proposalId}</Title>}
               <div className="proposal-detail-tag gap-bottom">
                 <Tag color="purple" className="gap-right">{proposalType}</Tag>
                 {CONTRACT_TEXT_MAP[contractMethod]

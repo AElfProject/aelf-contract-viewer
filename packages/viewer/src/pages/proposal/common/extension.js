@@ -3,6 +3,7 @@
  * @author zhouminghui
  */
 import AElfBridge from 'aelf-bridge';
+import Promise from 'core-js-pure/actual/promise';
 import {
   getPublicKeyFromObject
 } from '../../../common/utils';
@@ -36,6 +37,9 @@ export default class Extension {
     this.elfType = null; // extension app
     this.account = null;
 
+    // this.isExist = new Promise(resolve => {
+    //   resolve(true);
+    // });
     this.isExist = Promise.any([
       this.isExtensionExist(),
       this.isAelfBridgeExist(),
@@ -108,7 +112,8 @@ export default class Extension {
 
     this.currentWallet = {
       ...account,
-      publicKey: account.publicKey
+      publicKey: account.publicKey.match('"x"')
+        ? getPublicKeyFromObject(JSON.parse(account.publicKey)) : account.publicKey
     };
 
     this.elfInstance.chain.getChainStatus();

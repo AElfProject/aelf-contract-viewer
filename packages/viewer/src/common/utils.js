@@ -372,3 +372,18 @@ export function sleep(timeout = 1000) {
     setTimeout(() => resolve(), timeout);
   });
 }
+
+let isPhoneChecked = false;
+let phoneCheckResult = null;
+export const isPhoneCheck = () => {
+  if (!isPhoneChecked) {
+    const userAgentInfo = navigator.userAgent.toLowerCase();
+    const agents = ['android', 'iphone',
+      'symbianos', 'windows phone',
+      'ipad', 'ipod'];
+    isPhoneChecked = true;
+    phoneCheckResult = agents.find(agent => userAgentInfo.includes(agent));
+    return phoneCheckResult;
+  }
+  return phoneCheckResult;
+};
