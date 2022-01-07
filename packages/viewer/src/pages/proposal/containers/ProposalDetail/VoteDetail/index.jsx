@@ -262,6 +262,7 @@ const VoteDetail = props => {
               columns={personListColumn}
               rowKey="txId"
               pagination={false}
+              scroll={{ x: 980 }}
             />
           </div>
         </Then>
@@ -279,6 +280,7 @@ const VoteDetail = props => {
           loading={list.loadingStatus === LOADING_STATUS.LOADING}
           rowKey="txId"
           pagination={false}
+          scroll={{ x: 980 }}
         />
       </div>
       <Pagination

@@ -140,7 +140,7 @@ const OrganizationList = () => {
       </Tabs>
       <div className="organization-list-filter gap-top-large gap-bottom-large">
         <Row gutter={16}>
-          <Col span={6}>
+          <Col sm={6} xs={24}>
             <Search
               className="organization-list-search-input"
               placeholder="Organization Address"
@@ -159,7 +159,7 @@ const OrganizationList = () => {
             <Spin spinning={loadingStatus === LOADING_STATUS.LOADING}>
               <Row gutter={16}>
                 {list.map(item => (
-                  <Col span={12} key={item.orgAddress}>
+                  <Col sm={12} xs={24} key={item.orgAddress}>
                     <Organization
                       {...item}
                       bpList={bpList}

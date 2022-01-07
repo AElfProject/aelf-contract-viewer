@@ -239,7 +239,7 @@ const ApproveTokenModal = props => {
         amount,
         symbol: tokenSymbol
       });
-      const txId = result.result.TransactionId;
+      const txId = result.TransactionId || result.result.TransactionId;
       const txResult = await getTxResult(aelf, txId, 0, 6000);
       message.info(`Transactions ${txId} is ${txResult.Status}`);
       getProposalAllowanceInfo(aelf, proposalId, owner, tokenSymbol).then(res => {

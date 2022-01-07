@@ -95,20 +95,20 @@ const ContractDetail = props => {
         <Then>
           <>
             <Row>
-              <Col span={4}>
+              <Col sm={4} xs={24}>
                 <span className="sub-title">Contract Name</span>
               </Col>
-              <Col span={20}>{name}</Col>
+              <Col sm={20} xs={24}>{name}</Col>
             </Row>
             <Divider />
           </>
         </Then>
       </If>
       <Row>
-        <Col span={4}>
+        <Col sm={4} xs={24}>
           <span className="sub-title">Contract Address</span>
         </Col>
-        <Col span={20}>
+        <Col sm={20} xs={24}>
           <a
             href={getContractURL(contractAddress)}
             target="_blank"
@@ -120,19 +120,19 @@ const ContractDetail = props => {
       </Row>
       <Divider />
       <Row>
-        <Col span={4}>
+        <Col sm={4} xs={24}>
           <span className="sub-title">Contract Method Name</span>
         </Col>
-        <Col span={20}>
+        <Col sm={20} xs={24}>
           <Tag color="purple">{contractMethod}</Tag>
         </Col>
       </Row>
       <Divider />
       <Row>
-        <Col span={4}>
+        <Col sm={4} xs={24}>
           <span className="sub-title">Contract Params</span>
         </Col>
-        <Col span={20}>
+        <Col sm={20} xs={24}>
           <pre className="view-params">
             {params}
           </pre>

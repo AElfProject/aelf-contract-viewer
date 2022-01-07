@@ -22,6 +22,7 @@ import constants, {
   organizationInfoPropTypes
 } from '../../../common/constants';
 import './index.less';
+import { isPhoneCheck } from '../../../../../common/utils';
 
 const {
   viewer
@@ -235,6 +236,146 @@ const Organization = props => {
   const handleEdit = () => {
     editOrganization(orgAddress);
   };
+
+  if (isPhoneCheck()) {
+    return (
+      <div className="organization-list-item gap-bottom">
+        <Card
+          title={(
+            <Title
+              proposalType={proposalType}
+            />
+          )}
+        >
+          <div className="organization-list-item-id">
+            <div className="gap-right-large text-ellipsis">
+              {orgAddress}
+            </div>
+            {canEdit
+              ? (<EditOutlined color="purple" onClick={handleEdit} />) : null}
+          </div>
+          <Divider />
+          <div className="organization-list-item-info">
+            <div className="organization-list-item-info-item">
+              <span className="sub-title gap-right">Author:</span>
+              <span className="text-ellipsis">
+                <a
+                  href={`${viewer.addressUrl}/${creator}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {`ELF_${creator}_${viewer.chainId}`}
+                </a>
+              </span>
+            </div>
+            <div className="organization-list-item-info-item">
+              <span className="sub-title gap-right">Update Time:</span>
+              <span className="text-ellipsis">{moment(updatedAt).format('YYYY/MM/DD HH:mm:ss')}</span>
+            </div>
+          </div>
+          <Divider />
+          <div className="organization-list-item-votes">
+            <p>Voting Data: Votes (Votes / Minimum Votes)</p>
+            <Row
+              gutter={16}
+              className="organization-list-item-vote-chart"
+            >
+              <Col span={8} offset={2}>
+                <Circle
+                  className="organization-list-item-vote-chart-circle"
+                  type={proposalActions.APPROVE}
+                  {...votesData[proposalActions.APPROVE]}
+                />
+              </Col>
+              <Col span={8} offset={4}>
+                <Circle
+                  className="organization-list-item-vote-chart-circle"
+                  type={proposalActions.REJECT}
+                  {...votesData[proposalActions.REJECT]}
+                />
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}>
+                <div className="organization-list-item-vote-desc text-center">
+                  <div className="text-ellipsis" title="Approved Votes">Approved Votes</div>
+                  <div
+                    className="text-ellipsis"
+                    title={`${votesData[proposalActions.APPROVE].num}(${votesData[proposalActions.APPROVE].rate})`}
+                  >
+                    <span className="sub-title gap-right-small">{votesData[proposalActions.APPROVE].num}</span>
+                    <span>({votesData[proposalActions.APPROVE].rate})</span>
+                  </div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div className="organization-list-item-vote-desc text-center">
+                  <div className="text-ellipsis" title="Rejected Votes">Rejected Votes</div>
+                  <div
+                    className="text-ellipsis"
+                    title={`${votesData[proposalActions.REJECT].num}(${votesData[proposalActions.REJECT].rate})`}
+                  >
+                    <span className="sub-title gap-right-small">{votesData[proposalActions.REJECT].num}</span>
+                    <span>({votesData[proposalActions.REJECT].rate})</span>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+
+            <Row
+              gutter={16}
+              className="organization-list-item-vote-chart"
+            >
+              <Col span={8} offset={2}>
+                <Circle
+                  className="organization-list-item-vote-chart-circle"
+                  type={proposalActions.ABSTAIN}
+                  {...votesData[proposalActions.ABSTAIN]}
+                />
+              </Col>
+              <Col span={8} offset={4}>
+                <Circle
+                  className="organization-list-item-vote-chart-circle"
+                  type="Total"
+                  {...votesData.Total}
+                />
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}>
+                <div className="organization-list-item-vote-desc text-center">
+                  <div className="text-ellipsis" title="Abstained Votes">Abstained Votes</div>
+                  <div
+                    className="text-ellipsis"
+                    title={`${votesData[proposalActions.ABSTAIN].num}(${votesData[proposalActions.ABSTAIN].rate})`}
+                  >
+                    <span className="sub-title gap-right-small">{votesData[proposalActions.ABSTAIN].num}</span>
+                    <span>({votesData[proposalActions.ABSTAIN].rate})</span>
+                  </div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div className="organization-list-item-vote-desc text-center">
+                  <div className="text-ellipsis" title="Total Votes">Total Votes</div>
+                  <div
+                    className="text-ellipsis"
+                    title={`${votesData.Total.num}(${votesData.Total.rate})`}
+                  >
+                    <span className="sub-title gap-right-small">{votesData.Total.num}</span>
+                    <span>({votesData.Total.rate})</span>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </div>
+          <Divider />
+          <div className="organization-list-item-extra">
+            {leftOrg}
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="organization-list-item gap-bottom">

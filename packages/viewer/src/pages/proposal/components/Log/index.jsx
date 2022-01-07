@@ -12,6 +12,7 @@ import { logOut, logIn } from '../../actions/common';
 import {
   LOG_STATUS
 } from '../../common/constants';
+import { isPhoneCheck } from '../../../../common/utils';
 
 const OverLay = props => {
   const { address } = props;
@@ -57,11 +58,17 @@ const LogButton = props => {
         <Then>
           <If condition={logStatus === LOG_STATUS.LOGGED}>
             <Then>
-              <Dropdown overlay={<OverLay loading={loading} address={address} />}>
-                <Button>
-                  {name} <DownOutlined />
-                </Button>
-              </Dropdown>
+              {isPhoneCheck()
+                ? (
+                  <Button>
+                    {name}
+                  </Button>
+                )
+                : (
+                  <Dropdown overlay={<OverLay loading={loading} address={address} />}>
+                    <Button>{name} <DownOutlined /></Button>
+                  </Dropdown>
+                )}
             </Then>
             <Else>
               <Button type="primary" loading={loading} onClick={handleLogin}>

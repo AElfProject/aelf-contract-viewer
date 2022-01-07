@@ -50,6 +50,7 @@ const List = props => {
           loading={loading}
           pagination={false}
           rowKey={rowKey}
+          scroll={{ x: 1300 }}
         />
       </div>
       <Pagination

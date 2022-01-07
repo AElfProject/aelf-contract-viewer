@@ -13,7 +13,9 @@ const { ellipticEc } = AElf.wallet;
 
 const { proposalStatus } = constants;
 const bpRecord = [
-  [1640244300000, 13], // 2021.12.23 11 -> 13BP
+  [1642057800000, 17], // 2022.01.13 15 -> 17BPs
+  [1641453000000, 15], // 2022.01.06 13 -> 15BP
+  [1640849100000, 13], // 2021.12.30 11 -> 13BP
   [1639034700000, 11], // 2021.12.02 9 -> 11BP
   [1638429900000, 9], // 2021.12.02 7 -> 9BP
   [1637825100000, 7], // 2021.11.25 5 -> 7BP
@@ -372,3 +374,18 @@ export function sleep(timeout = 1000) {
     setTimeout(() => resolve(), timeout);
   });
 }
+
+let isPhoneChecked = false;
+let phoneCheckResult = null;
+export const isPhoneCheck = () => {
+  if (!isPhoneChecked) {
+    const userAgentInfo = navigator.userAgent.toLowerCase();
+    const agents = ['android', 'iphone',
+      'symbianos', 'windows phone',
+      'ipad', 'ipod'];
+    isPhoneChecked = true;
+    phoneCheckResult = agents.find(agent => userAgentInfo.includes(agent));
+    return phoneCheckResult;
+  }
+  return phoneCheckResult;
+};

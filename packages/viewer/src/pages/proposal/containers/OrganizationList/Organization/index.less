@@ -48,3 +48,59 @@
     }
   }
 }
+
+@media screen and (max-width: 576px) {
+  .organization-list-item {
+    .ant-divider-horizontal {
+      margin: 12px 0;
+    }
+    .ant-card-head {
+      background-color: #ededed;
+    }
+    &-title {
+      &-countdown {
+        float: right;
+        font-size: 14px;
+        font-weight: bold;
+        color: #d34a64;
+      }
+    }
+    &-id {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      align-items: center;
+      // min-height: 50px;
+      > i {
+        color: #5c28a9;
+      }
+      > div {
+        max-width: 80%;
+      }
+      &-status {
+        text-align: right;
+      }
+    }
+    &-info {
+      &-item {
+        display: block;
+        flex-flow: row nowrap;
+        span {
+          display: block;
+        }
+      }
+    }
+    &-vote {
+      &-chart {
+        .ant-col {
+          display: flex;
+          flex-flow: column nowrap;
+          align-items: center;;
+        }
+        &-circle {
+          // width: 70%;
+        }
+      }
+    }
+  }
+}

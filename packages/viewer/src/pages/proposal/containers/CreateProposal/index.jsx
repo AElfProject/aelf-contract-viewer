@@ -119,7 +119,7 @@ const CreateProposal = () => {
       if (name && +name !== -1) {
         await addContractName(wallet, currentWallet, {
           contractName: name,
-          txId: result.result.TransactionId,
+          txId: result.TransactionId || result.result.TransactionId,
           action: action === 'ProposeNewContract' ? 'DEPLOY' : 'UPDATE',
           address: currentWallet.address
         });
