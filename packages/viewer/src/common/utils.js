@@ -4,11 +4,11 @@
  */
 import AElf from 'aelf-sdk';
 import debounce from 'lodash.debounce';
-import AElfBridge from 'aelf-bridge';
 import { endsWith, startsWith } from 'lodash';
 import config from './config';
 import { request } from './request';
 import constants from '../pages/proposal/common/constants';
+import walletInstance from '../pages/proposal/common/wallet';
 
 const { ellipticEc } = AElf.wallet;
 
@@ -371,12 +371,12 @@ export const isPhoneCheck = () => {
 
 export async function _redirectPageToIframeMode() {
   console.log('RELOAD_ENV', process.env.RELOAD_ENV, process.env.NODE_ENV);
-  if (process.env.RELOAD_ENV !== 'reload') {
-    return;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('window.location.href reload');
-  }
+  // if (process.env.RELOAD_ENV !== 'reload') {
+  //   return;
+  // }
+  // if (process.env.NODE_ENV !== 'production') {
+  //   console.log('window.location.href reload');
+  // }
 
   if (!window.frameElement) {
     if (window.location.href.match('contract')) {
@@ -392,17 +392,15 @@ export async function _redirectPageToIframeMode() {
 }
 
 export async function redirectPageToIframeMode() {
-  // console.log('isConnected', new Date().getTime());
   if (isPhoneCheck()) {
-    const bridgeInstance = new AElfBridge();
-    const timer = setTimeout(() => {
+    try {
+      const detail = await walletInstance.isExist;
+      if (!detail) {
+        _redirectPageToIframeMode();
+      }
+    } catch (e) {
       _redirectPageToIframeMode();
-    }, 2000);
-    const connectResult = await bridgeInstance.connect();
-    if (connectResult) {
-      clearTimeout(timer);
     }
-    // console.log('isConnected', connectResult, new Date().getTime());
   } else {
     _redirectPageToIframeMode();
   }
