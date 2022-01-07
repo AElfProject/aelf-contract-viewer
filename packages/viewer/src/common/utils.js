@@ -4,6 +4,7 @@
  */
 import AElf from 'aelf-sdk';
 import debounce from 'lodash.debounce';
+import AElfBridge from 'aelf-bridge';
 import { endsWith, startsWith } from 'lodash';
 import config from './config';
 import { request } from './request';
@@ -44,28 +45,6 @@ export function getBPCount(status, createAt, expiredAt, releasedAt) {
     return getBpRecordTime(expiredTime);
   }
   return getBpRecordTime(currentTime);
-}
-
-export function redirectPageToIframeMode() {
-  console.log('RELOAD_ENV', process.env.RELOAD_ENV, process.env.NODE_ENV);
-  if (process.env.RELOAD_ENV !== 'reload') {
-    return;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('window.location.href reload');
-  }
-
-  if (!window.frameElement) {
-    if (window.location.href.match('contract')) {
-      window.location.href = `/contract?#${window.location.href}`;
-      // } else if (window.location.href.match('proposalsDetail')) {
-      //   window.location.href = `/viewer/proposal.html?#${window.location.href}`;
-    } else if (window.location.href.match('proposal')) {
-      window.location.href = `/proposal?#${window.location.href}`;
-    } else if (window.location.href.match('address')) {
-      window.location.href = `/address?#${window.location.href}`;
-    }
-  }
 }
 
 export function getPublicKeyFromObject(publicKey) {
@@ -389,3 +368,42 @@ export const isPhoneCheck = () => {
   }
   return phoneCheckResult;
 };
+
+export async function _redirectPageToIframeMode() {
+  console.log('RELOAD_ENV', process.env.RELOAD_ENV, process.env.NODE_ENV);
+  if (process.env.RELOAD_ENV !== 'reload') {
+    return;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('window.location.href reload');
+  }
+
+  if (!window.frameElement) {
+    if (window.location.href.match('contract')) {
+      window.location.href = `/contract?#${window.location.href}`;
+      // } else if (window.location.href.match('proposalsDetail')) {
+      //   window.location.href = `/viewer/proposal.html?#${window.location.href}`;
+    } else if (window.location.href.match('proposal')) {
+      window.location.href = `/proposal?#${window.location.href}`;
+    } else if (window.location.href.match('address')) {
+      window.location.href = `/address?#${window.location.href}`;
+    }
+  }
+}
+
+export async function redirectPageToIframeMode() {
+  // console.log('isConnected', new Date().getTime());
+  if (isPhoneCheck()) {
+    const bridgeInstance = new AElfBridge();
+    const timer = setTimeout(() => {
+      _redirectPageToIframeMode();
+    }, 2000);
+    const connectResult = await bridgeInstance.connect();
+    if (connectResult) {
+      clearTimeout(timer);
+    }
+    // console.log('isConnected', connectResult, new Date().getTime());
+  } else {
+    _redirectPageToIframeMode();
+  }
+}
