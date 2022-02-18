@@ -97,12 +97,14 @@ class Scanner {
   async loop() {
     console.log('start querying in loop');
     this.scheduler.setCallback(async () => {
-      const currentMaxId = await this.getMaxId();
+      let currentMaxId = await this.getMaxId();
       // const lastIncId = await Blocks.getLastIncId();
       const lastIncId = await ScanCursor.getLastId(config.scannerName);
       if (currentMaxId - lastIncId <= this.options.buffer) {
         return;
       }
+      currentMaxId = lastIncId + this.options.buffer;
+
       let results = await Transactions.getTransactionsById(lastIncId, currentMaxId, this.addressTo);
       results = results || [];
       results = results.filter(removeFailedOrOtherMethod);
