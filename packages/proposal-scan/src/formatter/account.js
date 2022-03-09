@@ -97,6 +97,7 @@ let TOKEN_DECIMALS = {};
 let FETCHING_TOKEN_LIST = false;
 
 async function getTokenDecimal(symbol) {
+  console.log('getTokenDecimal: ', symbol);
   if (
     Object.keys(TOKEN_DECIMALS).length === 0
   ) {
@@ -131,7 +132,13 @@ async function calculateBalances(symbol, balance) {
 }
 
 async function changeSupply(symbols, type) {
-  const tokenInfo = await getTokenInfo(symbols, type);
+  let tokenInfo = await getTokenInfo(symbols, type);
+  console.log('changeSupply', JSON.stringify(tokenInfo));
+  tokenInfo = tokenInfo.filter(item => !!item);
+  if (!tokenInfo.length) {
+    console.log('changeSupply failed', tokenInfo, symbols);
+    return null;
+  }
   return Promise.all(tokenInfo.map(v => Tokens.updateTokenSupply(v.symbol, v.supply)));
 }
 
@@ -206,6 +213,8 @@ async function transferredFormatter(transaction) {
   } = transaction;
   let transferInfo = await deserializeTransferredLogs(transaction, TOKEN_TRANSFERRED_EVENT);
   transferInfo = transferInfo.reduce((acc, v) => [...acc, ...v], []);
+  // TODO: 用来排除非法的Token名称或者用户自定义的Token名称
+  transferInfo = transferInfo.filter(v => v.symbol.match(/^[a-z0-9]+$/i));
   return Promise.all(transferInfo.map(async item => {
     const {
       amount,
