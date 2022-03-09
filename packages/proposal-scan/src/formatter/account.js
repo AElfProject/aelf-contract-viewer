@@ -149,6 +149,8 @@ async function tokenBalanceChangedFormatter(transaction, type) {
   // if (supplyChanged.length > 0) {
   //   await changeSupply(supplyChanged.map(v => v.symbol));
   // }
+  // TODO: 用来排除非法的Token名称或者用户自定义的Token名称
+  addressSymbols = addressSymbols.filter(v => v.symbol.match(/^[a-z0-9]+$/i));
   addressSymbols = lodash.uniq(addressSymbols.map(v => `${v.owner}_${v.symbol}`));
   const balancesFromCache = addressSymbols
     .filter(v => type !== QUERY_TYPE.LOOP && BALANCES_NOT_IN_LOOP[v] !== undefined)
