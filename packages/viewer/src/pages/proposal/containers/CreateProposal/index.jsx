@@ -33,6 +33,21 @@ function getCsrfToken() {
   return document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 }
 
+async function updateContractName(wallet, currentWallet, params) {
+  const signedParams = await getSignParams(wallet, currentWallet);
+  if (Object.keys(signedParams).length > 0) {
+    return request(API_PATH.UPDATE_CONTRACT_NAME, {
+      ...params,
+      ...signedParams,
+    }, {
+      headers: {
+        'x-csrf-token': getCsrfToken()
+      }
+    });
+  }
+  throw new Error('get signature failed');
+}
+
 async function addContractName(wallet, currentWallet, params) {
   const signedParams = await getSignParams(wallet, currentWallet);
   if (Object.keys(signedParams).length > 0) {
@@ -95,7 +110,8 @@ const CreateProposal = () => {
       address,
       action,
       name,
-      file
+      file,
+      isOnlyUpdateName
     } = contract;
     let params = {};
     if (action === 'ProposeNewContract') {
@@ -110,6 +126,15 @@ const CreateProposal = () => {
       };
     }
     try {
+      if (isOnlyUpdateName) {
+        await updateContractName(wallet, currentWallet, {
+          contractAddress: address,
+          contractName: name,
+          address: currentWallet.address,
+        });
+        message.success('Contract Name has been updated！');
+        return;
+      }
       const result = await wallet.invoke({
         contractAddress: getContractAddress('Genesis'),
         param: params,
@@ -141,8 +166,10 @@ const CreateProposal = () => {
       ...results,
       confirming: true
     });
+    const { isOnlyUpdateName } = results;
     Modal.confirm({
-      title: 'Are you sure create this new proposal?',
+      title: isOnlyUpdateName ? 'Are you sure you want to update this contract name?'
+        : 'Are you sure create this new proposal?',
       onOk: () => submitContract(results),
       onCancel: handleCancel
     });

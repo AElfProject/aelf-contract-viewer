@@ -6,7 +6,8 @@ const Controller = require('../core/baseController');
 const {
   getTxResult,
   deserializeLog,
-  getActualProposalStatus
+  getActualProposalStatus,
+  getTxResultAddAelf,
 } = require('../utils');
 
 const paramRules = {
@@ -106,7 +107,7 @@ class ProposalsController extends Controller {
       trim: true,
       required: true,
       min: 1,
-      max: 100
+      max: 150
     },
     txId: {
       type: 'string',
@@ -127,13 +128,33 @@ class ProposalsController extends Controller {
     }
   };
 
+  updateContractNameRules = {
+    contractName: {
+      type: 'string',
+      trim: true,
+      required: true,
+      min: 1,
+      max: 150
+    },
+    contractAddress: {
+      type: 'string',
+      trim: true,
+      required: true,
+    },
+    address: {
+      type: 'string',
+      trim: true,
+      required: true
+    }
+  };
+
   checkContractNameRules = {
     contractName: {
       type: 'string',
       trim: true,
       required: true,
       min: 1,
-      max: 100
+      max: 150
     },
   };
 
@@ -473,6 +494,56 @@ class ProposalsController extends Controller {
         }).catch(err => {
           console.log(err);
         });
+      }
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async updateContractName() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(this.updateContractNameRules, ctx.request.body);
+      if (errors) {
+        throw errors;
+      }
+      const { isAudit } = ctx;
+      if (!isAudit) {
+        throw new Error('need log in and sign');
+      }
+      const {
+        contractName,
+        address,
+        contractAddress
+      } = ctx.request.body;
+      let isExist = await app.model.ContractNames.isExist(contractName);
+      if (!isExist) {
+        isExist = await app.model.Contracts.isExistName(contractName);
+      }
+      if (isExist) {
+        throw new Error('contract name has been taken');
+      } else {
+        const info = await app.model.Code.getLastEventTxId({
+          contractAddress,
+          event: 'ContractDeployed'
+        });
+        const result = await getTxResultAddAelf(info.txId, app.config.constants.endpoint);
+        if (result.Status === 'MINED') {
+          const {
+            Transaction = {}
+          } = result;
+          const admin = Transaction.From;
+          if (admin !== address) throw new Error('Contract name update failed. Please confirm the contract name to be updated again！');
+          const res = await app.model.Contracts.updateContractName({
+            contractName,
+            contractAddress,
+            address,
+          });
+          this.sendBody(res);
+        } else {
+          throw new Error('Contract name update failed. Please confirm the contract name to be updated again！');
+        }
       }
     } catch (e) {
       this.error(e);

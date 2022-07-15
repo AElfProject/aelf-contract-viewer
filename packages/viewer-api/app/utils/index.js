@@ -40,6 +40,15 @@ async function getTxResult(txId, times = 0, delay = 5000, timeLimit = 10) {
   throw tx;
 }
 
+async function getTxResultAddAelf(txId, endpoint, times = 0, delay = 5000, timeLimit = 10) {
+  if (!zero || !aelf) {
+    aelf = new AElf(new AElf.providers.HttpProvider(endpoint));
+    const status = await aelf.chain.getChainStatus();
+    zero = status.GenesisContractAddress;
+  }
+  return getTxResult(txId, times, delay, timeLimit);
+}
+
 function parseJSON(str = '') {
   let result = null;
   try {
@@ -80,5 +89,6 @@ module.exports = {
   getTxResult,
   parseJSON,
   deserializeLog,
-  getActualProposalStatus
+  getActualProposalStatus,
+  getTxResultAddAelf
 };

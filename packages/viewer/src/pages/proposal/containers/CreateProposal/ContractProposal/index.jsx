@@ -2,7 +2,7 @@
  * @file contract proposal
  * @author atom-yang
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import {
@@ -19,6 +19,12 @@ import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
 
 const FormItem = Form.Item;
+const InputNameReg = /^[.,a-zA-Z\d]+$/;
+
+const UpdateType = {
+  updateContractName: 'updateContractName',
+  updateFile: 'updateFile'
+};
 
 const formItemLayout = {
   labelCol: {
@@ -26,6 +32,12 @@ const formItemLayout = {
   },
   wrapperCol: {
     sm: { span: 8 },
+  },
+};
+
+const radioButtonLayout = {
+  wrapperCol: {
+    sm: { span: 14, offset: 4 },
   },
 };
 
@@ -38,16 +50,28 @@ const tailFormItemLayout = {
   }
 };
 
-async function checkContractName(rule, value, isUpdate, currentContractInfo) {
+async function checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName) {
   if (!value) {
+    if (isUpdateName && isUpdate) throw new Error('Please enter the contract name！');
     return;
   }
   if (+value === -1) {
     throw new Error('-1 is not valid');
   }
   if (isUpdate && value === currentContractInfo.contractName) {
-    return;
+    if (isUpdateName) {
+      throw new Error('The name already exists！');
+    } else {
+      return;
+    }
   }
+  if (!InputNameReg.test(value)) {
+    throw new Error('Please enter alphanumeric characters only！');
+  }
+  if (value.length > 150) {
+    throw new Error('The maximum input character is 150');
+  }
+
   const result = await request(API_PATH.CHECK_CONTRACT_NAME, {
     contractName: value
   }, { method: 'GET' });
@@ -122,6 +146,7 @@ const ContractProposal = props => {
       });
   }, []);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [isUpdateName, setUpdateName] = useState(false);
   function handleAction() {
     setFieldsValue({
       name: ''
@@ -146,7 +171,10 @@ const ContractProposal = props => {
         action,
         address = ''
       } = result;
-      const file = await readFile(result.file[0].originFileObj);
+      let file;
+      if (!(isUpdate && isUpdateName)) {
+        file = await readFile(result.file[0].originFileObj);
+      }
       let name = result.name || '';
       if (isUpdate
         && (currentContractInfo.contractName === name)
@@ -157,12 +185,13 @@ const ContractProposal = props => {
         file,
         action,
         address,
-        name
+        name,
+        isOnlyUpdateName: isUpdate && isUpdateName
       };
       submit(submitObj);
     } catch (e) {
       console.error(e);
-      message.error(e.message || 'Please input the required form!');
+      message.error(e.message || e?.errorFields?.at?.(-1)?.errors?.[0] || 'Please input the required form!');
     }
   }
 
@@ -172,7 +201,21 @@ const ContractProposal = props => {
     setFieldsValue({
       name: +info.contractName === -1 ? '' : info.contractName
     });
+    if (isUpdateName) {
+      const ids = setTimeout(() => {
+        clearTimeout(ids);
+        form.validateFields(['name']);
+      }, 0);
+    }
   }
+
+  const updateTypeHandler = useCallback(e => {
+    setUpdateName(e.target.value === UpdateType.updateContractName);
+    setFieldsValue({
+      name: '',
+      address: ''
+    });
+  }, []);
 
   return (
     <div className="contract-proposal">
@@ -181,6 +224,7 @@ const ContractProposal = props => {
         initialValues={{
           action: 'ProposeNewContract',
           address: '',
+          updateType: UpdateType.updateFile,
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
         }}
         {...formItemLayout}
@@ -199,35 +243,52 @@ const ContractProposal = props => {
         {
           isUpdate
             ? (
-              <FormItem
-                label="Contract Address"
-                name="address"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please select a contract address!'
-                  }
-                ]}
-              >
-                <Select
-                  placeholder="Please select a contract address"
-                  showSearch
-                  optionFilterProp="children"
-                  filterOption={contractFilter}
-                  onChange={handleContractChange}
+              <>
+                <FormItem
+                  label=""
+                  name="updateType"
+                  {...radioButtonLayout}
                 >
-                  {
-                    contractList.map(v => (
-                      <Select.Option
-                        key={v.address}
-                        value={v.address}
-                      >
-                        {v.contractName || v.address}
-                      </Select.Option>
-                    ))
-                  }
-                </Select>
-              </FormItem>
+                  <Radio.Group
+                    onChange={updateTypeHandler}
+                    buttonStyle="solid"
+                  >
+                    <Radio.Button style={{ marginRight: '20px' }} value={UpdateType.updateFile}>
+                      Update Contract File
+                    </Radio.Button>
+                    <Radio.Button value={UpdateType.updateContractName}>Update The Contract Name Only</Radio.Button>
+                  </Radio.Group>
+                </FormItem>
+                <FormItem
+                  label="Contract Address"
+                  name="address"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please select a contract address!'
+                    }
+                  ]}
+                >
+                  <Select
+                    placeholder="Please select a contract address"
+                    showSearch
+                    optionFilterProp="children"
+                    filterOption={contractFilter}
+                    onChange={handleContractChange}
+                  >
+                    {
+                      contractList.map(v => (
+                        <Select.Option
+                          key={v.address}
+                          value={v.address}
+                        >
+                          {v.contractName || v.address}
+                        </Select.Option>
+                      ))
+                    }
+                  </Select>
+                </FormItem>
+              </>
             ) : null
         }
         <FormItem
@@ -237,9 +298,9 @@ const ContractProposal = props => {
           rules={
             [
               {
-                required: false,
+                required: isUpdate && isUpdateName,
                 type: 'string',
-                validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo)
+                validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
               }
             ]
           }
@@ -248,45 +309,51 @@ const ContractProposal = props => {
             disabled={isUpdate && currentContractInfo.isSystemContract}
           />
         </FormItem>
-        <FormItem
-          label={(
-            <span>
-              Upload File&nbsp;
-              <Tooltip
-                title="When creating a 'Contract Deployment' proposal, you only need to upload the file,
-                more information can be viewed on the public proposal page after the application is successful"
+        {
+          !(isUpdateName && isUpdate) ? (
+            <>
+              <FormItem
+                label={(
+                  <span>
+                    Upload File&nbsp;
+                    <Tooltip
+                      title="When creating a 'Contract Deployment' proposal, you only need to upload the file,
+                      more information can be viewed on the public proposal page after the application is successful"
+                    >
+                      <QuestionCircleOutlined className="main-color" />
+                    </Tooltip>
+                  </span>
+                )}
+                name="file"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+                rules={
+                [
+                  {
+                    required: true,
+                    message: 'Please upload the DLL or PATCHED file!'
+                  },
+                  {
+                    validator: validateFile
+                  }
+                ]
+                }
               >
-                <QuestionCircleOutlined className="main-color" />
-              </Tooltip>
-            </span>
-          )}
-          name="file"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-          rules={
-            [
-              {
-                required: true,
-                message: 'Please upload the DLL file!'
-              },
-              {
-                validator: validateFile
-              }
-            ]
-          }
-        >
-          <Upload
-            accept=".dll"
-            beforeUpload={() => false}
-            onChange={handleUpload}
-            extra="Only support DLL file, less than 2MB"
-          >
-            <Button disabled={fileLength === 1}>
-              <UploadOutlined className="gap-right-small" />
-              Click to Upload
-            </Button>
-          </Upload>
-        </FormItem>
+                <Upload
+                  accept=".dll,.patched"
+                  beforeUpload={() => false}
+                  onChange={handleUpload}
+                  extra="Support DLL or PATCHED file, less than 2MB"
+                >
+                  <Button disabled={fileLength === 1}>
+                    <UploadOutlined className="gap-right-small" />
+                    Click to Upload
+                  </Button>
+                </Upload>
+              </FormItem>
+            </>
+          ) : null
+        }
         <Form.Item {...tailFormItemLayout}>
           <Button
             shape="round"

@@ -157,6 +157,24 @@ class Contracts extends Model {
     });
     return !!isExist;
   }
+
+  static async updateContractName(params) {
+    const {
+      contractName,
+      contractAddress
+    } = params;
+    const isExist = await Contracts.isExistName(contractName);
+    if (isExist) {
+      throw new Error('Contract name is already exist');
+    }
+    return Contracts.update({
+      contractName,
+    }, {
+      where: {
+        address: contractAddress
+      }
+    });
+  }
 }
 
 Contracts.init(contractsDescription, {

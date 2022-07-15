@@ -149,6 +149,20 @@ class Code extends Model {
       ]
     });
   }
+
+  static getLastEventTxId(params) {
+    const { contractAddress, event } = params;
+    return Code.findOne({
+      attributes: ['txId'],
+      where: {
+        address: contractAddress,
+        event
+      },
+      order: [
+        ['updateTime', 'DESC']
+      ]
+    });
+  }
 }
 
 Code.init(codeDescription, {
