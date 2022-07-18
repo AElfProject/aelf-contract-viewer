@@ -15,11 +15,11 @@ import {
   Tooltip,
   Form
 } from 'antd';
+import { useCheckName, checkContractName } from './useCheckName';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
 
 const FormItem = Form.Item;
-const InputNameReg = /^[.,a-zA-Z\d]+$/;
 
 const UpdateType = {
   updateContractName: 'updateContractName',
@@ -50,40 +50,6 @@ const tailFormItemLayout = {
   }
 };
 
-async function checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName) {
-  if (!value) {
-    if (isUpdateName && isUpdate) throw new Error('Please enter the contract name！');
-    return;
-  }
-  if (+value === -1) {
-    throw new Error('-1 is not valid');
-  }
-  if (isUpdate && value === currentContractInfo.contractName) {
-    if (isUpdateName) {
-      throw new Error('The name already exists！');
-    } else {
-      return;
-    }
-  }
-  if (!InputNameReg.test(value)) {
-    throw new Error('Please enter alphanumeric characters only！');
-  }
-  if (value.length > 150) {
-    throw new Error('The maximum input character is 150');
-  }
-
-  const result = await request(API_PATH.CHECK_CONTRACT_NAME, {
-    contractName: value
-  }, { method: 'GET' });
-  const {
-    isExist = true
-  } = result;
-  if (!isExist) {
-    // eslint-disable-next-line consistent-return
-    return true;
-  }
-  throw new Error(`Contract name '${value}' is already exist`);
-}
 
 async function validateFile(rule, value) {
   if (!value || (Array.isArray(value) || value.length === 0)) {
@@ -164,6 +130,8 @@ const ContractProposal = props => {
   function handleUpload(e) {
     setFileLength(e.fileList.length);
   }
+  const [contractName, setContractName] = useState();
+
   async function handleSubmit() {
     try {
       const result = await validateFields();
@@ -176,6 +144,7 @@ const ContractProposal = props => {
         file = await readFile(result.file[0].originFileObj);
       }
       let name = result.name || '';
+      await checkContractName('', name, isUpdate, currentContractInfo, isUpdateName);
       if (isUpdate
         && (currentContractInfo.contractName === name)
       ) {
@@ -198,15 +167,11 @@ const ContractProposal = props => {
   function handleContractChange(address) {
     const info = contractList.filter(v => v.address === address)[0];
     setCurrentContractInfo(info);
+    const name = +info.contractName === -1 ? '' : info.contractName;
     setFieldsValue({
-      name: +info.contractName === -1 ? '' : info.contractName
+      name
     });
-    if (isUpdateName) {
-      const ids = setTimeout(() => {
-        clearTimeout(ids);
-        form.validateFields(['name']);
-      }, 0);
-    }
+    setContractName(name);
   }
 
   const updateTypeHandler = useCallback(e => {
@@ -216,6 +181,7 @@ const ContractProposal = props => {
       address: ''
     });
   }, []);
+  const checkName = useCheckName(contractName, isUpdate, currentContractInfo, isUpdateName);
 
   return (
     <div className="contract-proposal">
@@ -226,6 +192,9 @@ const ContractProposal = props => {
           address: '',
           updateType: UpdateType.updateFile,
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
+        }}
+        onValuesChange={change => {
+          if (change?.name) setContractName(change?.name);
         }}
         {...formItemLayout}
       >
@@ -294,13 +263,16 @@ const ContractProposal = props => {
         <FormItem
           label="Contract Name"
           name="name"
-          validateTrigger="onBlur"
+          // validateTrigger="onBlur"
+          validateStatus={checkName.validateStatus}
+          help={checkName.errorMsg}
           rules={
             [
               {
                 required: isUpdate && isUpdateName,
                 type: 'string',
-                validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
+                // eslint-disable-next-line max-len
+                // validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
               }
             ]
           }

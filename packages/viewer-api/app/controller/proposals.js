@@ -534,7 +534,7 @@ class ProposalsController extends Controller {
             Transaction = {}
           } = result;
           const admin = Transaction.From;
-          if (admin !== address) throw new Error('Contract name update failed. Please confirm the contract name to be updated again！');
+          if (admin !== address) throw new Error('Contract name update failed. You do not have permission to change the name of this contract！');
           const res = await app.model.Contracts.updateContractName({
             contractName,
             contractAddress,
