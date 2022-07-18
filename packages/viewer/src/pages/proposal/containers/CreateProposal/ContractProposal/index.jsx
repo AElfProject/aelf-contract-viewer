@@ -100,6 +100,8 @@ const ContractProposal = props => {
     contractName: -1
   });
   const [contractList, setContractList] = useState([]);
+  const [contractName, setContractName] = useState();
+
   useEffect(() => {
     request(API_PATH.GET_ALL_CONTRACTS, {
       search: ''
@@ -117,10 +119,11 @@ const ContractProposal = props => {
     setFieldsValue({
       name: ''
     });
+    setContractName('');
     setIsUpdate(!isUpdate);
   }
   const contractFilter = input => contractList
-    .filter(({ contractName, address }) => contractName.indexOf(input) > -1 || address.indexOf(input) > -1).length > 0;
+    .filter(({ contractName: item, address }) => item.indexOf(input) > -1 || address.indexOf(input) > -1).length > 0;
   function normFile(e) {
     if (Array.isArray(e)) {
       return e;
@@ -130,7 +133,6 @@ const ContractProposal = props => {
   function handleUpload(e) {
     setFileLength(e.fileList.length);
   }
-  const [contractName, setContractName] = useState();
 
   async function handleSubmit() {
     try {
@@ -180,6 +182,7 @@ const ContractProposal = props => {
       name: '',
       address: ''
     });
+    setContractName('');
   }, []);
   const checkName = useCheckName(contractName, isUpdate, currentContractInfo, isUpdateName);
 
