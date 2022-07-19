@@ -332,7 +332,7 @@ const ContractProposal = props => {
               <FormItem
                 label="Contract Name"
                 name="name"
-                // validateTrigger="onBlur"
+                validateTrigger=""
                 validateStatus={checkName?.validateStatus}
                 help={checkName?.errorMsg}
                 rules={
