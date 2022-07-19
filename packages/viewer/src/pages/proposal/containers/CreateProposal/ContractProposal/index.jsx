@@ -125,7 +125,8 @@ const ContractProposal = props => {
   const [form] = Form.useForm();
   const {
     validateFields,
-    setFieldsValue
+    setFieldsValue,
+    getFieldValue
   } = form;
   const [fileLength, setFileLength] = useState(0);
   const [currentContractInfo, setCurrentContractInfo] = useState({
@@ -192,10 +193,17 @@ const ContractProposal = props => {
     }
   }, [isUpdate, currentContractInfo, isUpdateName]);
 
+  async function customValidateFields() {
+    const [result] = await Promise.all([
+      validateFields(),
+      checkContractNameHandler(getFieldValue('name'))
+    ]);
+    return result;
+  }
+
   async function handleSubmit() {
     try {
-      const result = await validateFields();
-      await checkContractNameHandler(result.name || '');
+      const result = await customValidateFields();
       const {
         action,
         address = ''
