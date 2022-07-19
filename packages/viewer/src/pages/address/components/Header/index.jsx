@@ -10,7 +10,8 @@ import {
 } from 'react-if';
 import {
   Tag,
-  Divider
+  Divider,
+  Tooltip
 } from 'antd';
 import {
   LinkIcon
@@ -29,7 +30,11 @@ const Header = props => {
       <If condition={contractName && +contractName !== -1}>
         <Then>
           <>
-            <h2>{contractName}</h2>
+            <h2>
+              <Tooltip title={contractName} placement="topLeft">
+                {contractName}
+              </Tooltip>
+            </h2>
             <Divider />
           </>
         </Then>

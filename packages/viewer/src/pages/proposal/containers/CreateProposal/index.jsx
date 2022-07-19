@@ -173,7 +173,7 @@ const CreateProposal = () => {
       title: isOnlyUpdateName ? 'Are you sure you want to update this contract name?'
         : 'Are you sure create this new proposal?',
       onOk: () => submitContract(results),
-      onCancel: handleCancel
+      onCancel: () => { setContractResult(v => ({ ...v, confirming: false })); handleCancel(); }
     });
   }
 
