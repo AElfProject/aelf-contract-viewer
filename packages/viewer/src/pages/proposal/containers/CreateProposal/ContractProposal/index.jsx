@@ -15,11 +15,11 @@ import {
   Tooltip,
   Form
 } from 'antd';
-import { useCheckName, checkContractName } from './useCheckName';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
 
 const FormItem = Form.Item;
+const InputNameReg = /^[.,a-zA-Z\d]+$/;
 
 const UpdateType = {
   updateContractName: 'updateContractName',
@@ -50,6 +50,40 @@ const tailFormItemLayout = {
   }
 };
 
+async function checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName) {
+  if (!value) {
+    if (isUpdateName && isUpdate) throw new Error('Please enter the contract name！');
+    return;
+  }
+  if (+value === -1) {
+    throw new Error('-1 is not valid');
+  }
+  if (isUpdate && value === currentContractInfo.contractName) {
+    if (isUpdateName) {
+      throw new Error('The name already exists！');
+    } else {
+      return;
+    }
+  }
+  if (!InputNameReg.test(value)) {
+    throw new Error('Please enter alphanumeric characters only！');
+  }
+  if (value.length > 150) {
+    throw new Error('The maximum input character is 150');
+  }
+
+  const result = await request(API_PATH.CHECK_CONTRACT_NAME, {
+    contractName: value
+  }, { method: 'GET' });
+  const {
+    isExist = true
+  } = result;
+  if (!isExist) {
+    // eslint-disable-next-line consistent-return
+    return true;
+  }
+  throw new Error(`Contract name '${value}' is already exist`);
+}
 
 async function validateFile(rule, value) {
   if (!value || (Array.isArray(value) || value.length === 0)) {
@@ -100,7 +134,7 @@ const ContractProposal = props => {
     contractName: -1
   });
   const [contractList, setContractList] = useState([]);
-  const [contractName, setContractName] = useState();
+  const [checkName, setCheckName] = useState(undefined);
 
   useEffect(() => {
     request(API_PATH.GET_ALL_CONTRACTS, {
@@ -115,15 +149,19 @@ const ContractProposal = props => {
   }, []);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isUpdateName, setUpdateName] = useState(false);
-  function handleAction() {
+
+  const setContractName = useCallback(name => {
     setFieldsValue({
-      name: ''
+      name
     });
+    setCheckName(undefined);
+  }, []);
+  function handleAction() {
     setContractName('');
     setIsUpdate(!isUpdate);
   }
   const contractFilter = input => contractList
-    .filter(({ contractName: item, address }) => item.indexOf(input) > -1 || address.indexOf(input) > -1).length > 0;
+    .filter(({ contractName, address }) => contractName.indexOf(input) > -1 || address.indexOf(input) > -1).length > 0;
   function normFile(e) {
     if (Array.isArray(e)) {
       return e;
@@ -134,9 +172,30 @@ const ContractProposal = props => {
     setFileLength(e.fileList.length);
   }
 
+  const checkContractNameHandler = useCallback(async name => {
+    setCheckName({
+      validateStatus: 'validating',
+      errorMsg: undefined, // Inquiring...
+    });
+    try {
+      await checkContractName('', name, isUpdate, currentContractInfo, isUpdateName);
+      setCheckName({
+        validateStatus: 'success',
+        errorMsg: undefined, // Inquiring...
+      });
+    } catch (e) {
+      setCheckName({
+        validateStatus: 'error',
+        errorMsg: e.message,
+      });
+      throw e;
+    }
+  }, [isUpdate, currentContractInfo, isUpdateName]);
+
   async function handleSubmit() {
     try {
       const result = await validateFields();
+      await checkContractNameHandler(result.name || '');
       const {
         action,
         address = ''
@@ -146,7 +205,6 @@ const ContractProposal = props => {
         file = await readFile(result.file[0].originFileObj);
       }
       let name = result.name || '';
-      await checkContractName('', name, isUpdate, currentContractInfo, isUpdateName);
       if (isUpdate
         && (currentContractInfo.contractName === name)
       ) {
@@ -170,21 +228,16 @@ const ContractProposal = props => {
     const info = contractList.filter(v => v.address === address)[0];
     setCurrentContractInfo(info);
     const name = +info.contractName === -1 ? '' : info.contractName;
-    setFieldsValue({
-      name
-    });
     setContractName(name);
   }
 
   const updateTypeHandler = useCallback(e => {
     setUpdateName(e.target.value === UpdateType.updateContractName);
     setFieldsValue({
-      name: '',
       address: ''
     });
     setContractName('');
   }, []);
-  const checkName = useCheckName(contractName, isUpdate, currentContractInfo, isUpdateName);
 
   return (
     <div className="contract-proposal">
@@ -197,7 +250,7 @@ const ContractProposal = props => {
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
         }}
         onValuesChange={change => {
-          if (change?.name) setContractName(change?.name);
+          if (change?.name) setCheckName(undefined);
         }}
         {...formItemLayout}
       >
@@ -267,8 +320,8 @@ const ContractProposal = props => {
           label="Contract Name"
           name="name"
           // validateTrigger="onBlur"
-          validateStatus={checkName.validateStatus}
-          help={checkName.errorMsg}
+          validateStatus={checkName?.validateStatus}
+          help={checkName?.errorMsg}
           rules={
             [
               {
