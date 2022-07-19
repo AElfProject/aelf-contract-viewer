@@ -111,7 +111,8 @@ const CreateProposal = () => {
       action,
       name,
       file,
-      isOnlyUpdateName
+      isOnlyUpdateName,
+      onSuccess
     } = contract;
     let params = {};
     if (action === 'ProposeNewContract') {
@@ -153,6 +154,7 @@ const CreateProposal = () => {
       console.error(e);
       message.error((e.errorMessage || {}).message || e.message || e.msg || 'Error happened');
     } finally {
+      if (onSuccess) onSuccess();
       setContractResult({
         ...contract,
         confirming: false

@@ -82,7 +82,7 @@ async function checkContractName(rule, value, isUpdate, currentContractInfo, isU
     // eslint-disable-next-line consistent-return
     return true;
   }
-  throw new Error(`Contract name '${value}' is already exist`);
+  throw new Error('The name already exists！');
 }
 
 async function validateFile(rule, value) {
@@ -136,6 +136,7 @@ const ContractProposal = props => {
   });
   const [contractList, setContractList] = useState([]);
   const [checkName, setCheckName] = useState(undefined);
+  const [update, setUpdate] = useState();
 
   useEffect(() => {
     request(API_PATH.GET_ALL_CONTRACTS, {
@@ -147,7 +148,7 @@ const ContractProposal = props => {
       .catch(e => {
         message.error(e.message || 'Network Error');
       });
-  }, []);
+  }, [update]);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isUpdateName, setUpdateName] = useState(false);
 
@@ -223,7 +224,8 @@ const ContractProposal = props => {
         action,
         address,
         name,
-        isOnlyUpdateName: isUpdate && isUpdateName
+        isOnlyUpdateName: isUpdate && isUpdateName,
+        onSuccess: () => setUpdate(Date.now())
       };
       submit(submitObj);
     } catch (e) {
@@ -324,27 +326,34 @@ const ContractProposal = props => {
               </>
             ) : null
         }
-        <FormItem
-          label="Contract Name"
-          name="name"
-          // validateTrigger="onBlur"
-          validateStatus={checkName?.validateStatus}
-          help={checkName?.errorMsg}
-          rules={
-            [
-              {
-                required: isUpdate && isUpdateName,
-                type: 'string',
-                // eslint-disable-next-line max-len
-                // validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
-              }
-            ]
-          }
-        >
-          <Input
-            disabled={isUpdate && currentContractInfo.isSystemContract}
-          />
-        </FormItem>
+        {
+          !isUpdate || isUpdate && isUpdateName ? (
+            <>
+              <FormItem
+                label="Contract Name"
+                name="name"
+                // validateTrigger="onBlur"
+                validateStatus={checkName?.validateStatus}
+                help={checkName?.errorMsg}
+                rules={
+                  [
+                    {
+                      required: isUpdate && isUpdateName,
+                      type: 'string',
+                      // eslint-disable-next-line max-len
+                      // validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
+                    }
+                  ]
+                }
+              >
+                <Input
+                  disabled={isUpdate && currentContractInfo.isSystemContract}
+                  maxLength={150}
+                />
+              </FormItem>
+            </>
+          ) : null
+        }
         {
           !(isUpdateName && isUpdate) ? (
             <>
