@@ -19,7 +19,16 @@ async function getContract(endpoint, name) {
   return aelf.chain.contractAt(address, wallet);
 }
 
-async function getTxResult(txId, times = 0, delay = 5000, timeLimit = 10) {
+async function initAelf(endpoint) {
+  if (!zero || !aelf) {
+    if (!endpoint) throw new Error('Can not found valid endpoint');
+    aelf = new AElf(new AElf.providers.HttpProvider(endpoint));
+    const status = await aelf.chain.getChainStatus();
+    zero = status.GenesisContractAddress;
+  }
+}
+
+async function basicGetTxResult(txId, times = 0, delay = 5000, timeLimit = 10) {
   const currentTime = times + 1;
   await new Promise(resolve => {
     setTimeout(() => {
@@ -28,7 +37,7 @@ async function getTxResult(txId, times = 0, delay = 5000, timeLimit = 10) {
   });
   const tx = await aelf.chain.getTxResult(txId);
   if (tx.Status === 'PENDING' && currentTime <= timeLimit) {
-    const result = await getTxResult(aelf, txId, currentTime, delay, timeLimit);
+    const result = await basicGetTxResult(aelf, txId, currentTime, delay, timeLimit);
     return result;
   }
   if (tx.Status === 'PENDING' && currentTime > timeLimit) {
@@ -40,13 +49,10 @@ async function getTxResult(txId, times = 0, delay = 5000, timeLimit = 10) {
   throw tx;
 }
 
-async function getTxResultAddAelf(txId, endpoint, times = 0, delay = 5000, timeLimit = 10) {
-  if (!zero || !aelf) {
-    aelf = new AElf(new AElf.providers.HttpProvider(endpoint));
-    const status = await aelf.chain.getChainStatus();
-    zero = status.GenesisContractAddress;
-  }
-  return getTxResult(txId, times, delay, timeLimit);
+async function getTxResult(txId, times = 0, delay = 5000, timeLimit = 10, endpoint) {
+  await initAelf(endpoint);
+  const res = await basicGetTxResult(txId, times, delay, timeLimit);
+  return res;
 }
 
 function parseJSON(str = '') {
@@ -89,6 +95,5 @@ module.exports = {
   getTxResult,
   parseJSON,
   deserializeLog,
-  getActualProposalStatus,
-  getTxResultAddAelf
+  getActualProposalStatus
 };

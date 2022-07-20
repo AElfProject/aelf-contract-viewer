@@ -6,8 +6,7 @@ const Controller = require('../core/baseController');
 const {
   getTxResult,
   deserializeLog,
-  getActualProposalStatus,
-  getTxResultAddAelf,
+  getActualProposalStatus
 } = require('../utils');
 
 const paramRules = {
@@ -471,7 +470,7 @@ class ProposalsController extends Controller {
         throw new Error('contract name has been taken');
       } else {
         this.sendBody({});
-        getTxResult(txId).then(res => {
+        getTxResult(txId, undefined, undefined, undefined, app.config.constants.endpoint).then(res => {
           if (res.Status === 'MINED') {
             const {
               Logs = []
@@ -528,7 +527,7 @@ class ProposalsController extends Controller {
           contractAddress,
           event: 'ContractDeployed'
         });
-        const result = await getTxResultAddAelf(info.txId, app.config.constants.endpoint);
+        const result = await getTxResult(info.txId, undefined, undefined, undefined, app.config.constants.endpoint);
         if (result.Status === 'MINED') {
           const {
             Transaction = {}
