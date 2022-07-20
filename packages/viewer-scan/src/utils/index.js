@@ -346,7 +346,12 @@ async function contractTransactionFormatted(transaction) {
     const {
       code,
       contractName
-    } = await Proposal.getCode(proposalId);
+    } = await Proposal.findOne({
+      attributes: ['code', 'contractName'],
+      where: {
+        proposalId
+      }
+    });
     await Proposal.update({
       released: true,
       releasedTxId: TransactionId,
