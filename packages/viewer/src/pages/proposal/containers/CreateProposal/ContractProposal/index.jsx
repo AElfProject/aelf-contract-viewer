@@ -260,7 +260,7 @@ const ContractProposal = props => {
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
         }}
         onValuesChange={change => {
-          if (change?.name) setCheckName(undefined);
+          if ('name' in change) setCheckName(undefined);
         }}
         {...formItemLayout}
       >
@@ -332,19 +332,9 @@ const ContractProposal = props => {
               <FormItem
                 label="Contract Name"
                 name="name"
-                validateTrigger=""
+                required={isUpdate && isUpdateName}
                 validateStatus={checkName?.validateStatus}
                 help={checkName?.errorMsg}
-                rules={
-                  [
-                    {
-                      required: isUpdate && isUpdateName,
-                      type: 'string',
-                      // eslint-disable-next-line max-len
-                      // validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName)
-                    }
-                  ]
-                }
               >
                 <Input
                   disabled={isUpdate && currentContractInfo.isSystemContract}
