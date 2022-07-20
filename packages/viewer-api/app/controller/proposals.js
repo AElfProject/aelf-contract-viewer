@@ -470,7 +470,7 @@ class ProposalsController extends Controller {
         throw new Error('contract name has been taken');
       } else {
         this.sendBody({});
-        getTxResult(txId, undefined, undefined, undefined, app.config.constants.endpoint).then(res => {
+        getTxResult(txId, undefined, undefined, undefined, app.config.constants.endpoint).then(async res => {
           if (res.Status === 'MINED') {
             const {
               Logs = []
@@ -479,7 +479,7 @@ class ProposalsController extends Controller {
             if (log.length === 0) {
               return;
             }
-            const result = deserializeLog(log[0]);
+            const result = await deserializeLog(log[0]);
             if (result.length === 1) {
               app.model.ContractNames.addName({
                 contractName,
@@ -523,7 +523,7 @@ class ProposalsController extends Controller {
       if (isExist) {
         throw new Error('contract name has been taken');
       } else {
-        const info = await app.model.Code.getLastEventTxId({
+        const info = await app.model.Code.getTxIdByContractEvent({
           contractAddress,
           event: 'ContractDeployed'
         });

@@ -150,17 +150,22 @@ class Code extends Model {
     });
   }
 
-  static getLastEventTxId(params) {
-    const { contractAddress, event } = params;
+  /**
+   * @params {
+   * contractAddress: string, event: string; order: Array | fn | col | literal
+   * }
+   * @returns
+   */
+
+  static getTxIdByContractEvent(params) {
+    const { contractAddress, event, order = [['updateTime', 'DESC']] } = params;
     return Code.findOne({
       attributes: ['txId'],
       where: {
         address: contractAddress,
         event
       },
-      order: [
-        ['updateTime', 'DESC']
-      ]
+      order
     });
   }
 }
