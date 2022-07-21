@@ -163,10 +163,10 @@ class Tokens extends Model {
       const info = tokenCount[v.symbol];
       return {
         ...v,
-        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals || 8}`)
+        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals || 0}`)
           .toNumber()
           .toLocaleString(),
-        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals || 8}`)
+        supply: new Decimal(v.supply).dividedBy(`1e${v.decimals || 0}`)
           .toNumber()
           .toLocaleString(),
         holders: info && info.holders || 0,
