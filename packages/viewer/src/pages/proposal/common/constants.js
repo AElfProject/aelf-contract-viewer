@@ -16,6 +16,7 @@ export const API_PATH = {
   GET_PROPOSAL_INFO: '/api/proposal/proposalInfo',
   CHECK_CONTRACT_NAME: '/api/proposal/checkContractName',
   ADD_CONTRACT_NAME: '/api/proposal/addContractName',
+  UPDATE_CONTRACT_NAME: '/api/proposal/updateContractName',
   GET_AUDIT_ORGANIZATIONS: '/api/proposal/auditOrganizations',
   GET_ORGANIZATIONS: '/api/proposal/organizations',
   GET_VOTED_LIST: '/api/proposal/votedList',
