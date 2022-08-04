@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Button, message } from 'antd';
 import copy from 'copy-to-clipboard';
 import IconFont from '../../../../components/IconFont';
+import { omitString } from '../../../../common/utils';
 
 const CopylistItem = props => {
   const {
@@ -32,7 +33,7 @@ const CopylistItem = props => {
 :
         </span>
         <span className="copy-list-value">
-          {value}
+          {omitString(value, 10, 10)}
           <Button type="link" icon={<IconFont type="shareLink" />} href={href} />
 
           <Button

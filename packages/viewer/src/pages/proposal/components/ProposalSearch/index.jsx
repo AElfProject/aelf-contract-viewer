@@ -1,57 +1,26 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Form, message, Select } from 'antd';
-import { useSelector } from 'react-redux';
-import { request } from '../../../../common/request';
-import { API_PATH } from '../../common/constants';
+import { Form, Select } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
+import { getProposalSelectList } from '../../actions/proposalSelectList';
 
 const toBottomDistance = 30;
 
-// eslint-disable-next-line consistent-return
-export const getProposalList = async params => {
-  try {
-    const result = await request(API_PATH.GET_PROPOSAL_LIST, params, {
-      method: 'GET'
-    });
-    return result;
-  } catch (e) {
-    return e;
-  }
-};
 
 let isFetch = false;
 let timeout = null;
 let currentValue = '';
 
 // TODO reducer
-const ProposalSearch = () => {
-  const [proposalIdList, setProposalIdList] = useState([]);
-  const common = useSelector(state => state.common);
-  const {
-    currentWallet
-  } = common;
-  const [param, setParam] = useState({
-    pageSize: 20,
-    pageNum: 1,
-    proposalType: 'Parliament',
-    isContract: 1,
-    address: currentWallet.address,
-    search: '',
-    // TODO
-    status: 'all',
-  });
-
+const ProposalSearch = ({ selectMehtod = 'ReleaseApprovedContract' }) => {
+  const dispatch = useDispatch();
+  const proposalSelect = useSelector(state => state.proposalSelect);
+  const [param, setParam] = useState(proposalSelect.params);
   useEffect(() => {
-    getProposalList(param)
-      .then(res => {
-        setProposalIdList(v => {
-          const allList = v.concat(res?.list || []);
-          isFetch = !(res.total >= allList.length);
-          return v.concat(res?.list || []);
-        });
-      })
-      .catch(e => {
-        message.error(e.message || 'Network Error');
-      });
+    if (proposalSelect.isAll) return;
+    dispatch(getProposalSelectList(param)).then(() => {
+      isFetch = false;
+    });
   }, [param]);
 
   const proposalIdSearch = useCallback(newValue => {
@@ -67,7 +36,6 @@ const ProposalSearch = () => {
         search: currentValue,
         pageNum: 1
       }));
-      setProposalIdList([]);
     }, 300);
   }, []);
 
@@ -102,7 +70,14 @@ const ProposalSearch = () => {
         onPopupScroll={onPopupScroll}
         // open
       >
-        {proposalIdList.map(item => (
+        {proposalSelect?.list?.filter(({ contractMethod }) => {
+          if (selectMehtod === 'ReleaseApprovedContract') {
+            return contractMethod === 'ProposeContractCodeCheck';
+          } if (selectMehtod === 'ReleaseCodeCheckedContract') {
+            return contractMethod === 'DeploySmartContract';
+          }
+          return true;
+        }).map(item => (
           <Select.Option
             key={item.proposalId}
             value={item.proposalId}
@@ -113,6 +88,10 @@ const ProposalSearch = () => {
       </Select>
     </Form.Item>
   );
+};
+
+ProposalSearch.propTypes = {
+  selectMehtod: PropTypes.string.isRequired
 };
 
 

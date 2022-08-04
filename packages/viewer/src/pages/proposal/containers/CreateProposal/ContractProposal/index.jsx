@@ -17,9 +17,11 @@ import {
   Tooltip,
   Form
 } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
 import ProposalSearch from '../../../components/ProposalSearch';
+import { getProposalSelectList, GET_PROPOSAL_SELECT_LIST } from '../../../actions/proposalSelectList';
 
 const FormItem = Form.Item;
 const InputNameReg = /^[.,a-zA-Z\d]+$/;
@@ -150,6 +152,12 @@ const ContractProposal = props => {
     submit
   } = props;
   const [form] = Form.useForm();
+  const proposalSelect = useSelector(state => state.proposalSelect);
+  const common = useSelector(state => state.common);
+  const {
+    currentWallet
+  } = common;
+  const dispatch = useDispatch();
   const {
     validateFields,
     setFieldsValue,
@@ -163,7 +171,7 @@ const ContractProposal = props => {
   });
   const [contractList, setContractList] = useState([]);
   const [checkName, setCheckName] = useState(undefined);
-  const [isNewContract, setIsNewContract] = useState(true);
+  const [contractMethod, setContractMethod] = useState(contractMethodType.ProposeNewContract);
   const [update, setUpdate] = useState();
 
   useEffect(() => {
@@ -236,7 +244,9 @@ const ContractProposal = props => {
       const {
         action,
         address = '',
-        contractMethod = ''
+        // eslint-disable-next-line no-shadow
+        contractMethod = '',
+        proposalId
       } = result;
       let file;
       if (result.file) {
@@ -254,6 +264,7 @@ const ContractProposal = props => {
         action,
         address,
         name,
+        proposalId,
         isOnlyUpdateName: isUpdate && isUpdateName,
         contractMethod,
         onSuccess: () => setUpdate(Date.now())
@@ -289,6 +300,13 @@ const ContractProposal = props => {
     </>
   ), []);
 
+  useEffect(() => {
+    dispatch(getProposalSelectList({ ...proposalSelect.params, address: currentWallet?.address }));
+    return () => {
+      dispatch(GET_PROPOSAL_SELECT_LIST.DESTORY);
+    };
+  }, [currentWallet]);
+
   return (
     <div className="contract-proposal">
       <Form
@@ -303,12 +321,17 @@ const ContractProposal = props => {
         onValuesChange={change => {
           if ('name' in change) setCheckName(undefined);
           if ('contractMethod' in change) {
-            setIsNewContract(change.contractMethod === contractMethodType.ProposeNewContract);
+            setContractMethod(change.contractMethod);
+            setFieldsValue({
+              address: '',
+              name: '',
+              proposalId: ''
+            });
           }
           // if ('proposalId' in change) proposalIdChange(change.proposalId);
           if ('updateType' in change || 'action' in change) {
-            setFieldsValue({ contractMethod: contractMethodType.ProposeNewContract });
-            setIsNewContract(true);
+            setFieldsValue({ contractMethod: contractMethodType.ProposeNewContract, proposalId: '' });
+            setContractMethod(contractMethodType.ProposeNewContract);
           }
         }}
         {...formItemLayout}
@@ -387,7 +410,7 @@ const ContractProposal = props => {
           ) : null
         }
         {
-          isNewContract ? (
+          contractMethodType.ProposeNewContract === contractMethod ? (
             <>
               {
               isUpdate
@@ -488,7 +511,7 @@ const ContractProposal = props => {
               }
             </>
           ) : (
-            <ProposalSearch />
+            <ProposalSearch selectMehtod={contractMethod} />
           )
         }
         <Form.Item {...tailFormItemLayout}>
