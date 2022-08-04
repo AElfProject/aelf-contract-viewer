@@ -106,7 +106,7 @@ class ProposalsController extends Controller {
       trim: true,
       required: true,
       min: 1,
-      max: 100
+      max: 150
     },
     txId: {
       type: 'string',
@@ -127,13 +127,33 @@ class ProposalsController extends Controller {
     }
   };
 
+  updateContractNameRules = {
+    contractName: {
+      type: 'string',
+      trim: true,
+      required: true,
+      min: 1,
+      max: 150
+    },
+    contractAddress: {
+      type: 'string',
+      trim: true,
+      required: true,
+    },
+    address: {
+      type: 'string',
+      trim: true,
+      required: true
+    }
+  };
+
   checkContractNameRules = {
     contractName: {
       type: 'string',
       trim: true,
       required: true,
       min: 1,
-      max: 100
+      max: 150
     },
   };
 
@@ -450,7 +470,7 @@ class ProposalsController extends Controller {
         throw new Error('contract name has been taken');
       } else {
         this.sendBody({});
-        getTxResult(txId).then(res => {
+        getTxResult(txId, undefined, undefined, undefined, app.config.constants.endpoint).then(async res => {
           if (res.Status === 'MINED') {
             const {
               Logs = []
@@ -459,7 +479,7 @@ class ProposalsController extends Controller {
             if (log.length === 0) {
               return;
             }
-            const result = deserializeLog(log[0]);
+            const result = await deserializeLog(log[0]);
             if (result.length === 1) {
               app.model.ContractNames.addName({
                 contractName,
@@ -473,6 +493,56 @@ class ProposalsController extends Controller {
         }).catch(err => {
           console.log(err);
         });
+      }
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
+  async updateContractName() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(this.updateContractNameRules, ctx.request.body);
+      if (errors) {
+        throw errors;
+      }
+      const { isAudit } = ctx;
+      if (!isAudit) {
+        throw new Error('need log in and sign');
+      }
+      const {
+        contractName,
+        address,
+        contractAddress
+      } = ctx.request.body;
+      let isExist = await app.model.ContractNames.isExist(contractName);
+      if (!isExist) {
+        isExist = await app.model.Contracts.isExistName(contractName);
+      }
+      if (isExist) {
+        throw new Error('contract name has been taken');
+      } else {
+        const info = await app.model.Code.getTxIdByContractEvent({
+          contractAddress,
+          event: 'ContractDeployed'
+        });
+        const result = await getTxResult(info.txId, undefined, undefined, undefined, app.config.constants.endpoint);
+        if (result.Status === 'MINED') {
+          const {
+            Transaction = {}
+          } = result;
+          const admin = Transaction.From;
+          if (admin !== address) throw new Error('Contract name update failed. You do not have permission to change the name of this contract！');
+          const res = await app.model.Contracts.updateContractName({
+            contractName,
+            contractAddress,
+            address,
+          });
+          this.sendBody(res);
+        } else {
+          throw new Error('Contract name update failed. Please confirm the contract name to be updated again！');
+        }
       }
     } catch (e) {
       this.error(e);

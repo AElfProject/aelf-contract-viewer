@@ -10,7 +10,8 @@ import {
   Pagination,
   Table,
   Tag,
-  Input
+  Input,
+  Tooltip
 } from 'antd';
 import {
   Link
@@ -43,7 +44,9 @@ const ListColumn = [
         to={`/contract/${record.address}`}
         title={name}
       >
-        {removeAElfPrefix(name)}
+        <Tooltip title={name} placement="topLeft">
+          {removeAElfPrefix(name)}
+        </Tooltip>
       </Link>
     ) : '-')
   },
@@ -155,6 +158,15 @@ const ContractList = () => {
     getList(newPagination);
   };
 
+  const onShowSizeChange = (current, size) => {
+    const newPagination = {
+      ...pagination,
+      pageNum: 1,
+      pageSize: size
+    };
+    getList(newPagination);
+  };
+
   const onSearch = value => {
     const newPagination = {
       ...pagination,
@@ -192,9 +204,10 @@ const ContractList = () => {
           total={pagination.total}
           current={pagination.pageNum}
           pageSize={pagination.pageSize}
-          hideOnSinglePage
+          showSizeChanger
           onChange={onPageNumChange}
           showTotal={Total}
+          onShowSizeChange={onShowSizeChange}
         />
       </div>
     </div>
