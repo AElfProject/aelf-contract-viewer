@@ -2,75 +2,55 @@
  * @file create proposal
  * @author atom-yang
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Tabs,
   Modal,
-  message
+  message,
 } from 'antd';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { request } from '../../../../common/request';
-import {
-  API_PATH
-} from '../../common/constants';
 import NormalProposal from './NormalProposal';
-import ContractProposal from './ContractProposal';
+import ContractProposal, { contractMethodType } from './ContractProposal';
 import './index.less';
 import {
   formatTimeToNano,
   getContractAddress,
-  getSignParams,
   showTransactionResult,
   uint8ToBase64
 } from '../../common/utils';
+import CopylistItem from '../../components/CopylistItem';
+import { addContractName, getDeserializeLog, updateContractName } from './utils';
+import {
+  useCallbackAssem,
+  useReleaseApprovedContractAction,
+  useReleaseCodeCheckedContractAction
+} from './utils.callback';
+import ContractProposalModal from './ContractProposalModal';
 
 const {
   TabPane
 } = Tabs;
 
-function getCsrfToken() {
-  return document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-}
 
-async function updateContractName(wallet, currentWallet, params) {
-  const signedParams = await getSignParams(wallet, currentWallet);
-  if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.UPDATE_CONTRACT_NAME, {
-      ...params,
-      ...signedParams,
-    }, {
-      headers: {
-        'x-csrf-token': getCsrfToken()
-      }
-    });
-  }
-  throw new Error('get signature failed');
-}
-
-async function addContractName(wallet, currentWallet, params) {
-  const signedParams = await getSignParams(wallet, currentWallet);
-  if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.ADD_CONTRACT_NAME, {
-      ...params,
-      ...signedParams,
-    }, {
-      headers: {
-        'x-csrf-token': getCsrfToken()
-      }
-    });
-  }
-  throw new Error('get signature failed');
-}
+const initApplyModal = {
+  visible: false,
+  title: '',
+  children: ''
+};
 
 const CreateProposal = () => {
   const { orgAddress = '' } = useParams();
   const modifyData = useSelector(state => state.proposalModify);
   const common = useSelector(state => state.common);
+  const proposalSelect = useSelector(state => state.proposalSelect);
   const [normalResult, setNormalResult] = useState({
     isModalVisible: false,
     confirming: false
   });
+  const { contractSend } = useCallbackAssem();
+  const releaseApprovedContractHandler = useReleaseApprovedContractAction();
+  const releaseCodeCheckedContractHandler = useReleaseCodeCheckedContractAction();
   const [contractResult, setContractResult] = useState({
     confirming: false
   });
@@ -79,6 +59,7 @@ const CreateProposal = () => {
     wallet,
     currentWallet
   } = common;
+  const [applyModal, setApplyModal] = useState(initApplyModal);
 
   function handleCancel() {
     if (normalResult.isModalVisible) {
@@ -105,6 +86,17 @@ const CreateProposal = () => {
     });
   }
 
+  const ReleaseApprovedContractAction = useCallback(async contract => {
+    const modalContent = await releaseApprovedContractHandler(contract);
+    setApplyModal(modalContent);
+  }, [proposalSelect]);
+
+  const ReleaseCodeCheckedContractAction = useCallback(async contract => {
+    const modalContent = await releaseCodeCheckedContractHandler(contract);
+
+    setApplyModal(modalContent);
+  }, [proposalSelect]);
+
   async function submitContract(contract) {
     const {
       address,
@@ -112,20 +104,11 @@ const CreateProposal = () => {
       name,
       file,
       isOnlyUpdateName,
-      onSuccess
+      onSuccess,
+      contractMethod
     } = contract;
     let params = {};
-    if (action === 'ProposeNewContract') {
-      params = {
-        category: '0',
-        code: file
-      };
-    } else {
-      params = {
-        address,
-        code: file
-      };
-    }
+
     try {
       if (isOnlyUpdateName) {
         await updateContractName(wallet, currentWallet, {
@@ -136,12 +119,33 @@ const CreateProposal = () => {
         message.success('Contract Name has been updated！');
         return;
       }
-      const result = await wallet.invoke({
-        contractAddress: getContractAddress('Genesis'),
-        param: params,
-        contractMethod: action
-      });
-      showTransactionResult(result);
+      switch (contractMethod) {
+        case contractMethodType.ReleaseApprovedContract:
+          await ReleaseApprovedContractAction(contract);
+          return;
+        case contractMethodType.ReleaseCodeCheckedContract:
+          await ReleaseCodeCheckedContractAction(contract);
+          return;
+        default:
+          break;
+      }
+      if (action === 'ProposeNewContract') {
+        params = {
+          category: '0',
+          code: file
+        };
+      } else {
+        params = {
+          address,
+          code: file
+        };
+      }
+      const result = await contractSend(action, params);
+      const Log = await getDeserializeLog(
+        aelf, result?.TransactionId || result?.result?.TransactionId || '',
+        'ProposalCreated'
+      );
+      const { proposalId } = Log ?? '';
       if (name && +name !== -1) {
         await addContractName(wallet, currentWallet, {
           contractName: name,
@@ -150,6 +154,26 @@ const CreateProposal = () => {
           address: currentWallet.address
         });
       }
+      setApplyModal({
+        visible: true,
+        title: proposalId ? 'Proposal is created！' : 'Proposal failed to be created！',
+        children: (
+          <>
+            {proposalId
+              ? (
+                <CopylistItem
+                  label="Proposal ID："
+                  value={proposalId}
+                  href={`/proposalsDetail/${proposalId}`}
+                />
+              ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
+            <CopylistItem
+              label="Transaction ID："
+              value={result?.TransactionId || result?.result?.TransactionId || ''}
+              href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
+            />
+          </>)
+      });
     } catch (e) {
       console.error(e);
       message.error((e.errorMessage || {}).message || e.message || e.msg || 'Error happened');
@@ -218,6 +242,10 @@ const CreateProposal = () => {
       });
     }
   }
+
+  const contractModalCancle = useCallback(async () => {
+    setApplyModal(initApplyModal);
+  }, []);
 
   return (
     <div className="proposal-apply">
@@ -301,6 +329,10 @@ const CreateProposal = () => {
           </div>
         </div>
       </Modal>
+      <ContractProposalModal
+        contractModalCancle={contractModalCancle}
+        applyModal={applyModal}
+      />
     </div>
   );
 };

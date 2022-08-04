@@ -13,6 +13,7 @@ import {
 } from 'react-router-dom';
 import moment from 'moment';
 import {
+  Tooltip,
   Menu,
   message,
   Tabs,
@@ -23,6 +24,7 @@ import {
 import List from './List';
 import constants, { ACTIONS_COLOR_MAP, API_PATH, STATUS_COLOR_MAP } from '../../common/constants';
 import {
+  omitString,
   removePrefixOrSuffix,
   sendHeight
 } from '../../../../common/utils';
@@ -66,7 +68,13 @@ const LIST_TABS = {
         key: 'proposalId',
         ellipsis: true,
         render(text) {
-          return (<Link to={`/proposalsDetail/${text}`}>{text}</Link>);
+          return (
+            <Link to={`/proposalsDetail/${text}`}>
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
+            </Link>
+          );
         }
       },
       {
@@ -81,7 +89,9 @@ const LIST_TABS = {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {text}
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
             </a>
           );
         }
@@ -139,7 +149,9 @@ const LIST_TABS = {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {text}
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
             </a>
           );
         }
@@ -186,7 +198,9 @@ const LIST_TABS = {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {text}
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
             </a>
           );
         }
@@ -210,7 +224,13 @@ const LIST_TABS = {
         key: 'proposalId',
         ellipsis: true,
         render(text) {
-          return (<Link to={`/proposalsDetail/${text}`}>{text}</Link>);
+          return (
+            <Link to={`/proposalsDetail/${text}`}>
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
+            </Link>
+          );
         }
       },
       {
@@ -238,7 +258,9 @@ const LIST_TABS = {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {text}
+              <Tooltip title={text} placement="topLeft">
+                {omitString(text)}
+              </Tooltip>
             </a>
           );
         }
@@ -263,7 +285,13 @@ const REFERENDUM_TOKEN_COLUMN_ITEM = {
   key: 'amount',
   render(text, record) {
     if (text) {
-      return <div>{text}&nbsp;{record.symbol}</div>;
+      return (
+        <div>
+          {text}
+&nbsp;
+          {record.symbol}
+        </div>
+      );
     }
     return '-';
   }

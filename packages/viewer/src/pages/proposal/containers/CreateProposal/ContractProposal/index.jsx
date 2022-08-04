@@ -2,7 +2,9 @@
  * @file contract proposal
  * @author atom-yang
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo
+} from 'react';
 import PropTypes from 'prop-types';
 import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import {
@@ -15,8 +17,11 @@ import {
   Tooltip,
   Form
 } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
+import ProposalSearch from '../../../components/ProposalSearch';
+import { getProposalSelectList, GET_PROPOSAL_SELECT_LIST } from '../../../actions/proposalSelectList';
 
 const FormItem = Form.Item;
 const InputNameReg = /^[.,a-zA-Z\d]+$/;
@@ -25,6 +30,30 @@ const UpdateType = {
   updateContractName: 'updateContractName',
   updateFile: 'updateFile'
 };
+// eslint-disable-next-line max-len
+const step1 = 'Step 1 - ProposeNewContract: Apply to deploy a new contract(pending pproval from the parliament to enter the next stage);';
+// eslint-disable-next-line max-len
+const step2 = 'Step 2 - ReleaseApprovalContract: Apply for code check after the contract deployment proposal is approved (the parliament will agree upon the proposal once BPs have completed code check);';
+const step3 = 'Step 3 - ReleaseCodeCheckedContract: Contract deployment will be executed once the code check passes.';
+
+export const contractMethodType = {
+  ProposeNewContract: 'ProposeNewContract',
+  ReleaseApprovedContract: 'ReleaseApprovedContract',
+  ReleaseCodeCheckedContract: 'ReleaseCodeCheckedContract'
+};
+
+const contractMethodList = [{
+  methodTitle: 'Propose New Contract',
+  methodType: contractMethodType.ProposeNewContract
+},
+{
+  methodTitle: 'Release Approved Contract',
+  methodType: contractMethodType.ReleaseApprovedContract
+},
+{
+  methodTitle: 'Release Code Checked Contract',
+  methodType: contractMethodType.ReleaseCodeCheckedContract
+}];
 
 const formItemLayout = {
   labelCol: {
@@ -123,6 +152,12 @@ const ContractProposal = props => {
     submit
   } = props;
   const [form] = Form.useForm();
+  const proposalSelect = useSelector(state => state.proposalSelect);
+  const common = useSelector(state => state.common);
+  const {
+    currentWallet
+  } = common;
+  const dispatch = useDispatch();
   const {
     validateFields,
     setFieldsValue,
@@ -136,6 +171,7 @@ const ContractProposal = props => {
   });
   const [contractList, setContractList] = useState([]);
   const [checkName, setCheckName] = useState(undefined);
+  const [contractMethod, setContractMethod] = useState(contractMethodType.ProposeNewContract);
   const [update, setUpdate] = useState();
 
   useEffect(() => {
@@ -207,10 +243,13 @@ const ContractProposal = props => {
       const result = await customValidateFields();
       const {
         action,
-        address = ''
+        address = '',
+        // eslint-disable-next-line no-shadow
+        contractMethod = '',
+        proposalId
       } = result;
       let file;
-      if (!(isUpdate && isUpdateName)) {
+      if (result.file) {
         file = await readFile(result.file[0].originFileObj);
       }
       let name = result.name || '';
@@ -219,12 +258,15 @@ const ContractProposal = props => {
       ) {
         name = '';
       }
+      console.log(result);
       const submitObj = {
         file,
         action,
         address,
         name,
+        proposalId,
         isOnlyUpdateName: isUpdate && isUpdateName,
+        contractMethod,
         onSuccess: () => setUpdate(Date.now())
       };
       submit(submitObj);
@@ -249,6 +291,22 @@ const ContractProposal = props => {
     setContractName('');
   }, []);
 
+  const methosTip = useMemo(() => (
+    <>
+      <p>Contract Deployment Method:</p>
+      <p>{step1}</p>
+      <p>{step2}</p>
+      <p>{step3}</p>
+    </>
+  ), []);
+
+  useEffect(() => {
+    dispatch(getProposalSelectList({ ...proposalSelect.params, address: currentWallet?.address }));
+    return () => {
+      dispatch(GET_PROPOSAL_SELECT_LIST.DESTORY);
+    };
+  }, [currentWallet]);
+
   return (
     <div className="contract-proposal">
       <Form
@@ -257,10 +315,24 @@ const ContractProposal = props => {
           action: 'ProposeNewContract',
           address: '',
           updateType: UpdateType.updateFile,
+          contractMethod: contractMethodType.ProposeNewContract,
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
         }}
         onValuesChange={change => {
           if ('name' in change) setCheckName(undefined);
+          if ('contractMethod' in change) {
+            setContractMethod(change.contractMethod);
+            setFieldsValue({
+              address: '',
+              name: '',
+              proposalId: ''
+            });
+          }
+          // if ('proposalId' in change) proposalIdChange(change.proposalId);
+          if ('updateType' in change || 'action' in change) {
+            setFieldsValue({ contractMethod: contractMethodType.ProposeNewContract, proposalId: '' });
+            setContractMethod(contractMethodType.ProposeNewContract);
+          }
         }}
         {...formItemLayout}
       >
@@ -275,119 +347,172 @@ const ContractProposal = props => {
             <Radio value="ProposeUpdateContract">Update Contract</Radio>
           </Radio.Group>
         </FormItem>
+
         {
           isUpdate
             ? (
-              <>
-                <FormItem
-                  label=""
-                  name="updateType"
-                  {...radioButtonLayout}
+              <FormItem
+                label=""
+                name="updateType"
+                {...radioButtonLayout}
+              >
+                <Radio.Group
+                  onChange={updateTypeHandler}
+                  buttonStyle="solid"
                 >
-                  <Radio.Group
-                    onChange={updateTypeHandler}
-                    buttonStyle="solid"
-                  >
-                    <Radio.Button style={{ marginRight: '20px' }} value={UpdateType.updateFile}>
-                      Update Contract File
-                    </Radio.Button>
-                    <Radio.Button value={UpdateType.updateContractName}>Update The Contract Name Only</Radio.Button>
-                  </Radio.Group>
-                </FormItem>
-                <FormItem
-                  label="Contract Address"
-                  name="address"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please select a contract address!'
-                    }
-                  ]}
-                >
-                  <Select
-                    placeholder="Please select a contract address"
-                    showSearch
-                    optionFilterProp="children"
-                    filterOption={contractFilter}
-                    onChange={handleContractChange}
-                  >
-                    {
-                      contractList.map(v => (
-                        <Select.Option
-                          key={v.address}
-                          value={v.address}
-                        >
-                          {v.contractName || v.address}
-                        </Select.Option>
-                      ))
-                    }
-                  </Select>
-                </FormItem>
-              </>
+                  <Radio.Button style={{ marginRight: '20px' }} value={UpdateType.updateFile}>
+                    Update Contract File
+                  </Radio.Button>
+                  <Radio.Button value={UpdateType.updateContractName}>Update The Contract Name Only</Radio.Button>
+                </Radio.Group>
+              </FormItem>
             ) : null
         }
         {
-          !isUpdate || isUpdate && isUpdateName ? (
-            <>
-              <FormItem
-                label="Contract Name"
-                name="name"
-                required={isUpdate && isUpdateName}
-                validateStatus={checkName?.validateStatus}
-                help={checkName?.errorMsg}
-              >
-                <Input
-                  disabled={isUpdate && currentContractInfo.isSystemContract}
-                  maxLength={150}
-                />
-              </FormItem>
-            </>
-          ) : null
-        }
-        {
-          !(isUpdateName && isUpdate) ? (
+          !(isUpdate && isUpdateName) ? (
             <>
               <FormItem
                 label={(
                   <span>
-                    Upload File&nbsp;
+                    Contract Method&nbsp;
                     <Tooltip
-                      title="When creating a 'Contract Deployment' proposal, you only need to upload the file,
-                      more information can be viewed on the public proposal page after the application is successful"
+                      title={methosTip}
                     >
                       <QuestionCircleOutlined className="main-color" />
                     </Tooltip>
                   </span>
                 )}
-                name="file"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                rules={
-                [
+                name="contractMethod"
+                rules={[
                   {
                     required: true,
-                    message: 'Please upload the DLL or PATCHED file!'
-                  },
-                  {
-                    validator: validateFile
+                    message: 'Please select a contract method!'
                   }
-                ]
-                }
+                ]}
               >
-                <Upload
-                  accept=".dll,.patched"
-                  beforeUpload={() => false}
-                  onChange={handleUpload}
-                  extra="Support DLL or PATCHED file, less than 2MB"
+                <Select
+                  showSearch
+                  optionFilterProp="children"
                 >
-                  <Button disabled={fileLength === 1}>
-                    <UploadOutlined className="gap-right-small" />
-                    Click to Upload
-                  </Button>
-                </Upload>
+                  {
+                    contractMethodList.map(v => (
+                      <Select.Option
+                        key={v.methodType}
+                        value={v.methodType}
+                      >
+                        {v.methodTitle}
+                      </Select.Option>
+                    ))
+                  }
+                </Select>
               </FormItem>
             </>
           ) : null
+        }
+        {
+          contractMethodType.ProposeNewContract === contractMethod ? (
+            <>
+              {
+              isUpdate
+                ? (
+                  <FormItem
+                    label="Contract Address"
+                    name="address"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please select a contract address!'
+                      }
+                    ]}
+                  >
+                    <Select
+                      placeholder="Please select a contract address"
+                      showSearch
+                      optionFilterProp="children"
+                      filterOption={contractFilter}
+                      onChange={handleContractChange}
+                    >
+                      {
+                        contractList.map(v => (
+                          <Select.Option
+                            key={v.address}
+                            value={v.address}
+                          >
+                            {v.contractName || v.address}
+                          </Select.Option>
+                        ))
+                      }
+                    </Select>
+                  </FormItem>
+                ) : null
+              }
+              {
+                !isUpdate || isUpdate && isUpdateName ? (
+                  <>
+                    <FormItem
+                      label="Contract Name"
+                      name="name"
+                      required={isUpdate && isUpdateName}
+                      validateStatus={checkName?.validateStatus}
+                      help={checkName?.errorMsg}
+                    >
+                      <Input
+                        disabled={isUpdate && currentContractInfo.isSystemContract}
+                        maxLength={150}
+                      />
+                    </FormItem>
+                  </>
+                ) : null
+              }
+              {
+                !(isUpdateName && isUpdate) ? (
+                  <>
+                    <FormItem
+                      label={(
+                        <span>
+                          Upload File&nbsp;
+                          <Tooltip
+                            // eslint-disable-next-line max-len
+                            title="When creating a 'Contract Deployment' proposal, you only need to upload the file, more information can be viewed on the public proposal page after the application is successful"
+                          >
+                            <QuestionCircleOutlined className="main-color" />
+                          </Tooltip>
+                        </span>
+                      )}
+                      name="file"
+                      valuePropName="fileList"
+                      getValueFromEvent={normFile}
+                      rules={
+                      [
+                        {
+                          required: true,
+                          message: 'Please upload the DLL or PATCHED file!'
+                        },
+                        {
+                          validator: validateFile
+                        }
+                      ]
+                      }
+                    >
+                      <Upload
+                        accept=".dll,.patched"
+                        beforeUpload={() => false}
+                        onChange={handleUpload}
+                        extra="Support DLL or PATCHED file, less than 2MB"
+                      >
+                        <Button disabled={fileLength === 1}>
+                          <UploadOutlined className="gap-right-small" />
+                          Click to Upload
+                        </Button>
+                      </Upload>
+                    </FormItem>
+                  </>
+                ) : null
+              }
+            </>
+          ) : (
+            <ProposalSearch selectMehtod={contractMethod} />
+          )
         }
         <Form.Item {...tailFormItemLayout}>
           <Button

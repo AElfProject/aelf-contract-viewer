@@ -1,0 +1,16 @@
+import { Button, Modal } from 'antd';
+import React from 'react';
+
+// eslint-disable-next-line react/prop-types
+const ContractProposalModal = ({ applyModal, contractModalCancle, }) => (
+  <Modal
+    closable={false}
+    maskClosable={false}
+    footer={<Button type="primary" onClick={contractModalCancle}>OK</Button>}
+    {...applyModal}
+    onOk={contractModalCancle}
+    onCancel={contractModalCancle}
+  />
+);
+
+export default ContractProposalModal;
