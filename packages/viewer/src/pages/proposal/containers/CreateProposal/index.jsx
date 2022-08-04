@@ -7,85 +7,31 @@ import {
   Tabs,
   Modal,
   message,
-  Button
 } from 'antd';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { request } from '../../../../common/request';
-import {
-  API_PATH
-} from '../../common/constants';
-import {
-  getOriginProposedContractInputHash
-} from '../../common/util.proposed';
 import NormalProposal from './NormalProposal';
 import ContractProposal, { contractMethodType } from './ContractProposal';
 import './index.less';
 import {
   formatTimeToNano,
   getContractAddress,
-  getSignParams,
-  getTxResult,
   showTransactionResult,
   uint8ToBase64
 } from '../../common/utils';
-import { deserializeLog } from '../../../../common/utils';
 import CopylistItem from '../../components/CopylistItem';
+import { addContractName, getDeserializeLog, updateContractName } from './utils';
+import {
+  useCallbackAssem,
+  useReleaseApprovedContractAction,
+  useReleaseCodeCheckedContractAction
+} from './utils.callback';
+import ContractProposalModal from './ContractProposalModal';
 
 const {
   TabPane
 } = Tabs;
 
-function getCsrfToken() {
-  return document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-}
-
-async function updateContractName(wallet, currentWallet, params) {
-  const signedParams = await getSignParams(wallet, currentWallet);
-  if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.UPDATE_CONTRACT_NAME, {
-      ...params,
-      ...signedParams,
-    }, {
-      headers: {
-        'x-csrf-token': getCsrfToken()
-      }
-    });
-  }
-  throw new Error('get signature failed');
-}
-
-async function addContractName(wallet, currentWallet, params) {
-  const signedParams = await getSignParams(wallet, currentWallet);
-  if (Object.keys(signedParams).length > 0) {
-    return request(API_PATH.ADD_CONTRACT_NAME, {
-      ...params,
-      ...signedParams,
-    }, {
-      headers: {
-        'x-csrf-token': getCsrfToken()
-      }
-    });
-  }
-  throw new Error('get signature failed');
-}
-
-async function getDeserializeLog(aelf, txId, logName = 'ProposalCreated') {
-  if (!txId) throw new Error('get not get txId');
-  const txResult = await getTxResult(aelf, txId ?? '');
-  if (txResult.Status === 'MINED') {
-    const {
-      Logs = []
-    } = txResult;
-    const log = (Logs || []).filter(v => v.Name === logName);
-    if (log.length === 0) {
-      return;
-    }
-    const result = await deserializeLog(log[0], log[0].Name, log[0].Address);
-    // eslint-disable-next-line consistent-return
-    return result;
-  }
-}
 
 const initApplyModal = {
   visible: false,
@@ -102,6 +48,9 @@ const CreateProposal = () => {
     isModalVisible: false,
     confirming: false
   });
+  const { contractSend } = useCallbackAssem();
+  const releaseApprovedContractHandler = useReleaseApprovedContractAction();
+  const releaseCodeCheckedContractHandler = useReleaseCodeCheckedContractAction();
   const [contractResult, setContractResult] = useState({
     confirming: false
   });
@@ -137,92 +86,15 @@ const CreateProposal = () => {
     });
   }
 
-  // eslint-disable-next-line no-return-await
-  const contractSend = useCallback(async (action, params, isOriginResult) => {
-    const result = await wallet.invoke({
-      contractAddress: getContractAddress('Genesis'),
-      param: params,
-      contractMethod: action
-    });
-    if (isOriginResult) return result;
-    if (result && +result.error === 0 || !result.error) {
-      return result;
-    }
-    throw new Error((result.errorMessage || {}).message || 'Send transaction failed');
-  }, [wallet]);
-
   const ReleaseApprovedContractAction = useCallback(async contract => {
-    const { contractMethod, proposalId } = contract;
-    const proposalItem = proposalSelect.list.find(item => item.proposalId === proposalId);
-    if (!proposalItem) throw new Error('Please check if the proposalId is valid');
-    const res = await getDeserializeLog(aelf, proposalItem.createTxId, 'ContractProposed');
-    const { proposedContractInputHash } = res ?? {};
-    if (!proposedContractInputHash) throw new Error('Please check if the proposalId is valid');
-    const param = {
-      proposalId,
-      proposedContractInputHash
-    };
-    const result = await contractSend(contractMethod, param, true);
-    let isError = false;
-    if (!(result && +result.error === 0 || !result.error)) {
-      isError = true;
-      throw new Error((result.errorMessage || {}).message || 'Send transaction failed');
-    }
-    const Log = await getDeserializeLog(aelf, result?.TransactionId || result?.result?.TransactionId || '');
-    const { proposalId: newProposalId } = Log ?? '';
-    setApplyModal({
-      visible: true,
-      title: !isError ? 'Proposal is created！' : 'Proposal failed to be created！',
-      children: (
-        <>
-          {!isError && newProposalId
-            ? (
-              <CopylistItem
-                label="Proposal ID："
-                value={newProposalId ?? ''}
-                href={`/proposalsDetail/${newProposalId}`}
-              />
-            ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
-          <CopylistItem
-            label="Transaction ID："
-            value={result?.TransactionId || result?.result?.TransactionId || ''}
-            href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
-          />
-        </>)
-    });
+    const modalContent = await releaseApprovedContractHandler(contract);
+    setApplyModal(modalContent);
   }, [proposalSelect]);
 
   const ReleaseCodeCheckedContractAction = useCallback(async contract => {
-    const { contractMethod, proposalId } = contract;
+    const modalContent = await releaseCodeCheckedContractHandler(contract);
 
-    const proposalItem = proposalSelect.list.find(item => item.proposalId === proposalId);
-    if (!proposalItem) throw new Error('Please check if the proposalId is valid');
-    const proposedContractInputHash = await getOriginProposedContractInputHash({ txId: proposalItem.createTxId });
-    if (!proposedContractInputHash) throw new Error('Please check if the proposalId is valid');
-    const param = {
-      proposalId,
-      proposedContractInputHash
-    };
-
-    const result = await contractSend(contractMethod, param, true);
-    let isError = false;
-    if (!(result && +result.error === 0 || !result.error)) {
-      isError = true;
-      throw new Error((result.errorMessage || {}).message || 'Send transaction failed');
-    }
-
-    setApplyModal({
-      visible: true,
-      title: !isError ? 'Proposal is created！' : 'Proposal failed to be created！',
-      children: (
-        <>
-          <CopylistItem
-            label="Transaction ID："
-            value={(result?.TransactionId || result?.result?.TransactionId || '')}
-            href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
-          />
-        </>)
-    });
+    setApplyModal(modalContent);
   }, [proposalSelect]);
 
   async function submitContract(contract) {
@@ -269,7 +141,10 @@ const CreateProposal = () => {
         };
       }
       const result = await contractSend(action, params);
-      const Log = await getDeserializeLog(aelf, result?.TransactionId || result?.result?.TransactionId || '');
+      const Log = await getDeserializeLog(
+        aelf, result?.TransactionId || result?.result?.TransactionId || '',
+        'ProposalCreated'
+      );
       const { proposalId } = Log ?? '';
       if (name && +name !== -1) {
         await addContractName(wallet, currentWallet, {
@@ -454,13 +329,9 @@ const CreateProposal = () => {
           </div>
         </div>
       </Modal>
-      <Modal
-        closable={false}
-        maskClosable={false}
-        footer={<Button type="primary" onClick={contractModalCancle}>OK</Button>}
-        {...applyModal}
-        onOk={contractModalCancle}
-        onCancel={contractModalCancle}
+      <ContractProposalModal
+        contractModalCancle={contractModalCancle}
+        applyModal={applyModal}
       />
     </div>
   );
