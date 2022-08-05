@@ -19,6 +19,7 @@ const OverLay = props => {
   const dispatch = useDispatch();
 
   function handleLogout() {
+    localStorage.removeItem('currentWallet');
     dispatch(logOut(address));
   }
   return (

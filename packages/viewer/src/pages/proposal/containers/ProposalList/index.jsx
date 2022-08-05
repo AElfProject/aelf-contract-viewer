@@ -131,7 +131,7 @@ const ProposalList = () => {
 
   const send = async (id, action) => {
     if (params.proposalType === proposalTypes.REFERENDUM) {
-      const proposal = list.filter(item => item.proposalId === id)[0];
+      const [proposal] = list.filter(item => item.proposalId === id);
       setProposalInfo({
         ...proposalInfo,
         tokenSymbol: proposal.organizationInfo.leftOrgInfo.tokenSymbol,
