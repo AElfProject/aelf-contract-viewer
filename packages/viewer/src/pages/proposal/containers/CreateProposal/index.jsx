@@ -169,6 +169,7 @@ const CreateProposal = () => {
               ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
             <CopylistItem
               label="Transaction ID："
+              isParentHref
               value={result?.TransactionId || result?.result?.TransactionId || ''}
               href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
             />
@@ -249,6 +250,17 @@ const CreateProposal = () => {
 
   return (
     <div className="proposal-apply">
+      <CopylistItem
+        label="Proposal ID："
+        value="proposalId"
+        href={`/proposalsDetail/${'7282c19f5af2d7a3eff03a7c6e26409fe99b71a8fd58877b1c05961bebdf9596'}`}
+      />
+      <CopylistItem
+        label="Proposal ID："
+        value="tx"
+        isParentHref
+        href={`/tx/${'aca7cd54c2e0371ae0ffa5469c665b08bc8e8d1c0fc02a7fe12f4674f69b9c6c'}`}
+      />
       <Tabs
         className="proposal-apply-tab"
         defaultActiveKey="normal"
