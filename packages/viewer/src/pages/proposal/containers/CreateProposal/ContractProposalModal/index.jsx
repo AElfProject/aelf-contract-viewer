@@ -6,6 +6,7 @@ const ContractProposalModal = ({ applyModal, contractModalCancle, }) => (
   <Modal
     closable={false}
     maskClosable={false}
+    width={650}
     footer={<Button type="primary" onClick={contractModalCancle}>OK</Button>}
     {...applyModal}
     onOk={contractModalCancle}
