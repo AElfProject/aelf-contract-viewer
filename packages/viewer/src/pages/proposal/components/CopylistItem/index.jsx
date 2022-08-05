@@ -3,12 +3,13 @@ import './index.less';
 import PropTypes from 'prop-types';
 import { Button, message } from 'antd';
 import copy from 'copy-to-clipboard';
+import { Link } from 'react-router-dom';
 import IconFont from '../../../../components/IconFont';
 import { omitString } from '../../../../common/utils';
 
 const CopylistItem = props => {
   const {
-    label, value = '', href
+    label, value = '', href, isParentHref = false
   } = props;
   const handleCopy = () => {
     try {
@@ -34,8 +35,26 @@ const CopylistItem = props => {
         </span>
         <span className="copy-list-value">
           {omitString(value, 10, 10)}
-          <Button type="link" icon={<IconFont type="shareLink" />} href={href} />
-
+          {
+            isParentHref ? (
+              <Button
+                type="circle"
+                onClick={() => {
+                  window.parent.location.replace(href);
+                }}
+              >
+                <IconFont type="shareLink" />
+              </Button>
+            ) : (
+              <Button type="circle">
+                <Link
+                  to={href}
+                >
+                  <IconFont type="shareLink" />
+                </Link>
+              </Button>
+            )
+          }
           <Button
             onClick={handleCopy}
             type="circle"
@@ -51,7 +70,9 @@ const CopylistItem = props => {
 CopylistItem.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  href: PropTypes.string.isRequired
+  href: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/require-default-props
+  isParentHref: PropTypes.bool
 };
 
 export default CopylistItem;

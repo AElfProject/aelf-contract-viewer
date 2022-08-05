@@ -1,4 +1,5 @@
 import {
+  getCsrfToken,
   getSignParams,
   getTxResult,
 } from '../../common/utils';
@@ -9,10 +10,6 @@ import {
 
 import { deserializeLog } from '../../../../common/utils';
 
-
-export function getCsrfToken() {
-  return document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-}
 
 export async function updateContractName(wallet, currentWallet, params) {
   const signedParams = await getSignParams(wallet, currentWallet);

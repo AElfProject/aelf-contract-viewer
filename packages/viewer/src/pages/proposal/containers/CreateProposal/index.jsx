@@ -169,6 +169,7 @@ const CreateProposal = () => {
               ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
             <CopylistItem
               label="Transaction ID："
+              isParentHref
               value={result?.TransactionId || result?.result?.TransactionId || ''}
               href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
             />
