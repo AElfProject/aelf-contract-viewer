@@ -27,6 +27,7 @@ import {
 import {
   getContract
 } from '../../../../../common/utils';
+import { PRIMARY_COLOR } from '../../../../../common/constants';
 
 const {
   viewer
@@ -124,7 +125,7 @@ const ContractDetail = props => {
           <span className="sub-title">Contract Method Name</span>
         </Col>
         <Col sm={20} xs={24}>
-          <Tag color="purple">{contractMethod}</Tag>
+          <Tag color={PRIMARY_COLOR}>{contractMethod}</Tag>
         </Col>
       </Row>
       <Divider />
