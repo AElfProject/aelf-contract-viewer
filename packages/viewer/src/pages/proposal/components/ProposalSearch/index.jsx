@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { Form, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { getProposalSelectList } from '../../actions/proposalSelectList';
+import { getProposalSelectListWrap } from '../../actions/proposalSelectList';
 
 const toBottomDistance = 30;
 
@@ -18,7 +18,7 @@ const ProposalSearch = ({ selectMehtod = 'ReleaseApprovedContract' }) => {
   const [param, setParam] = useState(proposalSelect.params);
   useEffect(() => {
     if (proposalSelect.isAll) return;
-    dispatch(getProposalSelectList(param)).then(() => {
+    getProposalSelectListWrap(dispatch, param).then(() => {
       isFetch = false;
     });
   }, [param]);

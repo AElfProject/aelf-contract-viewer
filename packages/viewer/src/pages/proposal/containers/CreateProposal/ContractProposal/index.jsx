@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
 import ProposalSearch from '../../../components/ProposalSearch';
-import { getProposalSelectList, GET_PROPOSAL_SELECT_LIST } from '../../../actions/proposalSelectList';
+import { destorySelectList, getProposalSelectListWrap } from '../../../actions/proposalSelectList';
 
 const FormItem = Form.Item;
 const InputNameReg = /^[.,a-zA-Z\d]+$/;
@@ -301,9 +301,9 @@ const ContractProposal = props => {
   ), []);
 
   useEffect(() => {
-    dispatch(getProposalSelectList({ ...proposalSelect.params, address: currentWallet?.address }));
+    getProposalSelectListWrap(dispatch, { ...proposalSelect.params, address: currentWallet?.address });
     return () => {
-      dispatch(GET_PROPOSAL_SELECT_LIST.DESTORY);
+      destorySelectList();
     };
   }, [currentWallet]);
 

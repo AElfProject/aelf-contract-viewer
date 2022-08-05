@@ -14,11 +14,8 @@ export const GET_PROPOSAL_SELECT_LIST = arrayToMap([
 ]);
 
 
-export const getProposalSelectList = params => async dispatch => {
+const dispatchSelectList = ({ params, result }) => dispatch => {
   try {
-    const result = await request(API_PATH.GET_PROPOSAL_LIST, params, {
-      method: 'GET'
-    });
     dispatch({
       type: GET_PROPOSAL_SELECT_LIST.SET_PROPOSALS_SELECT_LIST_START,
       payload: {
@@ -34,4 +31,16 @@ export const getProposalSelectList = params => async dispatch => {
       payload: {}
     });
   }
+};
+
+export const getProposalSelectListWrap = async (dispatch, params) => {
+  const result = await request(API_PATH.GET_PROPOSAL_LIST, params, {
+    method: 'GET'
+  });
+  dispatch(dispatchSelectList({ params, result }));
+  return true;
+};
+
+export const destorySelectList = () => dispatch => {
+  dispatch(GET_PROPOSAL_SELECT_LIST.DESTORY);
 };
