@@ -74,7 +74,7 @@ const ProposalSearch = ({ selectMehtod = 'ReleaseApprovedContract' }) => {
           if (selectMehtod === 'ReleaseApprovedContract') {
             return contractMethod === 'ProposeContractCodeCheck';
           } if (selectMehtod === 'ReleaseCodeCheckedContract') {
-            return contractMethod === 'DeploySmartContract';
+            return contractMethod === 'DeploySmartContract' || contractMethod === 'UpdateSmartContract';
           }
           return true;
         }).map(item => (
