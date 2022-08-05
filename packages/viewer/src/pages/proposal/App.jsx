@@ -18,7 +18,7 @@ import {
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Tabs, Popover } from 'antd';
 import {
-  logIn,
+  // logIn,
   LOG_IN_ACTIONS
 } from './actions/common';
 import LogButton from './components/Log';
@@ -97,14 +97,18 @@ const App = () => {
   useEffect(() => {
     walletInstance.isExist.then(result => {
       setIsExist(result);
-      if (result === true) {
-        dispatch(logIn());
-      } else {
-        dispatch({
-          type: LOG_IN_ACTIONS.LOG_IN_FAILED,
-          payload: {}
-        });
-      }
+      dispatch({
+        type: LOG_IN_ACTIONS.LOG_IN_FAILED,
+        payload: {}
+      });
+      // if (result === true) {
+      //   dispatch(logIn());
+      // } else {
+      //   dispatch({
+      //     type: LOG_IN_ACTIONS.LOG_IN_FAILED,
+      //     payload: {}
+      //   });
+      // }
     }).catch(() => {
       setIsExist(false);
     });
