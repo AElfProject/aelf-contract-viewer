@@ -52,6 +52,7 @@ import ApproveTokenModal from '../../components/ApproveTokenModal';
 import {
   getBPCount, isPhoneCheck, sendHeight, validateURL
 } from '../../../../common/utils';
+import { PRIMARY_COLOR } from '../../../../common/constants';
 
 const {
   viewer
@@ -271,9 +272,9 @@ const ProposalDetail = () => {
                 ? <Title level={4}>Proposal ID: {proposalId}</Title>
                 : <Title level={3} ellipsis>Proposal ID: {proposalId}</Title>}
               <div className="proposal-detail-tag gap-bottom">
-                <Tag color="purple" className="gap-right">{proposalType}</Tag>
+                <Tag color={PRIMARY_COLOR} className="gap-right">{proposalType}</Tag>
                 {CONTRACT_TEXT_MAP[contractMethod]
-                  ? (<Tag color="purple">{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
+                  ? (<Tag color={PRIMARY_COLOR}>{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
               </div>
               <div className="proposal-detail-desc-list">
                 <Row gutter={48}>

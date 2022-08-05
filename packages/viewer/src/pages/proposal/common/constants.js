@@ -89,7 +89,7 @@ export const ACTIONS_COLOR_MAP = {
 export const STATUS_COLOR_MAP = {
   [proposalStatus.PENDING]: '#d34a64',
   [proposalStatus.APPROVED]: '#05ac90',
-  [proposalStatus.RELEASED]: '#5c28a9',
+  [proposalStatus.RELEASED]: '#266CD3',
   [proposalStatus.EXPIRED]: '#646464',
 };
 

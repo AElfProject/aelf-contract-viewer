@@ -23,6 +23,7 @@ import constants, {
 } from '../../../common/constants';
 import './index.less';
 import { isPhoneCheck } from '../../../../../common/utils';
+import { PRIMARY_COLOR } from '../../../../../common/constants';
 
 const {
   viewer
@@ -252,7 +253,7 @@ const Organization = props => {
               {orgAddress}
             </div>
             {canEdit
-              ? (<EditOutlined color="purple" onClick={handleEdit} />) : null}
+              ? (<EditOutlined color={PRIMARY_COLOR} onClick={handleEdit} />) : null}
           </div>
           <Divider />
           <div className="organization-list-item-info">
@@ -391,7 +392,7 @@ const Organization = props => {
             {orgAddress}
           </div>
           {canEdit
-            ? (<EditOutlined color="purple" onClick={handleEdit} />) : null}
+            ? (<EditOutlined color={PRIMARY_COLOR} onClick={handleEdit} />) : null}
         </div>
         <Divider />
         <div className="organization-list-item-info">

@@ -26,6 +26,7 @@ import constants, {
 import './index.less';
 import VoteChart from '../../../components/VoteChart';
 import { getBPCount } from '../../../../../common/utils';
+import { PRIMARY_COLOR } from '../../../../../common/constants';
 
 const {
   proposalTypes,
@@ -130,7 +131,7 @@ const Proposal = props => {
               {proposalId}
             </Link>
             {CONTRACT_TEXT_MAP[contractMethod]
-              ? (<Tag color="purple">{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
+              ? (<Tag color={PRIMARY_COLOR}>{CONTRACT_TEXT_MAP[contractMethod]}</Tag>) : null}
           </div>
           <div className="proposal-list-item-id-status">
             <Tag color={STATUS_COLOR_MAP[status]}>
