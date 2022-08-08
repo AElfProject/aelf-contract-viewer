@@ -82,7 +82,7 @@ export const useReleaseApprovedContractAction = () => {
           />
         </>)
     };
-  }, [proposalSelect]);
+  }, [proposalSelect, contractSend]);
 };
 
 export const useReleaseCodeCheckedContractAction = () => {
@@ -151,5 +151,5 @@ export const useReleaseCodeCheckedContractAction = () => {
           }
         </>)
     };
-  }, [proposalSelect]);
+  }, [proposalSelect, contractSend]);
 };
