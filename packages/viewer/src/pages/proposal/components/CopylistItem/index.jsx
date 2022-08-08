@@ -36,25 +36,32 @@ const CopylistItem = props => {
         <span className="copy-list-value">
           {omitString(value, 10, 10)}
           {
-            isParentHref ? (
-              <Button
-                type="circle"
-                onClick={() => {
-                  window.parent.location.replace(href);
-                }}
-              >
-                <IconFont type="shareLink" />
-              </Button>
-            ) : (
-              <Button type="circle">
-                <Link
-                  to={href}
+            href ? (
+              <>
+                {
+              isParentHref ? (
+                <Button
+                  type="circle"
+                  onClick={() => {
+                    window.parent.location.replace(href);
+                  }}
                 >
                   <IconFont type="shareLink" />
-                </Link>
-              </Button>
-            )
+                </Button>
+              ) : (
+                <Button type="circle">
+                  <Link
+                    to={href}
+                  >
+                    <IconFont type="shareLink" />
+                  </Link>
+                </Button>
+              )
+            }
+              </>
+            ) : null
           }
+
           <Button
             onClick={handleCopy}
             type="circle"

@@ -164,7 +164,7 @@ const CreateProposal = () => {
                 <CopylistItem
                   label="Proposal ID："
                   value={proposalId}
-                  href={`/proposalsDetail/${proposalId}`}
+                  // href={`/proposalsDetail/${proposalId}`}
                 />
               ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
             <CopylistItem
@@ -196,7 +196,7 @@ const CreateProposal = () => {
     const { isOnlyUpdateName } = results;
     Modal.confirm({
       title: isOnlyUpdateName ? 'Are you sure you want to update this contract name?'
-        : 'Are you sure create this new proposal?',
+        : 'Are you sure you want to submit this application?',
       onOk: () => submitContract(results),
       onCancel: () => { setContractResult(v => ({ ...v, confirming: false })); handleCancel(); }
     });
