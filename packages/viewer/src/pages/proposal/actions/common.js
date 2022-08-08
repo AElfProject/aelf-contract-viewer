@@ -66,6 +66,7 @@ export const logIn = () => async dispatch => {
       }
     });
   } catch (e) {
+    localStorage.removeItem('currentWallet');
     message.warn((e.errorMessage || {}).message || 'night ELF is locked!');
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_FAILED,
