@@ -91,8 +91,8 @@ const CreateProposal = () => {
     setApplyModal(modalContent);
   }, [proposalSelect]);
 
-  const ReleaseCodeCheckedContractAction = useCallback(async contract => {
-    const modalContent = await releaseCodeCheckedContractHandler(contract);
+  const ReleaseCodeCheckedContractAction = useCallback(async (contract, isDeploy) => {
+    const modalContent = await releaseCodeCheckedContractHandler(contract, isDeploy);
 
     setApplyModal(modalContent);
   }, [proposalSelect]);
@@ -124,7 +124,7 @@ const CreateProposal = () => {
           await ReleaseApprovedContractAction(contract);
           return;
         case contractMethodType.ReleaseCodeCheckedContract:
-          await ReleaseCodeCheckedContractAction(contract);
+          await ReleaseCodeCheckedContractAction(contract, action === 'ProposeNewContract');
           return;
         default:
           break;
