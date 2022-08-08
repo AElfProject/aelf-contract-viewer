@@ -120,18 +120,33 @@ export const useReleaseCodeCheckedContractAction = () => {
     } else {
       isError = true;
     }
+    let contractAddress = '';
+    if (!isError) {
+      const logs = await getDeserializeLog(
+        aelf,
+        result?.TransactionId || result?.result?.TransactionId || '',
+        'ContractDeployed'
+      );
+      const { address } = logs ?? {};
+      contractAddress = address;
+    }
 
     return {
       visible: true,
-      title: !isError ? 'Proposal is created！' : 'Proposal failed to be created！',
+      title: !isError && contractAddress ? 'Contract is deployed！' : 'Contract failed to be created！',
       children: (
         <>
-          <CopylistItem
-            label="Transaction ID："
-            isParentHref
-            value={(result?.TransactionId || result?.result?.TransactionId || '')}
-            href={`/tx/${result?.TransactionId || result?.result?.TransactionId || ''}`}
-          />
+          {
+            !isError && contractAddress
+              ? (
+                <CopylistItem
+                  label="Contract Address："
+                  value={contractAddress}
+                  href={`/contract/${contractAddress || ''}`}
+                />
+              )
+              : 'Please check your Proposal .'
+          }
         </>)
     };
   }, [proposalSelect]);
