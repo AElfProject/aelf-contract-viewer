@@ -2,7 +2,7 @@
  * @file App container
  * @author atom-yang
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   useHistory,
   Switch,
@@ -18,7 +18,7 @@ import {
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Tabs, Popover } from 'antd';
 import {
-  // logIn,
+  logIn,
   LOG_IN_ACTIONS
 } from './actions/common';
 import LogButton from './components/Log';
@@ -27,17 +27,13 @@ import {
 } from './common/constants';
 import walletInstance from './common/wallet';
 import Plugin from '../../components/plugin';
-import ProposalList from './containers/ProposalList';
-import OrganizationList from './containers/OrganizationList';
-import CreateProposal from './containers/CreateProposal';
-import CreateOrganization from './containers/CreateOrganization';
-import ProposalDetail from './containers/ProposalDetail';
-import MyProposal from './containers/MyProposal';
 import Rules from './components/Rules';
 import {
   isPhoneCheck,
   sendMessage
 } from '../../common/utils';
+
+import routeList from './route';
 
 const { TabPane } = Tabs;
 
@@ -60,21 +56,8 @@ const ROUTES_UNDER_TABS = {
 
 function useRouteMatch(path) {
   const pathKey = path.split('/')[1];
-  let result = 'proposals';
-  try {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const key of Object.keys(ROUTES_UNDER_TABS)) {
-      const l = ROUTES_UNDER_TABS[key].filter(v => v === pathKey);
-      if (l.length > 0) {
-        // eslint-disable-next-line prefer-destructuring
-        result = l[0];
-        break;
-      }
-    }
-    return result;
-  } catch (e) {
-    return 'proposals';
-  }
+  const [result] = Object.values(ROUTES_UNDER_TABS).find(tab => tab.find(item => item === pathKey)) || ['proposals'];
+  return result;
 }
 
 const App = () => {
@@ -83,32 +66,32 @@ const App = () => {
   const logStatus = useSelector(state => state.common.logStatus);
   const [isExist, setIsExist] = useState(true);
   const location = useLocation();
-  const {
-    pathname
-  } = location;
+  const { pathname } = location;
   const tabKey = useRouteMatch(pathname);
-  const fullPath = useUseLocation();
+  const { href } = useUseLocation();
+
+  const isLogged = useMemo(() => logStatus === LOG_STATUS.LOGGED, [logStatus]);
+
   useEffect(() => {
     sendMessage({
-      href: fullPath.href
+      href,
     });
-  }, [fullPath.href]);
+  }, [href]);
 
   useEffect(() => {
     walletInstance.isExist.then(result => {
       setIsExist(result);
-      dispatch({
-        type: LOG_IN_ACTIONS.LOG_IN_FAILED,
-        payload: {}
-      });
-      // if (result === true) {
-      //   dispatch(logIn());
-      // } else {
-      //   dispatch({
-      //     type: LOG_IN_ACTIONS.LOG_IN_FAILED,
-      //     payload: {}
-      //   });
-      // }
+      const wallet = localStorage.getItem('currentWallet');
+      if (result === true && wallet) {
+        if (wallet) {
+          dispatch(logIn());
+        }
+      } else {
+        dispatch({
+          type: LOG_IN_ACTIONS.LOG_IN_FAILED,
+          payload: {}
+        });
+      }
     }).catch(() => {
       setIsExist(false);
     });
@@ -118,22 +101,19 @@ const App = () => {
   };
   return (
     <div className="proposal">
-      {
-        isExist ? null : <Plugin />
-      }
+      {isExist ? null : <Plugin />}
       <Tabs
         defaultActiveKey={tabKey}
         activeKey={tabKey}
         onChange={handleTabChange}
         tabBarExtraContent={(
           <>
-            <Popover
-              content={<Rules />}
-              placement="bottom"
-            >
+            <Popover content={<Rules />} placement="bottom">
               <span className="gap-right-small">
                 <ExclamationCircleOutlined
-                  className={isPhoneCheck() ? 'main-color' : 'gap-right-small main-color'}
+                  className={
+                    isPhoneCheck() ? 'main-color' : 'gap-right-small main-color'
+                  }
                 />
                 {isPhoneCheck() ? ' Rule' : 'Proposal Rules'}
               </span>
@@ -143,48 +123,17 @@ const App = () => {
         )}
       >
         <TabPane tab="Proposals" key="proposals" />
-        {logStatus === LOG_STATUS.LOGGED
-          ? <TabPane tab="Apply" key="apply" /> : null}
+        {isLogged && <TabPane tab="Apply" key="apply" />}
         <TabPane tab="Organizations" key="organizations" />
-        {logStatus === LOG_STATUS.LOGGED
-          ? <TabPane tab="My Proposals" key="myProposals" />
-          : null}
+        {isLogged && <TabPane tab="My Proposals" key="myProposals" />}
       </Tabs>
       <div className="proposal-container">
         <Switch>
-          <Route path="/proposalsDetail/:proposalId">
-            <ProposalDetail />
-          </Route>
-          <Route path="/proposals">
-            <ProposalList />
-          </Route>
-          <Route path="/organizations">
-            <OrganizationList />
-          </Route>
-          <Route path="/apply/:orgAddress">
-            {
-              logStatus === LOG_STATUS.LOGGED
-                ? <CreateProposal /> : <Redirect to="/proposals" />
-            }
-          </Route>
-          <Route path="/apply">
-            {
-              logStatus === LOG_STATUS.LOGGED
-                ? <CreateProposal /> : <Redirect to="/proposals" />
-            }
-          </Route>
-          <Route path="/myProposals">
-            {
-              logStatus === LOG_STATUS.LOGGED
-                ? <MyProposal /> : <Redirect to="/proposals" />
-            }
-          </Route>
-          <Route path="/createOrganizations">
-            {
-              logStatus === LOG_STATUS.LOGGED
-                ? <CreateOrganization /> : <Redirect to="/organizations" />
-            }
-          </Route>
+          {routeList.map(item => (
+            <Route key={item.path} path={item.path}>
+              {item.component(isLogged)}
+            </Route>
+          ))}
           <Redirect to="/proposals" />
         </Switch>
       </div>
