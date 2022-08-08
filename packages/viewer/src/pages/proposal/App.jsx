@@ -81,8 +81,13 @@ const App = () => {
   useEffect(() => {
     walletInstance.isExist.then(result => {
       setIsExist(result);
-      const wallet = localStorage.getItem('currentWallet');
-      if (result === true && wallet) {
+      const wallet = JSON.parse(localStorage.getItem('currentWallet'));
+      const timeDiff = wallet ? (new Date()).valueOf() - Number(wallet.timestamp) : 15 * 60 * 1000;
+
+      if (timeDiff && timeDiff >= 15 * 60 * 1000) {
+        localStorage.removeItem('currentWallet');
+      }
+      if (result === true && timeDiff < 15 * 60 * 1000) {
         if (wallet) {
           dispatch(logIn());
         }
