@@ -63,7 +63,7 @@ export const useReleaseApprovedContractAction = () => {
     const { proposalId: newProposalId } = Log ?? '';
     return {
       visible: true,
-      title: !isError ? 'Proposal is created！' : 'Proposal failed to be created！',
+      title: !isError && newProposalId ? 'Proposal is created！' : 'Proposal failed to be created！',
       children: (
         <>
           {!isError && newProposalId
