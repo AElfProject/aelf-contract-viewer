@@ -81,8 +81,8 @@ const App = () => {
   useEffect(() => {
     walletInstance.isExist.then(result => {
       setIsExist(result);
-      if (result === true) {
-        const wallet = localStorage.getItem('currentWallet');
+      const wallet = localStorage.getItem('currentWallet');
+      if (result === true && wallet) {
         if (wallet) {
           dispatch(logIn());
         }
