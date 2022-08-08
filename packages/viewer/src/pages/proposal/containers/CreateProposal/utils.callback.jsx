@@ -92,7 +92,7 @@ export const useReleaseCodeCheckedContractAction = () => {
   const {
     aelf,
   } = common;
-  return useCallback(async contract => {
+  return useCallback(async (contract, isDeploy) => {
     const { contractMethod, proposalId } = contract;
     const proposalItem = proposalSelect.list.find(item => item.proposalId === proposalId);
     if (!proposalItem) throw new Error('Please check if the proposalId is valid');
@@ -125,7 +125,7 @@ export const useReleaseCodeCheckedContractAction = () => {
       const logs = await getDeserializeLog(
         aelf,
         result?.TransactionId || result?.result?.TransactionId || '',
-        'ContractDeployed'
+        isDeploy ? 'ContractDeployed' : 'CodeUpdated'
       );
       const { address } = logs ?? {};
       contractAddress = address;
@@ -133,7 +133,9 @@ export const useReleaseCodeCheckedContractAction = () => {
 
     return {
       visible: true,
-      title: !isError && contractAddress ? 'Contract is deployed！' : 'Contract failed to be created！',
+      title:
+      !isError && contractAddress
+        ? 'Contract is deployed！' : `Contract failed to be ${isDeploy ? 'created' : 'updated'}！`,
       children: (
         <>
           {
