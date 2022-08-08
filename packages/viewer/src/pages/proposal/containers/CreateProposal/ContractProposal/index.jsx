@@ -44,6 +44,7 @@ export const contractMethodType = {
 
 const contractMethodList = [{
   methodTitle: 'Propose New Contract',
+  methodUpdatedTitle: 'Propose Updated Contract',
   methodType: contractMethodType.ProposeNewContract
 },
 {
@@ -400,7 +401,9 @@ const ContractProposal = props => {
                         key={v.methodType}
                         value={v.methodType}
                       >
-                        {v.methodTitle}
+                        {
+                          isUpdate ? v?.methodUpdatedTitle || v.methodTitle : v.methodTitle
+                        }
                       </Select.Option>
                     ))
                   }
