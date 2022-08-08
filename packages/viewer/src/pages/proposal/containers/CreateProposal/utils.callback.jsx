@@ -71,7 +71,7 @@ export const useReleaseApprovedContractAction = () => {
               <CopylistItem
                 label="Proposal ID："
                 value={newProposalId ?? ''}
-                href={`/proposalsDetail/${newProposalId}`}
+                // href={`/proposalsDetail/${newProposalId}`}
               />
             ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
           <CopylistItem

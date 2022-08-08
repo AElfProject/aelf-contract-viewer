@@ -164,7 +164,7 @@ const CreateProposal = () => {
                 <CopylistItem
                   label="Proposal ID："
                   value={proposalId}
-                  href={`/proposalsDetail/${proposalId}`}
+                  // href={`/proposalsDetail/${proposalId}`}
                 />
               ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
             <CopylistItem
