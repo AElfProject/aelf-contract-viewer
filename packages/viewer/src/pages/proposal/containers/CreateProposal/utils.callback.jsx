@@ -135,7 +135,8 @@ export const useReleaseCodeCheckedContractAction = () => {
       visible: true,
       title:
       !isError && contractAddress
-        ? 'Contract is deployed！' : `Contract failed to be ${isDeploy ? 'created' : 'updated'}！`,
+        ? `Contract is ${isDeploy ? 'deployed' : 'updated'}！`
+        : `Contract failed to be ${isDeploy ? 'deployed' : 'updated'}！`,
       children: (
         <>
           {
