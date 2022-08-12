@@ -58,3 +58,11 @@ export async function getDeserializeLog(aelf, txId, logName) {
     return result;
   }
 }
+
+export function getContractURL(address) {
+  // eslint-disable-next-line max-len
+  const innerURL = `${window.location.protocol}//${window.location.host}/viewer/address.html#/contract/${address}`;
+  return `${window.location.protocol}//${
+    window.location.host
+  }/contract?#${encodeURIComponent(innerURL)}`;
+}
