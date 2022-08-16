@@ -43,7 +43,7 @@ export async function addContractName(wallet, currentWallet, params) {
 
 
 export async function getDeserializeLog(aelf, txId, logName) {
-  if (!txId) throw new Error('get not get txId');
+  if (!txId) throw new Error('Transaction failed. Please reinitiate this step.');
   const txResult = await getTxResult(aelf, txId ?? '');
   if (txResult.Status === 'MINED') {
     const {

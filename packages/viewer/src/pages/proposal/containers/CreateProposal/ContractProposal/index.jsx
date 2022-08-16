@@ -31,10 +31,10 @@ const UpdateType = {
   updateFile: 'updateFile'
 };
 // eslint-disable-next-line max-len
-const step1 = 'Step 1 - ProposeNewContract: Apply to deploy a new contract(pending pproval from the parliament to enter the next stage);';
+const step1 = '1 - ProposeNewContract: Apply to deploy a new contract (proceeds to the next stage after receiving approval from the parliament);';
 // eslint-disable-next-line max-len
-const step2 = 'Step 2 - ReleaseApprovalContract: Apply for code check after the contract deployment proposal is approved (the parliament will agree upon the proposal once BPs have completed code check);';
-const step3 = 'Step 3 - ReleaseCodeCheckedContract: Contract deployment will be executed once the code check passes.';
+const step2 = '2 - ReleaseApprovalContract: Apply for code check after the contract deployment proposal is approved (the parliament will agree upon the proposal once BPs have completed code check);';
+const step3 = '3 - ReleaseCodeCheckedContract: Contract deployment will be executed once it passes the code check.';
 
 export const contractMethodType = {
   ProposeNewContract: 'ProposeNewContract',
@@ -294,7 +294,7 @@ const ContractProposal = props => {
 
   const methosTip = useMemo(() => (
     <>
-      <p>Contract Deployment Method:</p>
+      <p>Contract deployment follows 3-step directions:</p>
       <p>{step1}</p>
       <p>{step2}</p>
       <p>{step3}</p>

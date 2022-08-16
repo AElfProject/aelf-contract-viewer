@@ -73,7 +73,7 @@ export const useReleaseApprovedContractAction = () => {
                 value={newProposalId ?? ''}
                 // href={`/proposalsDetail/${newProposalId}`}
               />
-            ) : 'This may be due to the failure in transaction which can be viewed via Transaction ID:'}
+            ) : 'This may be due to transaction failure. Please check it via Transaction ID:'}
           <CopylistItem
             label="Transaction ID："
             isParentHref
