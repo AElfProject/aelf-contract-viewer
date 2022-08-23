@@ -2,7 +2,9 @@
  * @file contract proposal
  * @author atom-yang
  */
-import React, { useState, useEffect } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo
+} from 'react';
 import PropTypes from 'prop-types';
 import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import {
@@ -15,10 +17,44 @@ import {
   Tooltip,
   Form
 } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import { request } from '../../../../../common/request';
 import { API_PATH } from '../../../common/constants';
+import ProposalSearch from '../../../components/ProposalSearch';
+import { destorySelectList, getProposalSelectListWrap } from '../../../actions/proposalSelectList';
 
 const FormItem = Form.Item;
+const InputNameReg = /^[.,a-zA-Z\d]+$/;
+
+const UpdateType = {
+  updateContractName: 'updateContractName',
+  updateFile: 'updateFile'
+};
+// eslint-disable-next-line max-len
+const step1 = '1 - ProposeNewContract: Apply to deploy a new contract (proceeds to the next stage after receiving approval from the parliament);';
+// eslint-disable-next-line max-len
+const step2 = '2 - ReleaseApprovalContract: Apply for code check after the contract deployment proposal is approved (the parliament will agree upon the proposal once BPs have completed code check);';
+const step3 = '3 - ReleaseCodeCheckedContract: Contract deployment will be executed once it passes the code check.';
+
+export const contractMethodType = {
+  ProposeNewContract: 'ProposeNewContract',
+  ReleaseApprovedContract: 'ReleaseApprovedContract',
+  ReleaseCodeCheckedContract: 'ReleaseCodeCheckedContract'
+};
+
+const contractMethodList = [{
+  methodTitle: 'Propose New Contract',
+  methodUpdatedTitle: 'Propose Updated Contract',
+  methodType: contractMethodType.ProposeNewContract
+},
+{
+  methodTitle: 'Release Approved Contract',
+  methodType: contractMethodType.ReleaseApprovedContract
+},
+{
+  methodTitle: 'Release Code Checked Contract',
+  methodType: contractMethodType.ReleaseCodeCheckedContract
+}];
 
 const formItemLayout = {
   labelCol: {
@@ -26,6 +62,12 @@ const formItemLayout = {
   },
   wrapperCol: {
     sm: { span: 8 },
+  },
+};
+
+const radioButtonLayout = {
+  wrapperCol: {
+    sm: { span: 14, offset: 4 },
   },
 };
 
@@ -38,16 +80,28 @@ const tailFormItemLayout = {
   }
 };
 
-async function checkContractName(rule, value, isUpdate, currentContractInfo) {
+async function checkContractName(rule, value, isUpdate, currentContractInfo, isUpdateName) {
   if (!value) {
+    if (isUpdateName && isUpdate) throw new Error('Please enter the contract name！');
     return;
   }
   if (+value === -1) {
     throw new Error('-1 is not valid');
   }
   if (isUpdate && value === currentContractInfo.contractName) {
-    return;
+    if (isUpdateName) {
+      throw new Error('The name already exists！');
+    } else {
+      return;
+    }
   }
+  if (!InputNameReg.test(value)) {
+    throw new Error('Please enter alphanumeric characters only！');
+  }
+  if (value.length > 150) {
+    throw new Error('The maximum input character is 150');
+  }
+
   const result = await request(API_PATH.CHECK_CONTRACT_NAME, {
     contractName: value
   }, { method: 'GET' });
@@ -58,7 +112,7 @@ async function checkContractName(rule, value, isUpdate, currentContractInfo) {
     // eslint-disable-next-line consistent-return
     return true;
   }
-  throw new Error(`Contract name '${value}' is already exist`);
+  throw new Error('The name already exists！');
 }
 
 async function validateFile(rule, value) {
@@ -99,9 +153,16 @@ const ContractProposal = props => {
     submit
   } = props;
   const [form] = Form.useForm();
+  const proposalSelect = useSelector(state => state.proposalSelect);
+  const common = useSelector(state => state.common);
+  const {
+    currentWallet
+  } = common;
+  const dispatch = useDispatch();
   const {
     validateFields,
-    setFieldsValue
+    setFieldsValue,
+    getFieldValue
   } = form;
   const [fileLength, setFileLength] = useState(0);
   const [currentContractInfo, setCurrentContractInfo] = useState({
@@ -110,6 +171,10 @@ const ContractProposal = props => {
     contractName: -1
   });
   const [contractList, setContractList] = useState([]);
+  const [checkName, setCheckName] = useState(undefined);
+  const [contractMethod, setContractMethod] = useState(contractMethodType.ProposeNewContract);
+  const [update, setUpdate] = useState();
+
   useEffect(() => {
     request(API_PATH.GET_ALL_CONTRACTS, {
       search: ''
@@ -120,12 +185,18 @@ const ContractProposal = props => {
       .catch(e => {
         message.error(e.message || 'Network Error');
       });
-  }, []);
+  }, [update]);
   const [isUpdate, setIsUpdate] = useState(false);
-  function handleAction() {
+  const [isUpdateName, setUpdateName] = useState(false);
+
+  const setContractName = useCallback(name => {
     setFieldsValue({
-      name: ''
+      name
     });
+    setCheckName(undefined);
+  }, []);
+  function handleAction() {
+    setContractName('');
     setIsUpdate(!isUpdate);
   }
   const contractFilter = input => contractList
@@ -139,40 +210,103 @@ const ContractProposal = props => {
   function handleUpload(e) {
     setFileLength(e.fileList.length);
   }
+
+  const checkContractNameHandler = useCallback(async name => {
+    setCheckName({
+      validateStatus: 'validating',
+      errorMsg: undefined, // Inquiring...
+    });
+    try {
+      await checkContractName('', name, isUpdate, currentContractInfo, isUpdateName);
+      setCheckName({
+        validateStatus: 'success',
+        errorMsg: undefined, // Inquiring...
+      });
+    } catch (e) {
+      setCheckName({
+        validateStatus: 'error',
+        errorMsg: e.message,
+      });
+      throw e;
+    }
+  }, [isUpdate, currentContractInfo, isUpdateName]);
+
+  async function customValidateFields() {
+    const [result] = await Promise.all([
+      validateFields(),
+      checkContractNameHandler(getFieldValue('name'))
+    ]);
+    return result;
+  }
+
   async function handleSubmit() {
     try {
-      const result = await validateFields();
+      const result = await customValidateFields();
       const {
         action,
-        address = ''
+        address = '',
+        // eslint-disable-next-line no-shadow
+        contractMethod = '',
+        proposalId
       } = result;
-      const file = await readFile(result.file[0].originFileObj);
+      let file;
+      if (result.file) {
+        file = await readFile(result.file[0].originFileObj);
+      }
       let name = result.name || '';
       if (isUpdate
         && (currentContractInfo.contractName === name)
       ) {
         name = '';
       }
+      console.log(result);
       const submitObj = {
         file,
         action,
         address,
-        name
+        name,
+        proposalId,
+        isOnlyUpdateName: isUpdate && isUpdateName,
+        contractMethod,
+        onSuccess: () => setUpdate(Date.now())
       };
       submit(submitObj);
     } catch (e) {
       console.error(e);
-      message.error(e.message || 'Please input the required form!');
+      message.error(e.message || e?.errorFields?.at?.(-1)?.errors?.[0] || 'Please input the required form!');
     }
   }
 
   function handleContractChange(address) {
     const info = contractList.filter(v => v.address === address)[0];
     setCurrentContractInfo(info);
-    setFieldsValue({
-      name: +info.contractName === -1 ? '' : info.contractName
-    });
+    const name = +info.contractName === -1 ? '' : info.contractName;
+    setContractName(name);
   }
+
+  const updateTypeHandler = useCallback(e => {
+    setUpdateName(e.target.value === UpdateType.updateContractName);
+    setFieldsValue({
+      address: ''
+    });
+    setContractName('');
+  }, []);
+
+  const methosTip = useMemo(() => (
+    <>
+      <p>Contract deployment follows 3-step directions:</p>
+      <p>{step1}</p>
+      <p>{step2}</p>
+      <p>{step3}</p>
+    </>
+  ), []);
+
+  useEffect(() => {
+    getProposalSelectListWrap(dispatch, { ...proposalSelect.params, address: currentWallet?.address });
+    return () => {
+      destorySelectList();
+    };
+  }, [currentWallet]);
 
   return (
     <div className="contract-proposal">
@@ -181,7 +315,25 @@ const ContractProposal = props => {
         initialValues={{
           action: 'ProposeNewContract',
           address: '',
+          updateType: UpdateType.updateFile,
+          contractMethod: contractMethodType.ProposeNewContract,
           name: +currentContractInfo.contractName === -1 ? '' : currentContractInfo.contractName
+        }}
+        onValuesChange={change => {
+          if ('name' in change) setCheckName(undefined);
+          if ('contractMethod' in change) {
+            setContractMethod(change.contractMethod);
+            setFieldsValue({
+              address: '',
+              name: '',
+              proposalId: ''
+            });
+          }
+          // if ('proposalId' in change) proposalIdChange(change.proposalId);
+          if ('updateType' in change || 'action' in change) {
+            setFieldsValue({ contractMethod: contractMethodType.ProposeNewContract, proposalId: '' });
+            setContractMethod(contractMethodType.ProposeNewContract);
+          }
         }}
         {...formItemLayout}
       >
@@ -196,97 +348,175 @@ const ContractProposal = props => {
             <Radio value="ProposeUpdateContract">Update Contract</Radio>
           </Radio.Group>
         </FormItem>
+
         {
           isUpdate
             ? (
               <FormItem
-                label="Contract Address"
-                name="address"
+                label=""
+                name="updateType"
+                {...radioButtonLayout}
+              >
+                <Radio.Group
+                  onChange={updateTypeHandler}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button style={{ marginRight: '20px' }} value={UpdateType.updateFile}>
+                    Update Contract File
+                  </Radio.Button>
+                  <Radio.Button value={UpdateType.updateContractName}>Update The Contract Name Only</Radio.Button>
+                </Radio.Group>
+              </FormItem>
+            ) : null
+        }
+        {
+          !(isUpdate && isUpdateName) ? (
+            <>
+              <FormItem
+                label={(
+                  <span>
+                    Contract Method&nbsp;
+                    <Tooltip
+                      title={methosTip}
+                    >
+                      <QuestionCircleOutlined className="main-color" />
+                    </Tooltip>
+                  </span>
+                )}
+                name="contractMethod"
                 rules={[
                   {
                     required: true,
-                    message: 'Please select a contract address!'
+                    message: 'Please select a contract method!'
                   }
                 ]}
               >
                 <Select
-                  placeholder="Please select a contract address"
                   showSearch
                   optionFilterProp="children"
-                  filterOption={contractFilter}
-                  onChange={handleContractChange}
                 >
                   {
-                    contractList.map(v => (
+                    contractMethodList.map(v => (
                       <Select.Option
-                        key={v.address}
-                        value={v.address}
+                        key={v.methodType}
+                        value={v.methodType}
                       >
-                        {v.contractName || v.address}
+                        {
+                          isUpdate ? v?.methodUpdatedTitle || v.methodTitle : v.methodTitle
+                        }
                       </Select.Option>
                     ))
                   }
                 </Select>
               </FormItem>
-            ) : null
+            </>
+          ) : null
         }
-        <FormItem
-          label="Contract Name"
-          name="name"
-          validateTrigger="onBlur"
-          rules={
-            [
+        {
+          contractMethodType.ProposeNewContract === contractMethod ? (
+            <>
               {
-                required: false,
-                type: 'string',
-                validator: (rule, value) => checkContractName(rule, value, isUpdate, currentContractInfo)
+              isUpdate
+                ? (
+                  <FormItem
+                    label="Contract Address"
+                    name="address"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please select a contract address!'
+                      }
+                    ]}
+                  >
+                    <Select
+                      placeholder="Please select a contract address"
+                      showSearch
+                      optionFilterProp="children"
+                      filterOption={contractFilter}
+                      onChange={handleContractChange}
+                    >
+                      {
+                        contractList.map(v => (
+                          <Select.Option
+                            key={v.address}
+                            value={v.address}
+                          >
+                            {v.contractName || v.address}
+                          </Select.Option>
+                        ))
+                      }
+                    </Select>
+                  </FormItem>
+                ) : null
               }
-            ]
-          }
-        >
-          <Input
-            disabled={isUpdate && currentContractInfo.isSystemContract}
-          />
-        </FormItem>
-        <FormItem
-          label={(
-            <span>
-              Upload File&nbsp;
-              <Tooltip
-                title="When creating a 'Contract Deployment' proposal, you only need to upload the file,
-                more information can be viewed on the public proposal page after the application is successful"
-              >
-                <QuestionCircleOutlined className="main-color" />
-              </Tooltip>
-            </span>
-          )}
-          name="file"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-          rules={
-            [
               {
-                required: true,
-                message: 'Please upload the DLL file!'
-              },
-              {
-                validator: validateFile
+                !isUpdate || isUpdate && isUpdateName ? (
+                  <>
+                    <FormItem
+                      label="Contract Name"
+                      name="name"
+                      required={isUpdate && isUpdateName}
+                      validateStatus={checkName?.validateStatus}
+                      help={checkName?.errorMsg}
+                    >
+                      <Input
+                        disabled={isUpdate && currentContractInfo.isSystemContract}
+                        maxLength={150}
+                      />
+                    </FormItem>
+                  </>
+                ) : null
               }
-            ]
-          }
-        >
-          <Upload
-            accept=".dll"
-            beforeUpload={() => false}
-            onChange={handleUpload}
-            extra="Only support DLL file, less than 2MB"
-          >
-            <Button disabled={fileLength === 1}>
-              <UploadOutlined className="gap-right-small" />
-              Click to Upload
-            </Button>
-          </Upload>
-        </FormItem>
+              {
+                !(isUpdateName && isUpdate) ? (
+                  <>
+                    <FormItem
+                      label={(
+                        <span>
+                          Upload File&nbsp;
+                          <Tooltip
+                            // eslint-disable-next-line max-len
+                            title="When creating a 'Contract Deployment' proposal, you only need to upload the file, more information can be viewed on the public proposal page after the application is successful"
+                          >
+                            <QuestionCircleOutlined className="main-color" />
+                          </Tooltip>
+                        </span>
+                      )}
+                      name="file"
+                      valuePropName="fileList"
+                      getValueFromEvent={normFile}
+                      rules={
+                      [
+                        {
+                          required: true,
+                          message: 'Please upload the DLL or PATCHED file!'
+                        },
+                        {
+                          validator: validateFile
+                        }
+                      ]
+                      }
+                    >
+                      <Upload
+                        accept=".dll,.patched"
+                        beforeUpload={() => false}
+                        onChange={handleUpload}
+                        extra="Support DLL or PATCHED file, less than 2MB"
+                      >
+                        <Button disabled={fileLength === 1}>
+                          <UploadOutlined className="gap-right-small" />
+                          Click to Upload
+                        </Button>
+                      </Upload>
+                    </FormItem>
+                  </>
+                ) : null
+              }
+            </>
+          ) : (
+            <ProposalSearch selectMehtod={contractMethod} />
+          )
+        }
         <Form.Item {...tailFormItemLayout}>
           <Button
             shape="round"

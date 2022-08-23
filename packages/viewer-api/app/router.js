@@ -29,6 +29,7 @@ module.exports = app => {
 
   router.get('/api/proposal/checkContractName', controller.proposals.checkContractName);
   router.post('/api/proposal/addContractName', audit, controller.proposals.addContractName);
+  router.post('/api/proposal/updateContractName', audit, controller.proposals.updateContractName);
 
   router.get('/api/proposal/auditOrganizations', controller.organizations.getAuditList);
   router.get('/api/proposal/auditOrganizationsByPage', controller.organizations.getAuditListByPage);

@@ -10,7 +10,8 @@ import {
   Pagination,
   Table,
   Tag,
-  Input
+  Input,
+  Tooltip
 } from 'antd';
 import {
   Link
@@ -43,7 +44,9 @@ const ListColumn = [
         to={`/contract/${record.address}`}
         title={name}
       >
-        {removeAElfPrefix(name)}
+        <Tooltip title={name} placement="topLeft">
+          {removeAElfPrefix(name)}
+        </Tooltip>
       </Link>
     ) : '-')
   },

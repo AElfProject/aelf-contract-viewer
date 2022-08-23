@@ -405,3 +405,8 @@ export async function redirectPageToIframeMode() {
     _redirectPageToIframeMode();
   }
 }
+
+export const omitString = (input, start = 8, end = 8) => {
+  if (!input) return '';
+  return `${input.slice(0, start)}...${input.slice(-end)}`;
+};

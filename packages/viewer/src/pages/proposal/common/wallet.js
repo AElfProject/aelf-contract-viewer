@@ -17,6 +17,10 @@ export class Wallet {
     this.isExist = this.proxy.isExist;
   }
 
+  getExtensionInfo() {
+    return this.proxy.elfInstance.getExtensionInfo();
+  }
+
   login(...args) {
     return this.proxy.login(...args);
   }

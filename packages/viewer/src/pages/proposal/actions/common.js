@@ -57,6 +57,7 @@ export const logIn = () => async dispatch => {
       });
     }, 8000);
     const detail = await walletInstance.login();
+    localStorage.setItem('currentWallet', JSON.stringify({ ...detail, timestamp: new Date().valueOf() }));
     clearTimeout(timer);
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_SUCCESS,
@@ -65,6 +66,7 @@ export const logIn = () => async dispatch => {
       }
     });
   } catch (e) {
+    localStorage.removeItem('currentWallet');
     message.warn((e.errorMessage || {}).message || 'night ELF is locked!');
     dispatch({
       type: LOG_IN_ACTIONS.LOG_IN_FAILED,
