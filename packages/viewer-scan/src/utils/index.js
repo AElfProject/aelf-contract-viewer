@@ -194,9 +194,12 @@ async function proposalCreatedFormatter(transaction) {
       expiredTime,
       organizationAddress
     } = paramsParsed;
-    const {
-      code
-    } = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params);
+    let code = '[deserialize ERROR] params: ' + JSON.stringify(params);
+    try {
+      code = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params).code;
+    } catch(error) {
+      console.log('deserialize error', error, params, transaction);
+    }
     return {
       contractAddress: toAddress,
       contractMethod: contractMethodName,
