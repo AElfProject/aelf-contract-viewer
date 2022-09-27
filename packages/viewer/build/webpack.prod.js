@@ -43,7 +43,13 @@ const prodConfig = {
         cache: true,
         parallel: true,
         sourceMap: false,
-        terserOptions: {}
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log'],
+          },
+        }
       }),
       new OptimizeCSSAssetsPlugin({
         cssProcessorOptions: {
