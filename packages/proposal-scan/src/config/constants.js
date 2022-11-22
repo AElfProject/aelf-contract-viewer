@@ -15,7 +15,8 @@ const SCAN_TAGS = {
   PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
   TOKEN_BALANCE_CHANGED: 'TOKEN_BALANCE_CHANGED',
   TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED',
-  TOKEN_SUPPLY_CHANGED: 'TOKEN_SUPPLY_CHANGED'
+  TOKEN_SUPPLY_CHANGED: 'TOKEN_SUPPLY_CHANGED',
+  NFT_TOKEN_SUPPLY_CHANGED: 'NFT_TOKEN_SUPPLY_CHANGED'
 };
 
 const TOKEN_BALANCE_CHANGED_EVENT = [
@@ -215,6 +216,19 @@ const TOKEN_SUPPLY_CHANGED_EVENT = [
   },
 ];
 
+// https://tdvv-explorer.aelf.io/tx/027a06b9c174611d968e82ddb4eb925c8001d5933f1dd377864415ddf61fab9a
+const NFT_TOKEN_SUPPLY_CHANGED_EVENT = [
+  {
+    filterText: 'NFTMinted',
+    formatter(eventResult) {
+      const {
+        symbol
+      } = eventResult;
+      return symbol;
+    }
+  },
+];
+
 const listeners = [
   {
     checker(bloom) {
@@ -290,6 +304,17 @@ const listeners = [
   },
   {
     checker(bloom) {
+      return NFT_TOKEN_SUPPLY_CHANGED_EVENT.map(event => {
+        const {
+          filterText
+        } = event;
+        return AElf.utils.isEventInBloom(bloom, filterText);
+      }).filter(v => v === true).length > 0;
+    },
+    tag: SCAN_TAGS.NFT_TOKEN_SUPPLY_CHANGED
+  },
+  {
+    checker(bloom) {
       return TOKEN_BALANCE_CHANGED_EVENT.map(event => {
         const {
           filterText
@@ -318,5 +343,6 @@ module.exports = {
   listeners,
   TOKEN_BALANCE_CHANGED_EVENT,
   TOKEN_TRANSFERRED_EVENT,
-  TOKEN_SUPPLY_CHANGED_EVENT
+  TOKEN_SUPPLY_CHANGED_EVENT,
+  NFT_TOKEN_SUPPLY_CHANGED_EVENT,
 };

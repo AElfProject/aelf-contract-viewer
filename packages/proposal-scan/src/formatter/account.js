@@ -24,7 +24,8 @@ const {
 const {
   TOKEN_BALANCE_CHANGED_EVENT,
   TOKEN_TRANSFERRED_EVENT,
-  TOKEN_SUPPLY_CHANGED_EVENT
+  TOKEN_SUPPLY_CHANGED_EVENT,
+  NFT_TOKEN_SUPPLY_CHANGED_EVENT,
 } = require('../config/constants');
 const config = require('../config');
 
@@ -93,6 +94,38 @@ async function getTokenInfo(symbols, type, maxQuery = 3) {
   return results;
 }
 
+async function getNFTProtocolInfo(symbols, type, maxQuery = 3) {
+  let results = [];
+  for (let i = 0; i < symbols.length; i += maxQuery) {
+    results = [
+      ...results,
+      // eslint-disable-next-line no-await-in-loop,max-len
+      ...(await Promise.all(symbols.slice(i, i + maxQuery).map(async v => {
+        let result;
+        try {
+          if (type === QUERY_TYPE.LOOP || !TOKEN_INFO[v]) {
+            result = await config
+              .contracts
+              .nftToken
+              .contract
+              .GetNFTProtocolInfo.call({ value: v });
+            TOKEN_INFO[v] = result;
+          } else {
+            result = TOKEN_INFO[v];
+          }
+        } catch (e) {
+          result = {
+            symbol: v,
+            supply: 0
+          };
+        }
+        return result;
+      })))
+    ];
+  }
+  return results;
+}
+
 let TOKEN_DECIMALS = {};
 let FETCHING_TOKEN_LIST = false;
 
@@ -137,6 +170,16 @@ async function changeSupply(symbols, type) {
   tokenInfo = tokenInfo.filter(item => !!item);
   if (!tokenInfo.length) {
     console.log('changeSupply failed', tokenInfo, symbols);
+    return null;
+  }
+  return Promise.all(tokenInfo.map(v => Tokens.updateTokenSupply(v.symbol, v.supply)));
+}
+async function changeNftSupply(symbols, type) {
+  let tokenInfo = await getNFTProtocolInfo(symbols, type);
+  console.log('change NFT supply', JSON.stringify(tokenInfo));
+  tokenInfo = tokenInfo.filter(item => !!item);
+  if (!tokenInfo.length) {
+    console.log('change NFT supply failed', tokenInfo, symbols);
     return null;
   }
   return Promise.all(tokenInfo.map(v => Tokens.updateTokenSupply(v.symbol, v.supply)));
@@ -246,8 +289,15 @@ async function tokenSupplyChangedInsert(transaction, type) {
   await changeSupply(list, type);
 }
 
+async function nftTokenSupplyChangedInsert(transaction, type) {
+  let list = await deserializeTransferredLogs(transaction, NFT_TOKEN_SUPPLY_CHANGED_EVENT);
+  list = lodash.uniq(list.reduce((acc, v) => [...acc, ...v], []));
+  await changeNftSupply(list, type);
+}
+
 module.exports = {
   tokenBalanceChangedInsert,
   tokenSupplyChangedInsert,
+  nftTokenSupplyChangedInsert,
   transferredInsert
 };

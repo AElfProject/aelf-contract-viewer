@@ -6,6 +6,7 @@ const AElf = require('aelf-sdk');
 let config = require('../../../../config');
 
 function getContractAddress(contracts) {
+  console.log('getContractAddress start');
   const contractAddress = {};
   const wallet = AElf.wallet.getWalletByPrivateKey(config.wallet.privateKey);
   const aelf = new AElf(new AElf.providers.HttpProvider(config.scan.host));
@@ -34,9 +35,18 @@ function getContractAddress(contracts) {
   };
 
   Object.entries(contracts).forEach(([key, value]) => {
-    const address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
-      sync: true
-    });
+    console.log('init contract', key, value);
+    let address;
+    // We can not use GetContractAddressByName to get the address of nftToken
+    // We set the address of nftToken inf config.contracts
+    if (key === 'nftToken') {
+      address = value;
+    } else {
+      address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
+        sync: true
+      });
+    }
+
     const proto = AElf.pbjs.Root.fromDescriptor(aelf.chain.getContractFileDescriptorSet(address, {
       sync: true
     }));
@@ -62,6 +72,7 @@ function getContractAddress(contracts) {
   const sideChainController = contractAddress.crossChain.contract.GetSideChainLifetimeController.call({
     sync: true
   }) || {};
+  console.log('getContractAddress end ---');
   return {
     aelf,
     wallet,
