@@ -8,6 +8,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "npm run clean && cross-env NODE_ENV=development pm2 start src/index.js --name aelf-proposal-scan --time",
+    "devn": "npm run clean && cross-env NODE_ENV=development node src/index.js",
     "start": "cross-env NODE_ENV=production pm2 start src/index.js --name aelf-proposal-scan --exp-backoff-restart-delay=1000 --time",
     "stop": "pm2 stop aelf-proposal-scan",
     "clean": "rimraf ./*.log"
