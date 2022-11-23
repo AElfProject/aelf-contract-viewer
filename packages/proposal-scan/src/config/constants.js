@@ -14,6 +14,7 @@ const SCAN_TAGS = {
   ORGANIZATION_MEMBER_CHANGED: 'ORGANIZATION_MEMBER_CHANGED',
   PROPOSAL_CLAIMED: 'PROPOSAL_CLAIMED',
   TOKEN_BALANCE_CHANGED: 'TOKEN_BALANCE_CHANGED',
+  NFT_TOKEN_BALANCE_CHANGED: 'NFT_TOKEN_BALANCE_CHANGED',
   TOKEN_TRANSFERRED: 'TOKEN_TRANSFERRED',
   TOKEN_SUPPLY_CHANGED: 'TOKEN_SUPPLY_CHANGED',
   NFT_TOKEN_SUPPLY_CHANGED: 'NFT_TOKEN_SUPPLY_CHANGED'
@@ -102,6 +103,55 @@ const TOKEN_BALANCE_CHANGED_EVENT = [
           owner: from,
           symbol,
           action: 'CrossChainTransferred'
+        }
+      ];
+    }
+  }
+];
+
+const NFT_TOKEN_BALANCE_CHANGED_EVENT = [
+  // ...TOKEN_BALANCE_CHANGED_EVENT,
+  // NFT Token is different from multiToken.
+  // When mint/transfer/get Balance, we need tokenId.
+  {
+    filterText: 'Transferred',
+    formatter(eventResult) {
+      const {
+        from,
+        to,
+        symbol,
+        tokenId
+      } = eventResult;
+      return [
+        {
+          owner: from,
+          symbol,
+          tokenId,
+          action: 'Transferred'
+        },
+        {
+          owner: to,
+          symbol,
+          tokenId,
+          action: 'Transferred'
+        }
+      ];
+    }
+  },
+  {
+    filterText: 'NFTMinted',
+    formatter(eventResult) {
+      const {
+        owner,
+        symbol,
+        tokenId,
+      } = eventResult;
+      return [
+        {
+          owner,
+          symbol,
+          tokenId,
+          action: 'NFTMinted'
         }
       ];
     }
@@ -323,6 +373,17 @@ const listeners = [
       }).filter(v => v === true).length > 0;
     },
     tag: SCAN_TAGS.TOKEN_TRANSFERRED
+  },
+  {
+    checker(bloom) {
+      return NFT_TOKEN_BALANCE_CHANGED_EVENT.map(event => {
+        const {
+          filterText
+        } = event;
+        return AElf.utils.isEventInBloom(bloom, filterText);
+      }).filter(v => v === true).length > 0;
+    },
+    tag: SCAN_TAGS.NFT_TOKEN_BALANCE_CHANGED
   }
 ];
 
@@ -344,5 +405,6 @@ module.exports = {
   TOKEN_BALANCE_CHANGED_EVENT,
   TOKEN_TRANSFERRED_EVENT,
   TOKEN_SUPPLY_CHANGED_EVENT,
+  NFT_TOKEN_BALANCE_CHANGED_EVENT,
   NFT_TOKEN_SUPPLY_CHANGED_EVENT,
 };
