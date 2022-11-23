@@ -73,7 +73,8 @@ async function getBalances(paramsArr, maxQuery = 3) {
 //     tokenId: '6'
 //   }
 // ]
-async function getNFTBalances(paramsArr, maxQuery = 3) {
+async function getNFTBalances(paramsArrInput, maxQuery = 3) {
+  const paramsArr = paramsArrInput.filter(item => !!item.tokenId && item.tokenId !== 'undefined');
   console.log('addOrCreate tokenId');
   // Record the tokenId of the owner at first.
   for (let i = 0; i < paramsArr.length; i += maxQuery) {
