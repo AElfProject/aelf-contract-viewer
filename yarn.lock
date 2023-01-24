@@ -3083,10 +3083,10 @@ aelf-sdk@^3.2.29:
     scryptsy "^2.1.0"
     xmlhttprequest "^1.8.0"
 
-aelf-sdk@^3.2.32:
-  version "3.2.32"
-  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.32.tgz#d577707821fa8510ded5ae65147aecec10956d93"
-  integrity sha512-FrQTKCxWkNdzy7Rc6JFFKyjuI8nI+VFBkKNmh36wfC3ccidVUhsvPoUndyg2ngdPrHqO7SFj8QNkrjUPYfbR0g==
+aelf-sdk@^3.2.40:
+  version "3.2.42"
+  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.42.tgz#610e0b006c47c25af9567ff5e004cd6cd4565a80"
+  integrity sha512-zyFgDGNfSsvmxIgVR3jbdgjFvutfghraLlsv7teOEybohERS+mvzy3uPcKkEv18nTeQFBVIMhfyLjwdRMW5/Dg==
   dependencies:
     "@aelfqueen/protobufjs" "^6.8.9"
     "@babel/runtime" "^7.4.5"
@@ -5941,9 +5941,9 @@ cookie@^0.3.1:
   integrity sha1-5+Ch+e9DtMi6klxcWpboBtFoc7s=
 
 cookiejar@^2.1.0:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.2.tgz#dd8a235530752f988f9a0844f3fc589e3111125c"
-  integrity sha512-Mw+adcfzPxcPeI+0WlvRrr/3lGVO0bD75SxX6811cxSh1Wbxx7xZBGK1eVtDf6si8rg2lhnUjsVLMFMfbRIuwA==
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.4.tgz#ee669c1fea2cf42dc31585469d193fef0d65771b"
+  integrity sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==
 
 cookies@~0.8.0:
   version "0.8.0"
