@@ -3083,10 +3083,10 @@ aelf-sdk@^3.2.29:
     scryptsy "^2.1.0"
     xmlhttprequest "^1.8.0"
 
-aelf-sdk@^3.2.32:
-  version "3.2.32"
-  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.32.tgz#d577707821fa8510ded5ae65147aecec10956d93"
-  integrity sha512-FrQTKCxWkNdzy7Rc6JFFKyjuI8nI+VFBkKNmh36wfC3ccidVUhsvPoUndyg2ngdPrHqO7SFj8QNkrjUPYfbR0g==
+aelf-sdk@^3.2.40:
+  version "3.2.44"
+  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.44.tgz#7f97d330711cf41c1ca4271f921a99130fcd1ea9"
+  integrity sha512-R/MD0z98LDv1GitTqhOWMmQTm7YLg9KsqOVjr3l0NWkq1KxgPGBfd2wlvg/jhhPgCsYJ91mQbAxkJU7kQRmHPA==
   dependencies:
     "@aelfqueen/protobufjs" "^6.8.9"
     "@babel/runtime" "^7.4.5"
@@ -10653,9 +10653,9 @@ jsx-ast-utils@^2.2.1:
     object.assign "^4.1.0"
 
 jszip@^3.2.2:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.2.2.tgz#b143816df7e106a9597a94c77493385adca5bd1d"
-  integrity sha512-NmKajvAFQpbg3taXQXr/ccS2wcucR1AZ+NtyWp2Nq7HHVsXhcJFR8p0Baf32C2yVvBylFWVeKf+WI2AnvlPhpA==
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.8.0.tgz#a2ac3c33fe96a76489765168213655850254d51b"
+  integrity sha512-cnpQrXvFSLdsR9KR5/x7zdf6c3m8IhZfZzSblFEHSqBaVwD2nvJ4CuCKLyvKvwBgZm08CgfSoiTBQLm5WW9hGw==
   dependencies:
     lie "~3.3.0"
     pako "~1.0.2"
