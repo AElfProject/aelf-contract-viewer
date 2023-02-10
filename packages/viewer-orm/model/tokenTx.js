@@ -66,6 +66,25 @@ class TokenTx extends Model {
     };
   }
 
+  static async getTokenList(symbol, pageNum, pageSize) {
+    const result = await TokenTx.findAndCountAll({
+      order: [
+        ['id', 'DESC']
+      ],
+      where: {
+        symbol
+      },
+      limit: +pageSize,
+      offset: (pageNum - 1) * pageSize
+    });
+    const total = result.count;
+    const list = result.rows.map(v => v.toJSON());
+    return {
+      total,
+      list
+    };
+  }
+
   static async getMaxId() {
     const id = await TokenTx.findOne({
       attributes: [
