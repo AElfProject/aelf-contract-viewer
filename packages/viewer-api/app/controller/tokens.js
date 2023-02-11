@@ -98,6 +98,55 @@ class TokensController extends Controller {
     }
   }
 
+  async getAllTransactionList() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(getTxListRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        pageSize = 10,
+        symbol,
+        pageNum
+      } = ctx.request.query;
+      // Get tokenList
+      const {
+        list,
+        total
+      } = await app.model.TokenTx.getTokenList(symbol, +pageNum, +pageSize);
+      // confirmed and unConfirmed
+      const ids = list.map(v => v.txId);
+      const confirmedTxs = await app.model.Transactions.getTransactionsByIds(ids);
+      const confirmedTxsMap = {};
+      confirmedTxs.forEach(tx => {
+        confirmedTxsMap[tx.txId] = tx.toJSON();
+      });
+
+      const unConfirmedTxs = await app.model.UnconfirmedTransactions.getTransactionsByIds(ids);
+
+      const unConfirmedTxsMap = {};
+      unConfirmedTxs.forEach(tx => {
+        unConfirmedTxsMap[tx.txId] = tx.toJSON();
+      });
+
+      const _list = list.map(item => ({
+        ...item,
+        ...(unConfirmedTxsMap[item.txId] || {}),
+        ...(confirmedTxsMap[item.txId] || {}),
+      }));
+
+
+      this.sendBody({
+        list: _list,
+        total,
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
+
   async getTokenInfo() {
     const { ctx, app } = this;
     try {
