@@ -1,0 +1,216 @@
+/**
+ * @file transactions model
+ * @author atom-yang
+ */
+const Sequelize = require('sequelize');
+const { scanModelOptions } = require('../common/scan');
+
+const {
+  Model,
+  BIGINT,
+  STRING,
+  TEXT,
+  Op
+} = Sequelize;
+
+const transactionsDescription = {
+  id: {
+    type: BIGINT,
+    allowNull: false,
+    primaryKey: true,
+    field: 'id'
+  },
+  txId: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'tx_id'
+  },
+  paramsTo: {
+    type: STRING(64),
+    allowNull: false,
+    defaultValue: '-1',
+    field: 'params_to'
+  },
+  chainId: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'chain_id'
+  },
+  blockHeight: {
+    type: BIGINT,
+    allowNull: false,
+    field: 'block_height'
+  },
+  addressFrom: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'address_from'
+  },
+  addressTo: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'address_to'
+  },
+  params: {
+    type: TEXT,
+    allowNull: false,
+    field: 'params'
+  },
+  method: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'method'
+  },
+  blockHash: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'block_hash'
+  },
+  quantity: {
+    type: BIGINT,
+    allowNull: false,
+    field: 'quantity'
+  },
+  txFee: {
+    type: STRING(255),
+    allowNull: false,
+    field: 'tx_fee',
+    defaultValue: '{}',
+    get() {
+      const data = this.getDataValue('txFee');
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        return data;
+      }
+    }
+  },
+  resources: {
+    type: STRING(255)
+  },
+  txStatus: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'tx_status'
+  },
+  time: {
+    type: STRING(64),
+    allowNull: false,
+    field: 'time'
+  }
+};
+
+class UnconfirmedTransactions extends Model {
+  static getTransactionsByIds(txIds) {
+    return UnconfirmedTransactions.findAll({
+      attributes: [
+        'txId',
+        'time',
+        'method',
+        'txFee',
+        'blockHeight',
+        'addressFrom',
+        'addressTo'
+      ],
+      where: {
+        txId: {
+          [Op.in]: txIds
+        }
+      }
+    });
+  }
+
+  static async getTransactionsByPage(pageSize, pageNum, lastId, addressTo) {
+    const ids = await UnconfirmedTransactions.findAll({
+      attributes: ['id'],
+      where: {
+        addressTo: {
+          [Op.in]: addressTo
+        },
+        id: {
+          [Op.gt]: lastId
+        }
+      },
+      order: [
+        ['id', 'ASC']
+      ],
+      limit: +pageSize,
+      offset: pageNum * pageSize
+    });
+    if (!ids) {
+      return [];
+    }
+    return UnconfirmedTransactions.findAll({
+      attributes: {
+        exclude: ['paramsTo', 'chainId', 'addressFrom', 'params', 'quantity']
+      },
+      where: {
+        id: {
+          [Op.in]: ids.map(v => v.toJSON().id)
+        }
+      }
+    });
+  }
+
+  static async getTransactionsInRange(minId, currentMaxId, whereCondition) {
+    const result = await UnconfirmedTransactions.findAll({
+      attributes: ['txId', 'addressTo', 'blockHeight', 'method', 'time', 'txStatus'],
+      where: {
+        blockHeight: {
+          [Op.between]: [minId + 1, currentMaxId]
+        },
+        ...whereCondition
+      },
+      order: [
+        ['blockHeight', 'ASC']
+      ]
+    });
+    if (!result) {
+      return [];
+    }
+    return result;
+  }
+
+  static async getTransactionsById(minId, currentMaxId, addressTo) {
+    const result = await UnconfirmedTransactions.findAll({
+      attributes: {
+        exclude: ['paramsTo', 'chainId', 'addressFrom', 'params', 'quantity']
+      },
+      where: {
+        blockHeight: {
+          [Op.between]: [minId + 1, currentMaxId]
+        },
+        addressTo: {
+          [Op.in]: addressTo
+        }
+      },
+      order: [
+        ['blockHeight', 'ASC']
+      ]
+    });
+    if (!result) {
+      return [];
+    }
+    return result;
+  }
+
+  static getMaxId() {
+    return UnconfirmedTransactions.findOne({
+      attributes: ['id'],
+      order: [
+        ['id', 'DESC']
+      ],
+      limit: 1
+    });
+  }
+}
+
+UnconfirmedTransactions.init(transactionsDescription, {
+  ...scanModelOptions,
+  tableName: 'transactions_unconfirmed'
+});
+
+module.exports = {
+  UnconfirmedTransactions,
+  transactionsDescription
+};

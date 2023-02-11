@@ -18,6 +18,8 @@ const { Balance } = require('viewer-orm/model/balance');
 const { Transfer } = require('viewer-orm/model/transfer');
 const { Events } = require('viewer-orm/model/events');
 const { TokenTx } = require('viewer-orm/model/tokenTx');
+const { Transactions } = require('viewer-orm/model/transactions');
+const { UnconfirmedTransactions } = require('viewer-orm/model/unconfirmedTransactions');
 
 module.exports = async app => {
   app.cache = {};
@@ -35,7 +37,9 @@ module.exports = async app => {
     Balance,
     Transfer,
     Events,
-    TokenTx
+    TokenTx,
+    Transactions,
+    UnconfirmedTransactions
   };
   if (process.env.NODE_ENV === 'production') {
     const aelf = new AElf(new AElf.providers.HttpProvider(app.config.constants.endpoint));
