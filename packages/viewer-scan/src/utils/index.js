@@ -15,6 +15,7 @@ const config = require('../config');
 const zeroContractRelatedMethods = [
   'DeploySmartContract',
   'DeploySystemSmartContract',
+  'ReleaseApprovedUserSmartContract',
   'UpdateSmartContract',
   'ChangeContractAuthor',
   'ChangeGenesisOwner'
@@ -96,6 +97,7 @@ function isProposalCreated(methodName, to, params) {
       && [
         'DeploySmartContract',
         'DeploySystemSmartContract',
+        'DeployUserSmartContract',
         'UpdateSmartContract'
       ].includes(contractMethodName);
   }
