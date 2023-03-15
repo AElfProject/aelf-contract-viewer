@@ -15,14 +15,15 @@ const config = require('../config');
 const zeroContractRelatedMethods = [
   'DeploySmartContract',
   'DeploySystemSmartContract',
-  'ReleaseApprovedUserSmartContract',
   'UpdateSmartContract',
   'ChangeContractAuthor',
   'ChangeGenesisOwner'
 ];
 
 const zeroProposalCreatedMethods = [
-  'ReleaseApprovedContract'
+  'ReleaseApprovedContract',
+  'DeployUserSmartContract',
+  'UpdateUserSmartContract',
 ];
 
 const proposalCreatedMethods = [
@@ -30,7 +31,8 @@ const proposalCreatedMethods = [
 ];
 
 const zeroReleasedMethods = [
-  'ReleaseCodeCheckedContract'
+  'ReleaseCodeCheckedContract',
+  'ReleaseApprovedUserSmartContract',
 ];
 
 const proposalReleasedMethods = [
@@ -97,7 +99,6 @@ function isProposalCreated(methodName, to, params) {
       && [
         'DeploySmartContract',
         'DeploySystemSmartContract',
-        'DeployUserSmartContract',
         'UpdateSmartContract'
       ].includes(contractMethodName);
   }
@@ -196,10 +197,10 @@ async function proposalCreatedFormatter(transaction) {
       expiredTime,
       organizationAddress
     } = paramsParsed;
-    let code = '[deserialize ERROR] params: ' + JSON.stringify(params);
+    let code = `[deserialize ERROR] params: ${JSON.stringify(params)}`;
     try {
       code = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params).code;
-    } catch(error) {
+    } catch (error) {
       console.log('deserialize error', error, params, transaction);
     }
     return {

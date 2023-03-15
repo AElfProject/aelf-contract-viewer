@@ -43,7 +43,9 @@ const contractRelatedMethods = [
   'ProposeUpdateContract',
   'ProposeContractCodeCheck',
   'ReleaseApprovedContract',
-  'ReleaseCodeCheckedContract'
+  'ReleaseCodeCheckedContract',
+  'DeployUserSmartContract',
+  'UpdateUserSmartContract',
 ];
 
 const USER_CREATED_METHODS = [
@@ -158,6 +160,8 @@ async function proposalCreatedFormatter(transaction) {
       case 'ProposeContractCodeCheck':
       case 'ProposeNewContract':
       case 'ProposeUpdateContract':
+      case 'DeployUserSmartContract':
+      case 'UpdateUserSmartContract':
         contractMethodName = SYSTEM_PROPOSAL_METHODS_MAP[MethodName];
         params = Params;
         if (MethodName === 'ProposeContractCodeCheck') {
@@ -168,6 +172,9 @@ async function proposalCreatedFormatter(transaction) {
             contractMethodName,
             parsedParams.contractInput
           ));
+        } else if (['DeployUserSmartContract', 'UpdateUserSmartContract'].includes(MethodName)) {
+          contractMethodName = MethodName === 'DeployUserSmartContract' ? 'DeploySmartContract' : 'UpdateSmartContract';
+          params = Params;
         } else if (MethodName === 'RequestSideChainCreation') {
           const parsedParams = parseParams(Params);
           if (proposalInfo.params && proposalInfoFromChain) {
