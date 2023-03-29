@@ -194,10 +194,10 @@ async function proposalCreatedFormatter(transaction) {
       expiredTime,
       organizationAddress
     } = paramsParsed;
-    let code = '[deserialize ERROR] params: ' + JSON.stringify(params);
+    let code = `[deserialize ERROR] params: ${JSON.stringify(params)}`;
     try {
       code = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params).code;
-    } catch(error) {
+    } catch (error) {
       console.log('deserialize error', error, params, transaction);
     }
     return {
@@ -235,7 +235,8 @@ async function proposalCreatedFormatter(transaction) {
     organizationAddress,
     createdTime: time
   };
-  if (MethodName === 'ReleaseApprovedContract' && To === config.contracts.zero.address) {
+  if ((MethodName === 'ReleaseApprovedContract' || MethodName === 'ReleaseApprovedUserSmartContract')
+    && To === config.contracts.zero.address) {
     const preProposalId = paramsParsed.proposalId || '';
     const contractName = await ContractNames.getContractName(preProposalId);
     if (contractName) {
@@ -281,11 +282,11 @@ async function getContractLogResult(Logs) {
     case 'ContractDeployed':
       result.codeHash = deserializeResult.codeHash;
       result.author = deserializeResult.author;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'CodeUpdated':
       result.codeHash = deserializeResult.newCodeHash;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'AuthorChanged':
       result.author = deserializeResult.newAuthor;
