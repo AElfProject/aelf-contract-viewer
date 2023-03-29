@@ -238,7 +238,8 @@ async function proposalCreatedFormatter(transaction) {
     organizationAddress,
     createdTime: time
   };
-  if (MethodName === 'ReleaseApprovedContract' && To === config.contracts.zero.address) {
+  if ((MethodName === 'ReleaseApprovedContract' || MethodName === 'ReleaseApprovedUserSmartContract')
+    && To === config.contracts.zero.address) {
     const preProposalId = paramsParsed.proposalId || '';
     const contractName = await ContractNames.getContractName(preProposalId);
     if (contractName) {
@@ -284,11 +285,11 @@ async function getContractLogResult(Logs) {
     case 'ContractDeployed':
       result.codeHash = deserializeResult.codeHash;
       result.author = deserializeResult.author;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'CodeUpdated':
       result.codeHash = deserializeResult.newCodeHash;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'AuthorChanged':
       result.author = deserializeResult.newAuthor;
