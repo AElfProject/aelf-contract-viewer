@@ -359,6 +359,11 @@ async function contractTransactionFormatted(transaction) {
         proposalId
       }
     });
+
+    const contractNameFromContractNames = await ContractNames.getContractName(proposalId);
+    const contractNameOutput = contractNameFromContractNames && (`${contractName}` === '-1')
+      ? contractNameFromContractNames : contractName;
+
     await Proposal.update({
       released: true,
       releasedTxId: TransactionId,
@@ -372,7 +377,7 @@ async function contractTransactionFormatted(transaction) {
     result = {
       ...result,
       code,
-      contractName
+      contractName: contractNameOutput
     };
   } else {
     // 零合约直接进行的合约部署/更新/作者更新，例如区块1的系统合约部署
