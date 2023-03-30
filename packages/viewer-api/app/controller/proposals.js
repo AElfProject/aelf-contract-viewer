@@ -532,7 +532,15 @@ class ProposalsController extends Controller {
           const {
             Transaction = {}
           } = result;
-          const admin = Transaction.From;
+          let admin = '';
+          // Deploy contract without approval, the admin is the author.
+          // But contract deploy with approval, the admin is the Transaction.From. Author is GenesisAddress.
+          if (Transaction.MethodName === 'ReleaseApprovedUserSmartContract') {
+            const info = await app.model.Code.getLastUpdated(contractAddress);
+            admin = info.author;
+          } else {
+            admin = Transaction.From;
+          }
           if (admin !== address) throw new Error('Contract name update failed. You do not have permission to change the name of this contract！');
           const res = await app.model.Contracts.updateContractName({
             contractName,
