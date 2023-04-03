@@ -93,7 +93,14 @@ class ListController extends Controller {
       }
       let name = '';
       if (address) {
-        name = await app.model.Contracts.getContractName(address);
+        // name = await app.model.Contracts.getContractName(address);
+        const result = await app.model.Contracts.findOne({
+          attributes: [ 'contractName' ],
+          where: {
+            address
+          }
+        });
+        name = result ? result.contractName : '';
       } else if (proposalId) {
         name = await app.model.ContractNames.getContractName(proposalId);
       }
