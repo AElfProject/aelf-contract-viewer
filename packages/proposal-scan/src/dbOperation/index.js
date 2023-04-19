@@ -22,7 +22,9 @@ const {
 } = require('../formatter/proposal');
 const {
   transferredInsert,
-  tokenSupplyChangedInsert
+  tokenSupplyChangedInsert,
+  nftTokenBalanceChangedInsert,
+  nftTokenSupplyChangedInsert
 } = require('../formatter/account');
 const {
   organizationCreatedInsert,
@@ -84,6 +86,16 @@ const INSERT_PHASE = [
     desc: 'token supply changed',
     tag: SCAN_TAGS.TOKEN_SUPPLY_CHANGED,
     insert: tokenSupplyChangedInsert
+  },
+  {
+    desc: 'nft token balance changed',
+    tag: SCAN_TAGS.NFT_TOKEN_BALANCE_CHANGED,
+    insert: nftTokenBalanceChangedInsert
+  },
+  {
+    desc: 'nft token supply changed',
+    tag: SCAN_TAGS.NFT_TOKEN_SUPPLY_CHANGED,
+    insert: nftTokenSupplyChangedInsert
   }
 ];
 
@@ -114,7 +126,7 @@ class Operation extends DBBaseOperation {
         console.log('INIT');
         break;
       case QUERY_TYPE.MISSING:
-        console.log('MISSING');
+        console.log('MISSING', data);
         await this.insertData(data);
         break;
       case QUERY_TYPE.GAP:

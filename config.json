@@ -7,7 +7,8 @@
     "referendum": "AElf.ContractNames.Referendum",
     "association": "AElf.ContractNames.Association",
     "crossChain": "AElf.ContractNames.CrossChain",
-    "token": "AElf.ContractNames.Token"
+    "token": "AElf.ContractNames.Token",
+    "nftToken": "2ZpYFeE4yWjrcKLBoj1iwbfYnbo9hK7exvfGTdqcq77QSxpzNH"
   },
   "contractNames": [
     "AElf.ContractNames.Election",

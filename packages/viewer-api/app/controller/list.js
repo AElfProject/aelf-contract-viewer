@@ -80,16 +80,30 @@ class ListController extends Controller {
     }
   }
 
+  // get contract name by contract address or proposalId of contract deploy proposal
   async getContractName() {
     const { ctx, app } = this;
     try {
       const {
-        address = ''
+        address = '',
+        proposalId = '',
       } = ctx.request.query;
-      if (!address) {
-        throw new Error('invalid parameter address');
+      if (!address && !proposalId) {
+        throw new Error('invalid parameter address or proposalId');
       }
-      const name = await app.model.Contracts.getContractName(address);
+      let name = '';
+      if (address) {
+        // name = await app.model.Contracts.getContractName(address);
+        const result = await app.model.Contracts.findOne({
+          attributes: [ 'contractName' ],
+          where: {
+            address
+          }
+        });
+        name = result ? result.contractName : '';
+      } else if (proposalId) {
+        name = await app.model.ContractNames.getContractName(proposalId);
+      }
       this.sendBody({
         name
       });

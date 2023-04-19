@@ -21,7 +21,9 @@ const zeroContractRelatedMethods = [
 ];
 
 const zeroProposalCreatedMethods = [
-  'ReleaseApprovedContract'
+  'ReleaseApprovedContract',
+  'DeployUserSmartContract',
+  'UpdateUserSmartContract',
 ];
 
 const proposalCreatedMethods = [
@@ -29,7 +31,8 @@ const proposalCreatedMethods = [
 ];
 
 const zeroReleasedMethods = [
-  'ReleaseCodeCheckedContract'
+  'ReleaseCodeCheckedContract',
+  'ReleaseApprovedUserSmartContract',
 ];
 
 const proposalReleasedMethods = [
@@ -194,10 +197,10 @@ async function proposalCreatedFormatter(transaction) {
       expiredTime,
       organizationAddress
     } = paramsParsed;
-    let code = '[deserialize ERROR] params: ' + JSON.stringify(params);
+    let code = `[deserialize ERROR] params: ${JSON.stringify(params)}`;
     try {
       code = deserialize(config.contracts.zero.contract[contractMethodName].inputType, params).code;
-    } catch(error) {
+    } catch (error) {
       console.log('deserialize error', error, params, transaction);
     }
     return {
@@ -235,7 +238,8 @@ async function proposalCreatedFormatter(transaction) {
     organizationAddress,
     createdTime: time
   };
-  if (MethodName === 'ReleaseApprovedContract' && To === config.contracts.zero.address) {
+  if ((MethodName === 'ReleaseApprovedContract' || MethodName === 'ReleaseApprovedUserSmartContract')
+    && To === config.contracts.zero.address) {
     const preProposalId = paramsParsed.proposalId || '';
     const contractName = await ContractNames.getContractName(preProposalId);
     if (contractName) {
@@ -281,11 +285,11 @@ async function getContractLogResult(Logs) {
     case 'ContractDeployed':
       result.codeHash = deserializeResult.codeHash;
       result.author = deserializeResult.author;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'CodeUpdated':
       result.codeHash = deserializeResult.newCodeHash;
-      result.version = deserializeResult.version;
+      result.version = deserializeResult.contractVersion || deserializeResult.version;
       break;
     case 'AuthorChanged':
       result.author = deserializeResult.newAuthor;
@@ -355,6 +359,11 @@ async function contractTransactionFormatted(transaction) {
         proposalId
       }
     });
+
+    const contractNameFromContractNames = await ContractNames.getContractName(proposalId);
+    const contractNameOutput = contractNameFromContractNames && (`${contractName}` === '-1')
+      ? contractNameFromContractNames : contractName;
+
     await Proposal.update({
       released: true,
       releasedTxId: TransactionId,
@@ -368,7 +377,7 @@ async function contractTransactionFormatted(transaction) {
     result = {
       ...result,
       code,
-      contractName
+      contractName: contractNameOutput
     };
   } else {
     // 零合约直接进行的合约部署/更新/作者更新，例如区块1的系统合约部署
