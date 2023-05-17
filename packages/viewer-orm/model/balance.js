@@ -76,7 +76,10 @@ class Balance extends Model {
         ['id', 'DESC']
       ],
       where: {
-        symbol
+        symbol,
+        balance: {
+          [Op.gt]: 0
+        }
       },
       limit: +pageSize,
       offset: (pageNum - 1) * pageSize
