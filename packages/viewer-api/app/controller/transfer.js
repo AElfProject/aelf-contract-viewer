@@ -34,12 +34,13 @@ class TransferController extends Controller {
       const {
         address = '',
         pageSize = 10,
-        pageNum
+        pageNum,
+        isNft = false,
       } = ctx.request.query;
       const {
         list,
         total
-      } = await app.model.Transfer.getTransferByAddress(address, +pageNum, +pageSize);
+      } = await (isNft ? app.model.NftTransfer : app.model.Transfer).getTransferByAddress(address, +pageNum, +pageSize);
       this.sendBody({
         list,
         total
