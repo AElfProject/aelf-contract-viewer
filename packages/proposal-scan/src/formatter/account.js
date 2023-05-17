@@ -10,6 +10,9 @@ const {
   Transfer
 } = require('viewer-orm/model/transfer');
 const {
+  NftTransfer
+} = require('viewer-orm/model/nftTransfer');
+const {
   Tokens
 } = require('viewer-orm/model/tokens');
 const {
@@ -411,6 +414,29 @@ async function transferredFormatter(transaction) {
   }));
 }
 
+async function nftTransferredFormatter(transaction) {
+  const {
+    TransactionId
+  } = transaction;
+  let transferInfo = await deserializeTransferredLogs(transaction, TOKEN_TRANSFERRED_EVENT);
+  transferInfo = transferInfo.reduce((acc, v) => [...acc, ...v], []);
+  // Make sure is nft token of aelf multiple token.
+  transferInfo = transferInfo.filter(v => v.symbol.match(/^([a-z0-9]+)+-[0-9]+$/i));
+  console.log('nft transfer', transferInfo);
+  return Promise.all(transferInfo.map(async item => {
+    const {
+      amount,
+      symbol
+    } = item;
+    const quantity = await calculateBalances(symbol, amount);
+    return {
+      ...item,
+      amount: quantity,
+      txId: TransactionId
+    };
+  }));
+}
+
 function transferredInserter(formattedData) {
   return sequelize.transaction(t => Transfer.bulkCreate(formattedData, {
     transaction: t
@@ -420,6 +446,17 @@ function transferredInserter(formattedData) {
 async function transferredInsert(transaction, type) {
   const formattedData = await transferredFormatter(transaction, type);
   return transferredInserter(formattedData);
+}
+
+function nftTransferredInserter(formattedData) {
+  return sequelize.transaction(t => NftTransfer.bulkCreate(formattedData, {
+    transaction: t
+  }));
+}
+
+async function nftTransferredInsert(transaction, type) {
+  const formattedData = await nftTransferredFormatter(transaction, type);
+  return nftTransferredInserter(formattedData);
 }
 
 async function tokenSupplyChangedInsert(transaction, type) {
@@ -439,5 +476,6 @@ module.exports = {
   nftTokenBalanceChangedInsert,
   tokenSupplyChangedInsert,
   nftTokenSupplyChangedInsert,
-  transferredInsert
+  transferredInsert,
+  nftTransferredInsert
 };

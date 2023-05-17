@@ -24,7 +24,8 @@ const {
   transferredInsert,
   tokenSupplyChangedInsert,
   nftTokenBalanceChangedInsert,
-  nftTokenSupplyChangedInsert
+  nftTokenSupplyChangedInsert,
+  nftTransferredInsert
 } = require('../formatter/account');
 const {
   organizationCreatedInsert,
@@ -81,6 +82,11 @@ const INSERT_PHASE = [
     desc: 'token transferred',
     tag: SCAN_TAGS.TOKEN_TRANSFERRED,
     insert: transferredInsert
+  },
+  {
+    desc: 'nft token transferred',
+    tag: SCAN_TAGS.TOKEN_TRANSFERRED,
+    insert: nftTransferredInsert
   },
   {
     desc: 'token supply changed',
