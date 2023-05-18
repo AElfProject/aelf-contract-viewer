@@ -232,7 +232,7 @@ async function getTokenDecimal(symbol) {
 
 async function calculateBalances(symbol, balance) {
   const decimal = await getTokenDecimal(symbol);
-  return new Decimal(balance).dividedBy(`1e${decimal || 8}`).toString();
+  return new Decimal(balance).dividedBy(`1e${decimal || 0}`).toString();
 }
 
 async function changeSupply(symbols, type) {
