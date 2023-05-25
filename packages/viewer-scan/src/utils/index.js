@@ -39,12 +39,17 @@ const proposalReleasedMethods = [
   'Release'
 ];
 
+const caAccountMayCallProposal = [
+  'ManagerForwardCall'
+];
+
 const relatedMethods = [
   ...zeroContractRelatedMethods,
   ...proposalCreatedMethods,
   ...zeroReleasedMethods,
   ...proposalReleasedMethods,
-  ...zeroProposalCreatedMethods
+  ...zeroProposalCreatedMethods,
+  ...caAccountMayCallProposal,
 ];
 
 const contractRelatedEventNames = [
@@ -110,6 +115,31 @@ function isZeroProposalCreated(methodName, to) {
   && zeroProposalCreatedMethods.includes(methodName);
 }
 
+function isProposalCreatedByCAAccount(methodName, to, params) {
+  console.log('isProposalCreatedByCAAccount----------', methodName, to);
+  if (to === config.contracts['Portkey.Contracts.CA'].address
+    && methodName === 'ManagerForwardCall') {
+    let paramsJson;
+    try {
+      paramsJson = JSON.parse(params);
+    } catch (e) {
+      paramsJson = params;
+    }
+    // {
+    //   "caHash": "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b",
+    //   "contractAddress": "2UKQnHcQvhBT6X6ULtfnuh3b9PVRvVMEroHHkcK4YfcoH1Z1x2",
+    //   "methodName": "DeployUserSmartContract",
+    //   "args": "xxx"
+    // }
+    const {
+      contractAddress,
+      methodName: method
+    } = paramsJson;
+    return isZeroProposalCreated(method, contractAddress);
+  }
+  return false;
+}
+
 function isContractProposalCreated(transaction) {
   const {
     Transaction,
@@ -121,7 +151,9 @@ function isContractProposalCreated(transaction) {
     Params
   } = Transaction;
   return Status.toUpperCase() === 'MINED'
-    && (isProposalCreated(MethodName, To, Params) || isZeroProposalCreated(MethodName, To));
+    && (isProposalCreated(MethodName, To, Params)
+      || isZeroProposalCreated(MethodName, To)
+      || isProposalCreatedByCAAccount(MethodName, To, Params));
 }
 
 function deserialize(dataType, serialized) {
@@ -394,6 +426,7 @@ async function contractTransactionFormatted(transaction) {
 
 module.exports = {
   isContractProposalCreated,
+  isProposalCreatedByCAAccount,
   contractTransactionFormatted,
   isContractRelated,
   isZeroContractOrProposalReleased,
