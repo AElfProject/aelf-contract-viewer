@@ -100,6 +100,51 @@ async function organizationNotFound(orgAddress, proposalType) {
 
 const PROPOSAL_CREATED_INPUT = Object.keys(config.contracts.parliament.contract.CreateProposal.inputTypeInfo.fields);
 
+async function proposalCreatedCaAccountCallFilterFormatter({
+  From, To, MethodName, Params
+}) {
+  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
+  if (isCaCall) {
+    const paramsOfCaCall = parseParams(Params);
+    const { caHash, methodName, args } = paramsOfCaCall;
+    if (['DeployUserSmartContract', 'UpdateUserSmartContract'].includes(methodName)) {
+      const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
+        caHash
+      });
+      const params = await config.contracts.zero.contract[methodName].unpackPackedInput(Buffer.from(args, 'base64'));
+      const from = holderInfo.caAddress;
+      const to = paramsOfCaCall.contractAddress;
+      return {
+        From: from,
+        To: to,
+        MethodName: methodName,
+        Params: params
+      };
+    }
+  }
+  return {
+    From,
+    To,
+    MethodName,
+    Params
+  };
+}
+
+async function updateProposalInfoFromChain(proposalInfo, proposalType, proposalId) {
+  const proposalInfoFromChain = await config.contracts[proposalType.toLowerCase()]
+    .contract.GetProposal.call(proposalId);
+  console.log('proposalInfoFromChain: ', proposalInfoFromChain);
+  if (proposalInfoFromChain) {
+    return {
+      ...proposalInfo,
+      ...proposalInfoFromChain,
+      expiredTime: formatTimestamp(proposalInfoFromChain.expiredTime),
+      updatedFromChain: true
+    };
+  }
+  return proposalInfo;
+}
+
 async function proposalCreatedFormatter(transaction) {
   const {
     Logs = [],
@@ -112,7 +157,8 @@ async function proposalCreatedFormatter(transaction) {
     To,
     Params,
     MethodName
-  } = Transaction;
+  } = proposalCreatedCaAccountCallFilterFormatter(Transaction);
+
   const logResults = await deserializeLogs(Logs, 'ProposalCreated');
   return Promise.all(logResults.map(async item => {
     const {
@@ -140,15 +186,9 @@ async function proposalCreatedFormatter(transaction) {
       toBeReleased: false,
       proposer: From
     };
-    // eslint-disable-next-line max-len
-    const proposalInfoFromChain = await config.contracts[proposalType.toLowerCase()].contract.GetProposal.call(proposalId);
-    if (proposalInfoFromChain) {
-      proposalInfo = {
-        ...proposalInfo,
-        ...proposalInfoFromChain,
-        expiredTime: formatTimestamp(proposalInfoFromChain.expiredTime)
-      };
-    }
+
+    proposalInfo = await updateProposalInfoFromChain(proposalInfo, proposalType, proposalId);
+
     switch (MethodName) {
       case 'CreateProposal':
         proposalInfo = {
@@ -177,7 +217,7 @@ async function proposalCreatedFormatter(transaction) {
           params = Params;
         } else if (MethodName === 'RequestSideChainCreation') {
           const parsedParams = parseParams(Params);
-          if (proposalInfo.params && proposalInfoFromChain) {
+          if (proposalInfo.params && proposalInfo.updatedFromChain) {
             params = JSON.stringify(await deserializeContract(
               To,
               'CreateSideChainInput',
@@ -219,7 +259,7 @@ async function proposalCreatedFormatter(transaction) {
         break;
       default:
         // eslint-disable-next-line no-case-declarations,max-len
-        if (!proposalInfoFromChain) {
+        if (!proposalInfo.updatedFromChain) {
           return {};
         }
     }
