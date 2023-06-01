@@ -22,6 +22,7 @@ const {
 } = require('./organization');
 const {
   parseParams,
+  stringifyParams,
   deserializeLogs,
   formatTimestamp,
   deserializeContract
@@ -109,7 +110,8 @@ async function proposalCreatedCaAccountCallFilterFormatter({
     const { caHash, methodName, args } = paramsOfCaCall;
     const isCaCallOfProposal = [
       'DeployUserSmartContract', 'UpdateUserSmartContract',
-      'ProposeNewContract', 'ProposeUpdateContract'
+      'ProposeNewContract', 'ProposeUpdateContract',
+      'ReleaseApprovedContract', 'ReleaseCodeCheckedContract'
     ].includes(methodName);
     if (isCaCallOfProposal) {
       const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
@@ -122,7 +124,7 @@ async function proposalCreatedCaAccountCallFilterFormatter({
         From: from,
         To: to,
         MethodName: methodName,
-        Params: params
+        Params: stringifyParams(params)
       };
     }
   }
@@ -161,7 +163,7 @@ async function proposalCreatedFormatter(transaction) {
     To,
     Params,
     MethodName
-  } = proposalCreatedCaAccountCallFilterFormatter(Transaction);
+  } = await proposalCreatedCaAccountCallFilterFormatter(Transaction);
 
   const logResults = await deserializeLogs(Logs, 'ProposalCreated');
   return Promise.all(logResults.map(async item => {
