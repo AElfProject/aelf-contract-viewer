@@ -107,7 +107,11 @@ async function proposalCreatedCaAccountCallFilterFormatter({
   if (isCaCall) {
     const paramsOfCaCall = parseParams(Params);
     const { caHash, methodName, args } = paramsOfCaCall;
-    if (['DeployUserSmartContract', 'UpdateUserSmartContract'].includes(methodName)) {
+    const isCaCallOfProposal = [
+      'DeployUserSmartContract', 'UpdateUserSmartContract',
+      'ProposeNewContract', 'ProposeUpdateContract'
+    ].includes(methodName);
+    if (isCaCallOfProposal) {
       const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
         caHash
       });
