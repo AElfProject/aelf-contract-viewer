@@ -8,7 +8,7 @@
     "association": "AElf.ContractNames.Association",
     "crossChain": "AElf.ContractNames.CrossChain",
     "token": "AElf.ContractNames.Token",
-    "nftToken": "2ZpYFeE4yWjrcKLBoj1iwbfYnbo9hK7exvfGTdqcq77QSxpzNH"
+    "Portkey.Contracts.CA": "Portkey.Contracts.CA.Address"
   },
   "contractNames": [
     "AElf.ContractNames.Election",

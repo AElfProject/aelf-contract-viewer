@@ -23,8 +23,7 @@ const {
 const {
   transferredInsert,
   tokenSupplyChangedInsert,
-  nftTokenBalanceChangedInsert,
-  nftTokenSupplyChangedInsert
+  nftTransferredInsert
 } = require('../formatter/account');
 const {
   organizationCreatedInsert,
@@ -83,20 +82,15 @@ const INSERT_PHASE = [
     insert: transferredInsert
   },
   {
+    desc: 'nft token transferred',
+    tag: SCAN_TAGS.TOKEN_TRANSFERRED,
+    insert: nftTransferredInsert
+  },
+  {
     desc: 'token supply changed',
     tag: SCAN_TAGS.TOKEN_SUPPLY_CHANGED,
     insert: tokenSupplyChangedInsert
   },
-  {
-    desc: 'nft token balance changed',
-    tag: SCAN_TAGS.NFT_TOKEN_BALANCE_CHANGED,
-    insert: nftTokenBalanceChangedInsert
-  },
-  {
-    desc: 'nft token supply changed',
-    tag: SCAN_TAGS.NFT_TOKEN_SUPPLY_CHANGED,
-    insert: nftTokenSupplyChangedInsert
-  }
 ];
 
 class Operation extends DBBaseOperation {

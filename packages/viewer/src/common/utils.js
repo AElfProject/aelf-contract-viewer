@@ -14,6 +14,7 @@ const { ellipticEc } = AElf.wallet;
 
 const { proposalStatus } = constants;
 const bpRecord = [
+  [1675926610000, 19], // 2023.02.09 17 -> 19BPs
   [1642057800000, 17], // 2022.01.13 15 -> 17BPs
   [1641453000000, 15], // 2022.01.06 13 -> 15BP
   [1640849100000, 13], // 2021.12.30 11 -> 13BP

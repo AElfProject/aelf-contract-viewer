@@ -53,6 +53,7 @@ class Scanner {
     this.getTransaction = this.getTransaction.bind(this);
     this.addressTo = [
       config.contracts.zero.address,
+      config.contracts['Portkey.Contracts.CA'].address,
       config.controller.contractAddress
     ];
   }

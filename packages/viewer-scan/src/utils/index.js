@@ -10,6 +10,7 @@ const {
 const {
   ContractNames
 } = require('viewer-orm/model/contractNames');
+const { parseParams, stringifyParams } = require('proposal-scan/src/utils');
 const config = require('../config');
 
 const zeroContractRelatedMethods = [
@@ -39,12 +40,17 @@ const proposalReleasedMethods = [
   'Release'
 ];
 
+const caAccountMayCallProposal = [
+  'ManagerForwardCall'
+];
+
 const relatedMethods = [
   ...zeroContractRelatedMethods,
   ...proposalCreatedMethods,
   ...zeroReleasedMethods,
   ...proposalReleasedMethods,
-  ...zeroProposalCreatedMethods
+  ...zeroProposalCreatedMethods,
+  ...caAccountMayCallProposal,
 ];
 
 const contractRelatedEventNames = [
@@ -67,6 +73,57 @@ function removeFailedOrOtherMethod(transaction) {
     && relatedMethods.includes(method);
 }
 
+function caAccountCallMethodAndToFormatter({ To, MethodName, Params }) {
+  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
+  if (isCaCall) {
+    const paramsOfCaCall = parseParams(Params);
+    const { contractAddress, methodName } = paramsOfCaCall;
+    return {
+      To: contractAddress,
+      MethodName: methodName,
+    };
+  }
+  return {
+    To,
+    MethodName,
+  };
+}
+
+const CONTRACT_TEMP_LIST = {};
+async function caAccountCallDataFilterFormatter({
+  From, To, MethodName, Params
+}) {
+  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
+  if (isCaCall) {
+    const paramsOfCaCall = parseParams(Params);
+    const {
+      caHash, methodName, args, contractAddress
+    } = paramsOfCaCall;
+    const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
+      caHash
+    });
+    if (!CONTRACT_TEMP_LIST[contractAddress]) {
+      CONTRACT_TEMP_LIST[contractAddress] = await config.aelf.chain.contractAt(contractAddress, config.wallet);
+      console.log('create a new contract:', contractAddress);
+    }
+    // eg: const contractInstance = config.contracts.zero.contract
+    // const params = await contractInstance[methodName].unpackPackedInput(Buffer.from(args, 'base64'));
+    const params = await CONTRACT_TEMP_LIST[contractAddress][methodName].unpackPackedInput(Buffer.from(args, 'base64'));
+    return {
+      From: holderInfo.caAddress,
+      To: contractAddress,
+      MethodName: methodName,
+      Params: stringifyParams(params)
+    };
+  }
+  return {
+    From,
+    To,
+    MethodName,
+    Params
+  };
+}
+
 function isZeroContractOrProposalReleased(transaction) {
   const {
     Transaction,
@@ -75,7 +132,7 @@ function isZeroContractOrProposalReleased(transaction) {
   const {
     To,
     MethodName
-  } = Transaction;
+  } = caAccountCallMethodAndToFormatter(Transaction);
   return Status.toUpperCase() === 'MINED'
     // eslint-disable-next-line max-len
     && (To === config.contracts.zero.address && [...zeroContractRelatedMethods, ...zeroReleasedMethods].includes(MethodName))
@@ -110,6 +167,31 @@ function isZeroProposalCreated(methodName, to) {
   && zeroProposalCreatedMethods.includes(methodName);
 }
 
+function isProposalCreatedByCAAccount(methodName, to, params) {
+  console.log('isProposalCreatedByCAAccount----------', methodName, to);
+  if (to === config.contracts['Portkey.Contracts.CA'].address
+    && methodName === 'ManagerForwardCall') {
+    let paramsJson;
+    try {
+      paramsJson = JSON.parse(params);
+    } catch (e) {
+      paramsJson = params;
+    }
+    // {
+    //   "caHash": "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b",
+    //   "contractAddress": "2UKQnHcQvhBT6X6ULtfnuh3b9PVRvVMEroHHkcK4YfcoH1Z1x2",
+    //   "methodName": "DeployUserSmartContract",
+    //   "args": "xxx"
+    // }
+    const {
+      contractAddress,
+      methodName: method
+    } = paramsJson;
+    return isZeroProposalCreated(method, contractAddress);
+  }
+  return false;
+}
+
 function isContractProposalCreated(transaction) {
   const {
     Transaction,
@@ -121,7 +203,9 @@ function isContractProposalCreated(transaction) {
     Params
   } = Transaction;
   return Status.toUpperCase() === 'MINED'
-    && (isProposalCreated(MethodName, To, Params) || isZeroProposalCreated(MethodName, To));
+    && (isProposalCreated(MethodName, To, Params)
+      || isZeroProposalCreated(MethodName, To)
+      || isProposalCreatedByCAAccount(MethodName, To, Params));
 }
 
 function deserialize(dataType, serialized) {
@@ -175,17 +259,12 @@ async function proposalCreatedFormatter(transaction) {
     time
   } = transaction;
   const {
-    Params,
     From,
+    To,
     MethodName,
-    To
-  } = Transaction;
-  let paramsParsed;
-  try {
-    paramsParsed = JSON.parse(Params);
-  } catch (e) {
-    paramsParsed = Params;
-  }
+    Params
+  } = await caAccountCallDataFilterFormatter(Transaction);
+  const paramsParsed = parseParams(Params);
   const {
     proposalId
   } = deserializeLog(Logs.filter(v => v.Name === proposalCreatedEventName)[0]);
@@ -328,13 +407,8 @@ async function contractTransactionFormatted(transaction) {
     To,
     MethodName,
     Params
-  } = Transaction;
-  let params;
-  try {
-    params = JSON.parse(Params);
-  } catch (e) {
-    params = Params;
-  }
+  } = await caAccountCallDataFilterFormatter(Transaction);
+  const params = parseParams(Params);
   let contractTime = time;
   contractTime = contractTime.startsWith('1970') ? config.chainInitTime : contractTime;
   const contractInfo = await getContractLogResult(Logs);
@@ -394,6 +468,7 @@ async function contractTransactionFormatted(transaction) {
 
 module.exports = {
   isContractProposalCreated,
+  isProposalCreatedByCAAccount,
   contractTransactionFormatted,
   isContractRelated,
   isZeroContractOrProposalReleased,

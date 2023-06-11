@@ -34,9 +34,12 @@ function getContractAddress(contracts) {
   };
 
   Object.entries(contracts).forEach(([key, value]) => {
-    const address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
-      sync: true
-    });
+    let address = value;
+    if (!['Portkey.Contracts.CA'].includes(key)) {
+      address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
+        sync: true
+      });
+    }
     const proto = AElf.pbjs.Root.fromDescriptor(aelf.chain.getContractFileDescriptorSet(address, {
       sync: true
     }));

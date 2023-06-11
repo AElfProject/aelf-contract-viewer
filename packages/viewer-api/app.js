@@ -16,6 +16,7 @@ const { Votes } = require('viewer-orm/model/votes');
 const { ContractNames } = require('viewer-orm/model/contractNames');
 const { Balance } = require('viewer-orm/model/balance');
 const { Transfer } = require('viewer-orm/model/transfer');
+const { NftTransfer } = require('viewer-orm/model/nftTransfer');
 const { Events } = require('viewer-orm/model/events');
 const { TokenTx } = require('viewer-orm/model/tokenTx');
 const { Transactions } = require('viewer-orm/model/transactions');
@@ -36,6 +37,7 @@ module.exports = async app => {
     Members,
     Balance,
     Transfer,
+    NftTransfer,
     Events,
     TokenTx,
     Transactions,

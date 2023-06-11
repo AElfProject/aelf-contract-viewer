@@ -37,9 +37,9 @@ function getContractAddress(contracts) {
   Object.entries(contracts).forEach(([key, value]) => {
     console.log('init contract', key, value);
     let address;
-    // We can not use GetContractAddressByName to get the address of nftToken
-    // We set the address of nftToken inf config.contracts
-    if (key === 'nftToken') {
+    // We can not use GetContractAddressByName to get the address of Portkey.Contracts.CA
+    // We set the address of Portkey.Contracts.CA inf config.contracts
+    if (key === 'Portkey.Contracts.CA') {
       address = value;
     } else {
       address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {

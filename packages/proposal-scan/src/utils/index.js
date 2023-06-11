@@ -109,6 +109,13 @@ function parseParams(params) {
   }
 }
 
+function stringifyParams(params) {
+  if (typeof params === 'string') {
+    return params;
+  }
+  return JSON.stringify(params);
+}
+
 function formatTimestamp(timestamp) {
   if (typeof timestamp === 'string') {
     return moment(timestamp);
@@ -133,6 +140,7 @@ module.exports = {
   deserializeLogs,
   sleep,
   parseParams,
+  stringifyParams,
   formatTimestamp,
   asyncFilter,
   deserializeContract

@@ -76,7 +76,10 @@ class Balance extends Model {
         ['id', 'DESC']
       ],
       where: {
-        symbol
+        symbol,
+        balance: {
+          [Op.gt]: 0
+        }
       },
       limit: +pageSize,
       offset: (pageNum - 1) * pageSize
@@ -102,7 +105,10 @@ class Balance extends Model {
 
   static async getBalanceByOwner(owner, search = '') {
     let whereCondition = {
-      owner
+      owner,
+      balance: {
+        [Op.gt]: 0
+      }
     };
     if (search) {
       whereCondition = {

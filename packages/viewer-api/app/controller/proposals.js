@@ -514,7 +514,8 @@ class ProposalsController extends Controller {
       const {
         contractName,
         address,
-        contractAddress
+        contractAddress,
+        caHash
       } = ctx.request.body;
       let isExist = await app.model.ContractNames.isExist(contractName);
       if (!isExist) {
@@ -533,15 +534,25 @@ class ProposalsController extends Controller {
             Transaction = {}
           } = result;
           let admin = '';
+          let caHashInTransaction = '';
           // Deploy contract without approval, the admin is the author.
           // But contract deploy with approval, the admin is the Transaction.From. Author is GenesisAddress.
           if (Transaction.MethodName === 'ReleaseApprovedUserSmartContract') {
             const info = await app.model.Code.getLastUpdated(contractAddress);
             admin = info.author;
+          } else if (Transaction.MethodName === 'ManagerForwardCall') {
+            const params = JSON.parse(Transaction.Params);
+            caHashInTransaction = params.caHash;
           } else {
             admin = Transaction.From;
           }
-          if (admin !== address) throw new Error('Contract name update failed. You do not have permission to change the name of this contract！');
+          if (admin !== address) {
+            if (caHashInTransaction && caHashInTransaction === caHash) {
+              // do nothing
+            } else {
+              throw new Error('Contract name update failed. You do not have permission to change the name of this contract！');
+            }
+          }
           const res = await app.model.Contracts.updateContractName({
             contractName,
             contractAddress,
