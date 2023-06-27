@@ -40,9 +40,10 @@ const {
 const config = require('../config');
 
 function deserializeTransferredLogs(transaction, filters) {
-  const {
+  let {
     Logs = []
   } = transaction;
+  Logs = Logs.filter(l => l.Address === config.contracts.token.address);
   return Promise.all(
     filters
       .map(f => {
@@ -51,7 +52,7 @@ function deserializeTransferredLogs(transaction, filters) {
           filterText
         } = f;
         return deserializeLogs(Logs, filterText)
-          .then(res => res.map(r => formatter(r.deserializeLogResult, transaction)));
+          .then(res => res?.map(r => formatter(r.deserializeLogResult, transaction)) || []);
       })
   );
 }
