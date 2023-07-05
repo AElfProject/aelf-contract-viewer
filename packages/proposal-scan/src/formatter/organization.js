@@ -20,7 +20,7 @@ const {
   Members
 } = require('viewer-orm/model/members');
 const {
-  deserializeLogs
+  deserializeLogs, caAccountCallDataFilterFormatter
 } = require('../utils');
 const config = require('../config');
 
@@ -33,7 +33,7 @@ async function organizationCreatedFormatter(transaction) {
   } = transaction;
   const {
     From
-  } = Transaction;
+  } = await caAccountCallDataFilterFormatter(Transaction);
   const logResults = await deserializeLogs(Logs, 'OrganizationCreated');
   return Promise.all(logResults.map(log => {
     const {

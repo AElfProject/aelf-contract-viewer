@@ -136,6 +136,41 @@ function asyncFilter(array, predicate, ...args) {
     .then(results => array.filter((_, i) => results[i]));
 }
 
+const CONTRACT_TEMP_LIST = {};
+async function caAccountCallDataFilterFormatter({
+  From, To, MethodName, Params
+}) {
+  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
+  if (isCaCall) {
+    const paramsOfCaCall = parseParams(Params);
+    const {
+      caHash, methodName, args, contractAddress
+    } = paramsOfCaCall;
+    const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
+      caHash
+    });
+    if (!CONTRACT_TEMP_LIST[contractAddress]) {
+      CONTRACT_TEMP_LIST[contractAddress] = await config.aelf.chain.contractAt(contractAddress, config.wallet);
+      console.log('create a new contract:', contractAddress);
+    }
+    // eg: const contractInstance = config.contracts.zero.contract
+    // const params = await contractInstance[methodName].unpackPackedInput(Buffer.from(args, 'base64'));
+    const params = await CONTRACT_TEMP_LIST[contractAddress][methodName].unpackPackedInput(Buffer.from(args, 'base64'));
+    return {
+      From: holderInfo.caAddress,
+      To: contractAddress,
+      MethodName: methodName,
+      Params: stringifyParams(params)
+    };
+  }
+  return {
+    From,
+    To,
+    MethodName,
+    Params
+  };
+}
+
 module.exports = {
   deserializeLogs,
   sleep,
@@ -143,5 +178,6 @@ module.exports = {
   stringifyParams,
   formatTimestamp,
   asyncFilter,
-  deserializeContract
+  deserializeContract,
+  caAccountCallDataFilterFormatter
 };
