@@ -131,7 +131,6 @@ class TokensController extends Controller {
       });
 
       const _list = list.map(item => ({
-        ...item,
         ...(unConfirmedTxsMap[item.txId] || {}),
         ...(confirmedTxsMap[item.txId] || {}),
       }));
