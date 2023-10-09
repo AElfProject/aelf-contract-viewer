@@ -130,11 +130,12 @@ class TokensController extends Controller {
         unConfirmedTxsMap[tx.txId] = tx.toJSON();
       });
 
-      const _list = list.map(item => ({
+      let _list = list.map(item => ({
+        ...item,
         ...(unConfirmedTxsMap[item.txId] || {}),
         ...(confirmedTxsMap[item.txId] || {}),
       }));
-
+      _list = _list.filter(item => item.addressTo && item.addressFrom);
 
       this.sendBody({
         list: _list,
