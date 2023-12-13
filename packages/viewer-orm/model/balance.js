@@ -99,7 +99,12 @@ class Balance extends Model {
         [fn('COUNT', col('symbol')), 'holders'],
         [fn('SUM', col('count')), 'transfers']
       ],
-      group: 'symbol'
+      group: 'symbol',
+      where: {
+        balance: {
+          [Op.gt]: 0
+        }
+      }
     });
   }
 
@@ -167,7 +172,12 @@ class Balance extends Model {
         [fn('COUNT', col('symbol')), 'holders'],
         [fn('SUM', col('count')), 'transfers']
       ],
-      group: 'symbol'
+      group: 'symbol',
+      where: {
+        balance: {
+          [Op.gt]: 0
+        }
+      }
     });
   }
 
@@ -178,7 +188,10 @@ class Balance extends Model {
         [fn('SUM', col('count')), 'transfers']
       ],
       where: {
-        symbol
+        symbol,
+        balance: {
+          [Op.gt]: 0
+        }
       }
     });
     if (!result) {
