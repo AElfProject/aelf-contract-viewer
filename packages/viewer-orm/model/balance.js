@@ -92,6 +92,8 @@ class Balance extends Model {
     };
   }
 
+  // @Deprecated: can not deal the holders which balance > 0 and add the all transfers count
+  // use getHoldersAndTransfersCountBySymbols instead
   static async getCountBySymbols() {
     return Balance.findAll({
       attributes: [
@@ -99,12 +101,47 @@ class Balance extends Model {
         [fn('COUNT', col('symbol')), 'holders'],
         [fn('SUM', col('count')), 'transfers']
       ],
+      group: 'symbol'
+    });
+  }
+
+  static async getHoldersAndTransfersCountBySymbols() {
+    const holdersPromise = Balance.getHoldersBySymbols();
+    const transfersCountPromise = Balance.getTransfersCountBySymbols();
+    const result = await Promise.all([holdersPromise, transfersCountPromise]);
+    const holders = result[0];
+    const transfersCount = result[1];
+    return transfersCount.map(item => {
+      const holdersMatched = holders.find(v => v.symbol === item.symbol).holders;
+      return {
+        ...item,
+        holders: holdersMatched
+      };
+    });
+  }
+
+  static async getHoldersBySymbols() {
+    return Balance.findAll({
+      attributes: [
+        'symbol',
+        [fn('COUNT', col('symbol')), 'holders'],
+      ],
       group: 'symbol',
       where: {
         balance: {
           [Op.gt]: 0
         }
       }
+    });
+  }
+
+  static async getTransfersCountBySymbols() {
+    return Balance.findAll({
+      attributes: [
+        'symbol',
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      group: 'symbol'
     });
   }
 
@@ -181,6 +218,8 @@ class Balance extends Model {
     });
   }
 
+  // @Deprecated: can not deal the holders which balance > 0 and add the all transfers count
+  // use getHoldersAndTransfersCountBySymbol instead
   static async getSymbolCount(symbol) {
     const result = await Balance.findOne({
       attributes: [
@@ -188,10 +227,50 @@ class Balance extends Model {
         [fn('SUM', col('count')), 'transfers']
       ],
       where: {
+        symbol
+      }
+    });
+    if (!result) {
+      return {};
+    }
+    return result.toJSON();
+  }
+
+  static async getHoldersAndTransfersCountBySymbol(symbol) {
+    const holdersPromise = Balance.getHoldersBySymbol(symbol);
+    const transfersCountPromise = Balance.getTransfersCountBySymbol(symbol);
+    const result = await Promise.all([holdersPromise, transfersCountPromise]);
+    return {
+      ...result[0],
+      ...result[1]
+    };
+  }
+
+  static async getHoldersBySymbol(symbol) {
+    const result = await Balance.findOne({
+      attributes: [
+        [fn('COUNT', 1), 'holders'],
+      ],
+      where: {
         symbol,
         balance: {
           [Op.gt]: 0
         }
+      }
+    });
+    if (!result) {
+      return {};
+    }
+    return result.toJSON();
+  }
+
+  static async getTransfersCountBySymbol(symbol) {
+    const result = await Balance.findOne({
+      attributes: [
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      where: {
+        symbol
       }
     });
     if (!result) {

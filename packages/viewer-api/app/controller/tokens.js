@@ -158,7 +158,8 @@ class TokensController extends Controller {
         symbol
       } = ctx.request.query;
       const tokenInfo = await app.model.Tokens.getTokenInfo(symbol);
-      const balanceInfo = await app.model.Balance.getSymbolCount(symbol);
+      // const balanceInfo = await app.model.Balance.getSymbolCount(symbol); @Deprecated
+      const balanceInfo = await app.model.Balance.getHoldersAndTransfersCountBySymbol(symbol);
       this.sendBody({
         ...(tokenInfo || {}),
         ...balanceInfo
