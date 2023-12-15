@@ -112,7 +112,11 @@ class Balance extends Model {
     const holders = result[0];
     const transfersCount = result[1];
     return transfersCount.map(item => {
-      const holdersMatched = holders.find(v => v.symbol === item.symbol).holders;
+      const itemTemp = item.toJSON();
+      const holdersMatched = holders.find(holder => {
+        const holderTemp = holder.toJSON();
+        return holderTemp.symbol === itemTemp.symbol;
+      }).holders;
       return {
         ...item,
         holders: holdersMatched

@@ -155,7 +155,7 @@ class Tokens extends Model {
     }
     // let tokenCount = await Balance.getCountBySymbols(); @Deprecated
     let tokenCount = await Balance.getHoldersAndTransfersCountBySymbols();
-    tokenCount = tokenCount.map(v => v.toJSON()).reduce((acc, v) => ({
+    tokenCount = tokenCount.reduce((acc, v) => ({
       ...acc,
       [v.symbol]: v
     }), {});
