@@ -113,14 +113,19 @@ class Balance extends Model {
     const transfersCount = result[1];
     return transfersCount.map(item => {
       const itemTemp = item.toJSON();
-      const holdersMatched = holders.find(holder => {
-        const holderTemp = holder.toJSON();
-        return holderTemp.symbol === itemTemp.symbol;
-      }).holders;
-      return {
-        ...item,
-        holders: holdersMatched
+      let transfersCountTemp = {
+        ...itemTemp
       };
+      holders.forEach(holder => {
+        const holderTemp = holder.toJSON();
+        if (holderTemp.symbol === itemTemp.symbol) {
+          transfersCountTemp = {
+            ...transfersCountTemp,
+            ...holderTemp
+          };
+        }
+      });
+      return transfersCountTemp;
     });
   }
 
