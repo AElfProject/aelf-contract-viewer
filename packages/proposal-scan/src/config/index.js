@@ -39,7 +39,7 @@ function getContractAddress(contracts) {
     let address;
     // We can not use GetContractAddressByName to get the address of Portkey.Contracts.CA
     // We set the address of Portkey.Contracts.CA inf config.contracts
-    if (key === 'Portkey.Contracts.CA') {
+    if (['Portkey.Contracts.CA', 'Portkey.Contracts.CA.V2'].includes(key)) {
       address = value;
     } else {
       address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {

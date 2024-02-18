@@ -101,11 +101,27 @@ async function organizationNotFound(orgAddress, proposalType) {
 
 const PROPOSAL_CREATED_INPUT = Object.keys(config.contracts.parliament.contract.CreateProposal.inputTypeInfo.fields);
 
+function checkAndRetrieveAAInfo(toAddress, methodName) {
+  console.log('isAAForwardCall toAddress：', toAddress, methodName);
+  const output = {};
+  const portkeyContractsAddresses = Object.values(config.contractsPortkeyVersions);
+  const portkeySelectedIndex = portkeyContractsAddresses.findIndex(value => toAddress === value);
+  const isPortkey = portkeySelectedIndex !== -1;
+  output.isAAForwardCall = isPortkey && methodName === 'ManagerForwardCall';
+
+  if (output.isAAForwardCall) {
+    const portkeyContractsKeyPair = Object.entries(config.contractsPortkeyVersions);
+    output.portkeyContract = config.contracts[`${portkeyContractsKeyPair[portkeySelectedIndex][0]}`].contract;
+  }
+  console.log('portkeySelectedIndex: ', portkeySelectedIndex);
+  return output;
+}
+
 async function proposalCreatedCaAccountCallFilterFormatter({
   From, To, MethodName, Params
 }) {
-  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
-  if (isCaCall) {
+  const { isAAForwardCall, portkeyContract } = checkAndRetrieveAAInfo(To, MethodName);
+  if (isAAForwardCall) {
     const paramsOfCaCall = parseParams(Params);
     const { caHash, methodName, args } = paramsOfCaCall;
     const isCaCallOfProposal = [
@@ -114,7 +130,7 @@ async function proposalCreatedCaAccountCallFilterFormatter({
       'ReleaseApprovedContract', 'ReleaseCodeCheckedContract'
     ].includes(methodName);
     if (isCaCallOfProposal) {
-      const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
+      const holderInfo = await portkeyContract.GetHolderInfo.call({
         caHash
       });
       const params = await config.contracts.zero.contract[methodName].unpackPackedInput(Buffer.from(args, 'base64'));
