@@ -35,7 +35,7 @@ function getContractAddress(contracts) {
 
   Object.entries(contracts).forEach(([key, value]) => {
     let address = value;
-    if (!['Portkey.Contracts.CA'].includes(key)) {
+    if (!['Portkey.Contracts.CA', 'Portkey.Contracts.CA.V2'].includes(key)) {
       address = genContract.GetContractAddressByName.call(AElf.utils.sha256(value), {
         sync: true
       });

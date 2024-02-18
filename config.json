@@ -8,7 +8,12 @@
     "association": "AElf.ContractNames.Association",
     "crossChain": "AElf.ContractNames.CrossChain",
     "token": "AElf.ContractNames.Token",
-    "Portkey.Contracts.CA": "Portkey.Contracts.CA.Address"
+    "Portkey.Contracts.CA": "iupiTuL2cshxB9UNauXNXe9iyCcqka7jCotodcEHGpNXeLzqG",
+    "Portkey.Contracts.CA.V2": "238X6iw1j8YKcHvkDYVtYVbuYk2gJnK8UoNpVCtssynSpVC8hb"
+  },
+  "contractsPortkeyVersions": {
+    "Portkey.Contracts.CA": "iupiTuL2cshxB9UNauXNXe9iyCcqka7jCotodcEHGpNXeLzqG",
+    "Portkey.Contracts.CA.V2": "238X6iw1j8YKcHvkDYVtYVbuYk2gJnK8UoNpVCtssynSpVC8hb"
   },
   "contractNames": [
     "AElf.ContractNames.Election",
