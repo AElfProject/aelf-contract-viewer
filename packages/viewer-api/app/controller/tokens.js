@@ -68,8 +68,8 @@ class TokensController extends Controller {
         pageNum,
         search = ''
       } = ctx.request.query;
-      if (pageNum > 100) {
-        throw Error('pageNum should be less than 100');
+      if (pageSize > 100) {
+        throw Error('pageSize should be less than 100');
       }
 
       const result = await app.redis.get('aelfContractViewer_tokenList');
