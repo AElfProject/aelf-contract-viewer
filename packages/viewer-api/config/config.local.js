@@ -2,7 +2,7 @@
  * @file config file
  * @author atom-yang
  */
-const { constants, scan } = require('../../../config');
+const { constants, scan, redis } = require('../../../config');
 
 module.exports = appInfo => {
   exports = {};
@@ -10,6 +10,15 @@ module.exports = appInfo => {
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_development';
+
+  config.redis = {
+    client: {
+      port: redis.port, // Redis port
+      host: redis.host, // Redis host
+      db: redis.db,
+      password: null
+    }
+  };
 
   // add your config here
   config.middleware = [];

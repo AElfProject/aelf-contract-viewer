@@ -22,6 +22,7 @@
     "egg-scripts": "^2.11.1",
     "egg-swagger": "^1.2.2",
     "egg-validate": "^2.0.2",
+    "egg-redis": "^2.4.0",
     "lodash": "^4.17.15",
     "viewer-orm": "^0.1.0"
   },

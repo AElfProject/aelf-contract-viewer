@@ -106,27 +106,21 @@ class Balance extends Model {
   }
 
   static async getHoldersAndTransfersCountBySymbols() {
-    const holdersPromise = Balance.getHoldersBySymbols();
-    const transfersCountPromise = Balance.getTransfersCountBySymbols();
-    const result = await Promise.all([holdersPromise, transfersCountPromise]);
-    const holders = result[0];
-    const transfersCount = result[1];
-    return transfersCount.map(item => {
-      const itemTemp = item.toJSON();
-      let transfersCountTemp = {
-        ...itemTemp
-      };
-      holders.forEach(holder => {
-        const holderTemp = holder.toJSON();
-        if (holderTemp.symbol === itemTemp.symbol) {
-          transfersCountTemp = {
-            ...transfersCountTemp,
-            ...holderTemp
-          };
+    const result = await Balance.findAll({
+      attributes: [
+        'symbol',
+        [fn('COUNT', col('symbol')), 'holders'],
+        [fn('SUM', col('count')), 'transfers']
+      ],
+      group: 'symbol',
+      where: {
+        balance: {
+          [Op.gt]: 0
         }
-      });
-      return transfersCountTemp;
+      }
     });
+
+    return result.map(item => item.toJSON());
   }
 
   static async getHoldersBySymbols() {

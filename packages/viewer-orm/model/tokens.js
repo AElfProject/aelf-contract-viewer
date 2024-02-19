@@ -133,7 +133,7 @@ class Tokens extends Model {
     });
   }
 
-  static async getAllToken(pageNum, pageSize, search) {
+  static async getAllToken(search) {
     let whereCondition = {};
     if (search) {
       whereCondition = {
@@ -159,7 +159,7 @@ class Tokens extends Model {
       ...acc,
       [v.symbol]: v
     }), {});
-    const offset = (pageNum - 1) * pageSize;
+
     list = list.map(v => {
       const info = tokenCount[v.symbol];
       return {
@@ -173,7 +173,7 @@ class Tokens extends Model {
         holders: info && info.holders || 0,
         transfers: info && info.transfers || 0
       };
-    }).sort((a, b) => b.holders - a.holders).slice(offset, offset + pageSize);
+    }).sort((a, b) => b.holders - a.holders);
     return {
       total,
       list
