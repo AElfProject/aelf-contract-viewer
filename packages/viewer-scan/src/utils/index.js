@@ -73,9 +73,25 @@ function removeFailedOrOtherMethod(transaction) {
     && relatedMethods.includes(method);
 }
 
+function checkAndRetrieveAAInfo(toAddress, methodName) {
+  console.log('isAAForwardCall toAddress：', toAddress, methodName);
+  const output = {};
+  const portkeyContractsAddresses = Object.values(config.contractsPortkeyVersions);
+  const portkeySelectedIndex = portkeyContractsAddresses.findIndex(value => toAddress === value);
+  const isPortkey = portkeySelectedIndex !== -1;
+  output.isAAForwardCall = isPortkey && methodName === 'ManagerForwardCall';
+
+  if (output.isAAForwardCall) {
+    const portkeyContractsKeyPair = Object.entries(config.contractsPortkeyVersions);
+    output.portkeyContract = config.contracts[`${portkeyContractsKeyPair[portkeySelectedIndex][0]}`].contract;
+  }
+  console.log('portkeySelectedIndex: ', portkeySelectedIndex);
+  return output;
+}
+
 function caAccountCallMethodAndToFormatter({ To, MethodName, Params }) {
-  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
-  if (isCaCall) {
+  const { isAAForwardCall } = checkAndRetrieveAAInfo(To, MethodName);
+  if (isAAForwardCall) {
     const paramsOfCaCall = parseParams(Params);
     const { contractAddress, methodName } = paramsOfCaCall;
     return {
@@ -93,13 +109,13 @@ const CONTRACT_TEMP_LIST = {};
 async function caAccountCallDataFilterFormatter({
   From, To, MethodName, Params
 }) {
-  const isCaCall = To === config.contracts['Portkey.Contracts.CA'].address && MethodName === 'ManagerForwardCall';
-  if (isCaCall) {
+  const { isAAForwardCall, portkeyContract } = checkAndRetrieveAAInfo(To, MethodName);
+  if (isAAForwardCall) {
     const paramsOfCaCall = parseParams(Params);
     const {
       caHash, methodName, args, contractAddress
     } = paramsOfCaCall;
-    const holderInfo = await config.contracts['Portkey.Contracts.CA'].contract.GetHolderInfo.call({
+    const holderInfo = await portkeyContract.GetHolderInfo.call({
       caHash
     });
     if (!CONTRACT_TEMP_LIST[contractAddress]) {
@@ -169,8 +185,8 @@ function isZeroProposalCreated(methodName, to) {
 
 function isProposalCreatedByCAAccount(methodName, to, params) {
   console.log('isProposalCreatedByCAAccount----------', methodName, to);
-  if (to === config.contracts['Portkey.Contracts.CA'].address
-    && methodName === 'ManagerForwardCall') {
+  const { isAAForwardCall } = checkAndRetrieveAAInfo(to, methodName);
+  if (isAAForwardCall) {
     let paramsJson;
     try {
       paramsJson = JSON.parse(params);

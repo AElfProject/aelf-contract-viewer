@@ -54,6 +54,7 @@ class Scanner {
     this.addressTo = [
       config.contracts.zero.address,
       config.contracts['Portkey.Contracts.CA'].address,
+      config.contracts['Portkey.Contracts.CA.V2'].address,
       config.controller.contractAddress
     ];
   }
