@@ -72,29 +72,33 @@ class TokensController extends Controller {
         throw Error('pageSize should be less than 100');
       }
 
+      const getAndUpdateCache = async function(result) {
+        const updateLock = await app.redis.get('aelfContractViewer_tokenList_lock') || 'unlock';
+        console.log('all token updateLock:', updateLock);
+        const dataNow = Date.now();
+        const interval = dataNow - (result ? JSON.parse(result).timestamp : 0);
+        const cacheExpire = 60000 * 5;
+        const isCacheExpire = interval > cacheExpire;
+        if ((updateLock === 'unlock' && isCacheExpire) || !result) {
+          const allTokenInfo = await app.model.Tokens.getAllToken(search);
+          await app.redis.set('aelfContractViewer_tokenList_lock', 'locked');
+          const output = {
+            ...allTokenInfo,
+            timestamp: Date.now()
+          };
+          await app.redis.set('aelfContractViewer_tokenList', JSON.stringify(output));
+          await app.redis.set('aelfContractViewer_tokenList_lock', 'unlock');
+          return getListByPage(output, pageNum, pageSize);
+        }
+      };
+
       const result = await app.redis.get('aelfContractViewer_tokenList');
-      const updateLock = await app.redis.get('aelfContractViewer_tokenList_lock') || 'unlock';
-      console.log('all token updateLock:', updateLock);
       if (result) {
         this.sendBody(getListByPage(JSON.parse(result), pageNum, pageSize));
-      }
-
-      const dataNow = Date.now();
-      const interval = dataNow - (result ? JSON.parse(result).timestamp : 0);
-      const cacheExpire = 60000 * 5;
-      const isCacheExpire = interval > cacheExpire;
-      if ((updateLock === 'unlock' && isCacheExpire) || !result) {
-        const allTokenInfo = await app.model.Tokens.getAllToken(search);
-        await app.redis.set('aelfContractViewer_tokenList_lock', 'locked');
-        const output = {
-          ...allTokenInfo,
-          timestamp: Date.now()
-        };
-        await app.redis.set('aelfContractViewer_tokenList', JSON.stringify(output));
-        await app.redis.set('aelfContractViewer_tokenList_lock', 'unlock');
-        if (!result) {
-          this.sendBody(getListByPage(output, pageNum, pageSize));
-        }
+        getAndUpdateCache(result);
+      } else {
+        const output = await getAndUpdateCache(result);
+        this.sendBody(output);
       }
     } catch (e) {
       this.error(e);
