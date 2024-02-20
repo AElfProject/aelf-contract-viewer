@@ -111,22 +111,22 @@ class Balance extends Model {
     const result = await Promise.all([holdersPromise, transfersCountPromise]);
     const holders = result[0];
     const transfersCount = result[1];
-    return transfersCount.map(item => {
+
+    const output = {};
+    transfersCount.forEach(item => {
       const itemTemp = item.toJSON();
-      let transfersCountTemp = {
+      output[itemTemp.symbol] = {
         ...itemTemp
       };
-      holders.forEach(holder => {
-        const holderTemp = holder.toJSON();
-        if (holderTemp.symbol === itemTemp.symbol) {
-          transfersCountTemp = {
-            ...transfersCountTemp,
-            ...holderTemp
-          };
-        }
-      });
-      return transfersCountTemp;
     });
+    holders.forEach(item => {
+      const itemTemp = item.toJSON();
+      output[itemTemp.symbol] = {
+        ...output[itemTemp.symbol],
+        ...itemTemp
+      };
+    });
+    return output;
   }
 
   static async getHoldersBySymbols() {

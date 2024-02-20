@@ -15,10 +15,9 @@ const result = {
     path: path.resolve(prefix, 'egg-validate')
   },
   redis: {
-    port: 6379,
-    host: '127.0.0.1',
+    enable: true,
+    package: 'egg-redis',
     path: path.resolve(prefix, 'egg-redis'),
-    db: 1
   },
   // swagger: {
   //   enable: !isProd,

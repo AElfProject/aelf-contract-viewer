@@ -45,6 +45,16 @@ const getTokenInfoRules = {
   }
 };
 
+function getListByPage(listInfo, pageNum, pageSize) {
+  const { list } = listInfo;
+  const start = (pageNum - 1) * pageSize;
+  const end = start + pageSize;
+  return {
+    ...listInfo,
+    list: list.slice(start, end)
+  };
+}
+
 class TokensController extends Controller {
   async getList() {
     const { ctx, app } = this;
@@ -58,14 +68,38 @@ class TokensController extends Controller {
         pageNum,
         search = ''
       } = ctx.request.query;
-      const {
-        list,
-        total
-      } = await app.model.Tokens.getAllToken(+pageNum, +pageSize, search);
-      this.sendBody({
-        list,
-        total
-      });
+      if (pageSize > 100) {
+        throw Error('pageSize should be less than 100');
+      }
+
+      const getAndUpdateCache = async function(result) {
+        const updateLock = await app.redis.get('aelfContractViewer_tokenList_lock') || 'unlock';
+        console.log('all token updateLock:', updateLock);
+        const dataNow = Date.now();
+        const interval = dataNow - (result ? JSON.parse(result).timestamp : 0);
+        const cacheExpire = 60000 * 5;
+        const isCacheExpire = interval > cacheExpire;
+        if ((updateLock === 'unlock' && isCacheExpire) || !result) {
+          const allTokenInfo = await app.model.Tokens.getAllToken(search);
+          await app.redis.set('aelfContractViewer_tokenList_lock', 'locked');
+          const output = {
+            ...allTokenInfo,
+            timestamp: Date.now()
+          };
+          await app.redis.set('aelfContractViewer_tokenList', JSON.stringify(output));
+          await app.redis.set('aelfContractViewer_tokenList_lock', 'unlock');
+          return getListByPage(output, pageNum, pageSize);
+        }
+      };
+
+      const result = await app.redis.get('aelfContractViewer_tokenList');
+      if (result) {
+        this.sendBody(getListByPage(JSON.parse(result), pageNum, pageSize));
+        getAndUpdateCache(result);
+      } else {
+        const output = await getAndUpdateCache(result);
+        this.sendBody(output);
+      }
     } catch (e) {
       this.error(e);
       this.sendBody();

@@ -133,7 +133,7 @@ class Tokens extends Model {
     });
   }
 
-  static async getAllToken(pageNum, pageSize, search) {
+  static async getAllToken(search) {
     let whereCondition = {};
     if (search) {
       whereCondition = {
@@ -154,12 +154,11 @@ class Tokens extends Model {
       };
     }
     // let tokenCount = await Balance.getCountBySymbols(); @Deprecated
-    let tokenCount = await Balance.getHoldersAndTransfersCountBySymbols();
-    tokenCount = tokenCount.reduce((acc, v) => ({
-      ...acc,
-      [v.symbol]: v
-    }), {});
-    const offset = (pageNum - 1) * pageSize;
+    const startTime = Date.now();
+    const tokenCount = await Balance.getHoldersAndTransfersCountBySymbols();
+    console.log('getHoldersAndTransfersCountBySymbols time:', (Date.now() - startTime) / 1000, 's');
+
+    const startTimeList = Date.now();
     list = list.map(v => {
       const info = tokenCount[v.symbol];
       return {
@@ -173,7 +172,8 @@ class Tokens extends Model {
         holders: info && info.holders || 0,
         transfers: info && info.transfers || 0
       };
-    }).sort((a, b) => b.holders - a.holders).slice(offset, offset + pageSize);
+    }).sort((a, b) => b.holders - a.holders);
+    console.log('getAllToken time:', (Date.now() - startTimeList) / 1000, 's');
     return {
       total,
       list
