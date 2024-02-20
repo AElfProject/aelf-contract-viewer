@@ -154,8 +154,11 @@ class Tokens extends Model {
       };
     }
     // let tokenCount = await Balance.getCountBySymbols(); @Deprecated
+    const startTime = Date.now();
     const tokenCount = await Balance.getHoldersAndTransfersCountBySymbols();
+    console.log('getHoldersAndTransfersCountBySymbols time:', (Date.now() - startTime) / 1000, 's');
 
+    const startTimeList = Date.now();
     list = list.map(v => {
       const info = tokenCount[v.symbol];
       return {
@@ -170,6 +173,7 @@ class Tokens extends Model {
         transfers: info && info.transfers || 0
       };
     }).sort((a, b) => b.holders - a.holders);
+    console.log('getAllToken time:', (Date.now() - startTimeList) / 1000, 's');
     return {
       total,
       list
