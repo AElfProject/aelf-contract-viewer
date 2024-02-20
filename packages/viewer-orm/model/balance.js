@@ -106,21 +106,47 @@ class Balance extends Model {
   }
 
   static async getHoldersAndTransfersCountBySymbols() {
-    const result = await Balance.findAll({
-      attributes: [
-        'symbol',
-        [fn('COUNT', col('symbol')), 'holders'],
-        [fn('SUM', col('count')), 'transfers']
-      ],
-      group: 'symbol',
-      where: {
-        balance: {
-          [Op.gt]: 0
-        }
-      }
-    });
+    const holdersPromise = Balance.getHoldersBySymbols();
+    const transfersCountPromise = Balance.getTransfersCountBySymbols();
+    const result = await Promise.all([holdersPromise, transfersCountPromise]);
+    const holders = result[0];
+    const transfersCount = result[1];
 
-    return result.map(item => item.toJSON());
+    const output = {};
+    transfersCount.forEach(item => {
+      const itemTemp = item.toJSON();
+      output[itemTemp.symbol] = {
+        ...itemTemp
+      };
+    });
+    holders.forEach(item => {
+      const itemTemp = item.toJSON();
+      output[itemTemp.symbol] = {
+        ...output[itemTemp.symbol],
+        ...itemTemp
+      };
+    });
+    return output;
+    // // const holdersFormatted = holders.map(item => item.toJSON());
+    // // const holdersFormatted = holders.map(item => item.toJSON());
+    //
+    // const resultTemp = await Balance.findAll({
+    //   attributes: [
+    //     'symbol',
+    //     [fn('COUNT', col('symbol')), 'holders'],
+    //     [fn('SUM', col('count')), 'transfers']
+    //   ],
+    //   group: 'symbol',
+    //   where: {
+    //     balance: {
+    //       [Op.gt]: 0
+    //     }
+    //   }
+    // });
+    //
+    // // console.log('getHoldersAndTransfersCountBySymbols result:', resultTemp);
+    //
+    // return resultTemp.map(item => item.toJSON());
   }
 
   static async getHoldersBySymbols() {
