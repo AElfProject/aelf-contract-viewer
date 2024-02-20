@@ -127,26 +127,6 @@ class Balance extends Model {
       };
     });
     return output;
-    // // const holdersFormatted = holders.map(item => item.toJSON());
-    // // const holdersFormatted = holders.map(item => item.toJSON());
-    //
-    // const resultTemp = await Balance.findAll({
-    //   attributes: [
-    //     'symbol',
-    //     [fn('COUNT', col('symbol')), 'holders'],
-    //     [fn('SUM', col('count')), 'transfers']
-    //   ],
-    //   group: 'symbol',
-    //   where: {
-    //     balance: {
-    //       [Op.gt]: 0
-    //     }
-    //   }
-    // });
-    //
-    // // console.log('getHoldersAndTransfersCountBySymbols result:', resultTemp);
-    //
-    // return resultTemp.map(item => item.toJSON());
   }
 
   static async getHoldersBySymbols() {
