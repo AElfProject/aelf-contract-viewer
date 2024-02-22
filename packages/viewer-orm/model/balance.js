@@ -193,6 +193,34 @@ class Balance extends Model {
     return result || [];
   }
 
+  static async getTotalOfBalanceByOwner(owner, search = '') {
+    let whereCondition = {
+      owner,
+      balance: {
+        [Op.gt]: 0
+      }
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        symbol: {
+          [Op.substring]: search
+        }
+      };
+    }
+
+    const result = await Balance.findAll({
+      attributes: [
+        [fn('COUNT', col('symbol')), 'total'],
+      ],
+      order: [
+        ['balance', 'DESC']
+      ],
+      where: whereCondition,
+    });
+    return result;
+  }
+
   static async addOrCreate(item, transaction) {
     const [
       list,

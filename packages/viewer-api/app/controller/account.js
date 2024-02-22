@@ -114,6 +114,40 @@ class AccountController extends Controller {
       this.sendBody();
     }
   }
+
+  async getBalancesByAddressWithTotal() {
+    const { ctx, app } = this;
+    try {
+      const errors = app.validator.validate(getBalancesRules, ctx.request.query);
+      if (errors) {
+        throw errors;
+      }
+      const {
+        address,
+        search = '',
+        pageSize,
+        pageNum,
+      } = ctx.request.query;
+
+      if (pageNum && !pageSize) {
+        throw Error('pageSize is required when pageNum is provided');
+      }
+
+      const list = await app.model.Balance.getBalanceByOwner(address, search, {
+        pageSize,
+        pageNum
+      });
+
+      const total = await app.model.Balance.getTotalOfBalanceByOwner(address, search);
+      this.sendBody({
+        ...total[0].toJSON(),
+        list,
+      });
+    } catch (e) {
+      this.error(e);
+      this.sendBody();
+    }
+  }
 }
 
 module.exports = AccountController;
