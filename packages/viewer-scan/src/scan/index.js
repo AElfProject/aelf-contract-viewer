@@ -201,13 +201,13 @@ class Scanner {
         });
       } else if (eventName === 'CodeUpdated') {
         // eslint-disable-next-line no-await-in-loop
-        const lastUpdated = await Code.getLastUpdated(address);
+        const lastUpdated = await Code.getLastUpdated(address) || {};
         const {
           author: oldAuthor,
           contractName: oldContractName
         } = lastUpdated;
-        contractUpdated.author = oldAuthor;
-        codeData.author = oldAuthor;
+        contractUpdated.author = oldAuthor || author;
+        codeData.author = oldAuthor || author;
         // 上一个name不为空并且这一次name为空的情况下，使用上次的name
         if (+oldContractName !== -1 && +contractName === -1) {
           contractUpdated.contractName = oldContractName;
