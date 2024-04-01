@@ -154,7 +154,7 @@ class Balance extends Model {
     });
   }
 
-  static async getBalanceByOwner(owner, search = '') {
+  static async getBalanceByOwner(owner, search = '', params) {
     let whereCondition = {
       owner,
       balance: {
@@ -169,6 +169,16 @@ class Balance extends Model {
         }
       };
     }
+
+    const {
+      pageSize,
+      pageNum,
+    } = params;
+    const pageSql = pageSize ? {
+      offset: (pageNum - 1) * pageSize,
+      limit: +pageSize
+    } : {};
+
     const result = await Balance.findAll({
       attributes: [
         'symbol',
@@ -177,9 +187,38 @@ class Balance extends Model {
       order: [
         ['balance', 'DESC']
       ],
-      where: whereCondition
+      where: whereCondition,
+      ...pageSql
     });
     return result || [];
+  }
+
+  static async getTotalOfBalanceByOwner(owner, search = '') {
+    let whereCondition = {
+      owner,
+      balance: {
+        [Op.gt]: 0
+      }
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        symbol: {
+          [Op.substring]: search
+        }
+      };
+    }
+
+    const result = await Balance.findAll({
+      attributes: [
+        [fn('COUNT', col('symbol')), 'total'],
+      ],
+      order: [
+        ['balance', 'DESC']
+      ],
+      where: whereCondition,
+    });
+    return result;
   }
 
   static async addOrCreate(item, transaction) {

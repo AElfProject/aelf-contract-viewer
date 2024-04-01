@@ -21,6 +21,7 @@ module.exports = app => {
 
   router.get('/api/viewer/accountList', controller.account.getAccountListBySymbol);
   router.get('/api/viewer/balances', controller.account.getBalancesByAddress);
+  router.get('/api/viewer/balances/v2', controller.account.getBalancesByAddressWithTotal);
 
   router.get('/api/proposal/list', controller.proposals.getList);
   router.get('/api/proposal/appliedList', controller.proposals.appliedProposal);
