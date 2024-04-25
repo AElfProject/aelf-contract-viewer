@@ -84,7 +84,7 @@ class Tokens extends Model {
       whereCondition = {
         ...whereCondition,
         totalSupply: {
-          [Op.gt]: 1
+          [Op.gte]: 2
         }
       };
     }
