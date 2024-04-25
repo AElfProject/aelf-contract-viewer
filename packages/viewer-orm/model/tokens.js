@@ -92,7 +92,7 @@ class Tokens extends Model {
       };
     }
     const list = await Tokens.findAll({
-      attributes: ['symbol', 'decimals', 'totalSupply'],
+      attributes: ['symbol', 'decimals', 'totalSupply', 'supply'],
       where: whereCondition,
       order: [
         ['id', 'ASC']
