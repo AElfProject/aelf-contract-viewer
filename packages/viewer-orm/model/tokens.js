@@ -71,12 +71,20 @@ const tokensDescription = {
 };
 
 class Tokens extends Model {
-  static async getTokenList(search = '') {
+  static async getTokenList(search = '', voteValid = false) {
     let whereCondition = {};
     if (search) {
       whereCondition = {
         symbol: {
           [Op.substring]: search
+        }
+      };
+    }
+    if (voteValid) {
+      whereCondition = {
+        ...whereCondition,
+        totalSupply: {
+          [Op.gt]: 1
         }
       };
     }

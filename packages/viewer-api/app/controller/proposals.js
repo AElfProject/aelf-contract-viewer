@@ -577,9 +577,10 @@ class ProposalsController extends Controller {
         throw errors;
       }
       const {
-        search = ''
+        search = '',
+        voteValid = false,
       } = ctx.request.query;
-      const list = await app.model.Tokens.getTokenList(search);
+      const list = await app.model.Tokens.getTokenList(search, voteValid);
       this.sendBody({
         list
       });
