@@ -98,6 +98,18 @@ class Tokens extends Model {
         ['id', 'ASC']
       ]
     });
+
+    if (voteValid) {
+      return (list || []).filter(item => {
+        const validTotalSupply = new Decimal(item.totalSupply).dividedBy(`1e${item.decimals}`).gt(2);
+        const validSupply = new Decimal(item.supply).dividedBy(`1e${item.decimals}`).gt(2);
+        return validTotalSupply && validSupply;
+      }).map(v => ({
+        ...v.toJSON(),
+        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString()
+      }));
+    }
+
     return (list || []).map(v => ({
       ...v.toJSON(),
       totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString()
