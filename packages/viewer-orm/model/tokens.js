@@ -71,7 +71,7 @@ const tokensDescription = {
 };
 
 class Tokens extends Model {
-  static async getTokenList(search = '') {
+  static async getTokenList(search = '', voteValid = false) {
     let whereCondition = {};
     if (search) {
       whereCondition = {
@@ -80,13 +80,36 @@ class Tokens extends Model {
         }
       };
     }
+    if (voteValid) {
+      whereCondition = {
+        ...whereCondition,
+        totalSupply: {
+          [Op.gt]: 2
+        },
+        supply: {
+          [Op.gt]: 2
+        }
+      };
+    }
     const list = await Tokens.findAll({
-      attributes: ['symbol', 'decimals', 'totalSupply'],
+      attributes: ['symbol', 'decimals', 'totalSupply', 'supply'],
       where: whereCondition,
       order: [
         ['id', 'ASC']
       ]
     });
+
+    if (voteValid) {
+      return (list || []).filter(item => {
+        const validTotalSupply = new Decimal(item.totalSupply).dividedBy(`1e${item.decimals}`).gt(2);
+        const validSupply = new Decimal(item.supply).dividedBy(`1e${item.decimals}`).gt(2);
+        return validTotalSupply && validSupply;
+      }).map(v => ({
+        ...v.toJSON(),
+        totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString()
+      }));
+    }
+
     return (list || []).map(v => ({
       ...v.toJSON(),
       totalSupply: new Decimal(v.totalSupply).dividedBy(`1e${v.decimals}`).toString()
