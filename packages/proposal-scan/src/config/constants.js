@@ -279,16 +279,23 @@ const NFT_TOKEN_SUPPLY_CHANGED_EVENT = [
   },
 ];
 
+function bloomCheckOfficialGovernance(bloom) {
+  return AElf.utils.isAddressInBloom(bloom, config.contracts.parliament.address)
+    || AElf.utils.isAddressInBloom(bloom, config.contracts.referendum.address)
+    || AElf.utils.isAddressInBloom(bloom, config.contracts.association.address);
+}
 const listeners = [
   {
     checker(bloom) {
-      return AElf.utils.isEventInBloom(bloom, 'OrganizationCreated');
+      return AElf.utils.isEventInBloom(bloom, 'OrganizationCreated')
+        && bloomCheckOfficialGovernance(bloom);
     },
     tag: SCAN_TAGS.ORGANIZATION_CREATED
   },
   {
     checker(bloom) {
-      return AElf.utils.isEventInBloom(bloom, 'ProposalCreated');
+      return AElf.utils.isEventInBloom(bloom, 'ProposalCreated')
+        && bloomCheckOfficialGovernance(bloom);
     },
     tag: SCAN_TAGS.PROPOSAL_CREATED
   },
@@ -308,7 +315,8 @@ const listeners = [
   },
   {
     checker(bloom) {
-      return AElf.utils.isEventInBloom(bloom, 'ProposalReleased');
+      return AElf.utils.isEventInBloom(bloom, 'ProposalReleased')
+        && bloomCheckOfficialGovernance(bloom);
     },
     tag: SCAN_TAGS.PROPOSAL_RELEASED
   },
