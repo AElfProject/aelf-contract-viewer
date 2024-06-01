@@ -17,7 +17,7 @@
     "undo-all:dev": "cross-env NODE_ENV=development sequelize db:migrate:undo:all"
   },
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.2",
     "lodash": "^4.17.15",
     "mysql2": "^2.1.0"
   },
