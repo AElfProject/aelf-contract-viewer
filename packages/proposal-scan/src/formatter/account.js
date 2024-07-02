@@ -198,29 +198,13 @@ async function getNFTProtocolInfo(symbols, type, maxQuery = 3) {
   return results;
 }
 
-let TOKEN_DECIMALS = {};
-let FETCHING_TOKEN_LIST = false;
+const TOKEN_DECIMALS = {};
 
 async function getTokenDecimal(symbol) {
   console.log('getTokenDecimal: ', symbol);
-  if (
-    Object.keys(TOKEN_DECIMALS).length === 0
-  ) {
-    if (!FETCHING_TOKEN_LIST) {
-      FETCHING_TOKEN_LIST = Tokens.getTokenList();
-    }
-    const tokenList = await FETCHING_TOKEN_LIST;
-    TOKEN_DECIMALS = {
-      ...TOKEN_DECIMALS,
-      ...tokenList.reduce((acc, t) => {
-        const data = t.toJSON ? t.toJSON() : t;
-        return {
-          ...acc,
-          [data.symbol]: data.decimals
-        };
-      }, {})
-    };
-  } else if (!TOKEN_DECIMALS[symbol]) {
+  // Too many token in the system,
+  // we check it from contract every time but not select from sql.
+  if (!TOKEN_DECIMALS[symbol]) {
     const {
       decimals: tokenDecimals
     } = await config.contracts.token.contract.GetTokenInfo.call({
