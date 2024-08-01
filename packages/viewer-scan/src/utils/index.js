@@ -440,15 +440,24 @@ async function contractTransactionFormatted(transaction) {
   ) {
     const proposalId = params.proposalId || params;
     // 通过提案进行的合约部署或者更新
-    const {
-      code,
-      contractName
-    } = await Proposal.findOne({
+    const proposalInfo = await Proposal.findOne({
       attributes: ['code', 'contractName'],
       where: {
         proposalId
       }
     });
+
+    if (!proposalInfo) {
+      return {
+        ...result,
+        code: '',
+      };
+    }
+
+    const {
+      code,
+      contractName
+    } = proposalInfo;
 
     const contractNameFromContractNames = await ContractNames.getContractName(proposalId);
     const contractNameOutput = contractNameFromContractNames && (`${contractName}` === '-1')
