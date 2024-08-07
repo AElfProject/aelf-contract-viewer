@@ -448,9 +448,17 @@ async function contractTransactionFormatted(transaction) {
     });
 
     if (!proposalInfo) {
+      let code = '';
+      if (result.codeHash) {
+        const _contractInfo = await config.contracts.zero.contract.GetSmartContractRegistrationByCodeHash.call(
+          result.codeHash
+        );
+        code = _contractInfo.code || '';
+      }
+
       return {
         ...result,
-        code: '',
+        code,
       };
     }
 
