@@ -3083,10 +3083,10 @@ aelf-sdk@^3.2.29:
     scryptsy "^2.1.0"
     xmlhttprequest "^1.8.0"
 
-aelf-sdk@^3.2.32:
-  version "3.2.32"
-  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.32.tgz#d577707821fa8510ded5ae65147aecec10956d93"
-  integrity sha512-FrQTKCxWkNdzy7Rc6JFFKyjuI8nI+VFBkKNmh36wfC3ccidVUhsvPoUndyg2ngdPrHqO7SFj8QNkrjUPYfbR0g==
+aelf-sdk@^3.2.40:
+  version "3.2.41"
+  resolved "https://registry.yarnpkg.com/aelf-sdk/-/aelf-sdk-3.2.41.tgz#6e2df4cd57e884a7c06b1cc1fa73634e7306e3cd"
+  integrity sha512-1Iq/wTNRUMYMgptzxNgWVFq9MJAYBkX/Q+XU+emZIpx8gqAE+fN3ph1FnWEMjnzkg47HAKwXmXYYmc95kWMAAw==
   dependencies:
     "@aelfqueen/protobufjs" "^6.8.9"
     "@babel/runtime" "^7.4.5"
@@ -6519,9 +6519,9 @@ decimal.js@^10.2.0:
   integrity sha512-vDPw+rDgn3bZe1+F/pyEwb1oMG2XTlRVgAa6B4KccTEpYgF8w6eQllVbQcfIJnZyvzFtFpxnpGtx8dd7DJp/Rw==
 
 decode-uri-component@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
-  integrity sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU=
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.2.tgz#e69dbe25d37941171dd540e024c444cd5188e1e9"
+  integrity sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==
 
 dedent@0.7.0, dedent@^0.7.0:
   version "0.7.0"
